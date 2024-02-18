@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Maze Runner</title>
+<style>
+    body {
+        margin: 10px;
+        padding: 10px;
+        animation: bgColorChange 30s infinite alternate;
+    }
+
+    @keyframes bgColorChange {
+        0% {
+            background-color: red;
+        }
+
+        20% {
+            background-color: orange;
+        }
+
+        40% {
+            background-color: yellow;
+        }
+
+        60% {
+            background-color: green;
+        }
+
+        80% {
+            background-color: blue;
+        }
+
+        100% {
+            background-color: purple;
+        }
+    }
+
+    h1, h2, .controls, #livesCount, #superPowerCount, #scoreCount, #levelTitle {
+        animation: txtColorChange 10s infinite alternate;
+    }
+
+    @keyframes txtColorChange {
+        0% {
+            color: red;
+        }
+
+        20% {
+            color: orange;
+        }
+
+        40% {
+            color: yellow;
+        }
+
+        60% {
+            color: green;
+        }
+
+        80% {
+            color: blue;
+        }
+
+        100% {
+            color: purple;
+        }
+    }
+
+    .controls {
+      text-align: center;
+    }
+    
+    .control-button, #nextLevel {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    #Up, #Down, #Super {
+      width: 50px;
+      height: 50px;
+    }
+    
+    #Left, #Right {
+      width: 50px;
+      height: 50px;
+      margin: 0 10px;
+    }
+</style>
+</head>
+<body>
+<h1>Battle Maze Ultra 9K</h1>
+<span id="levelTitle">Title Above Maze</span>
+<span id="livesCount">❤️ 0</span>
+<span id="superPowerCount">⚡ 0</span>
+<span id="scoreCount">⭐ 0</span>
+<h2 id="levelText">Level description below maze.</h2>
+
+<canvas id="gameCanvas" width="800" height="800"></canvas>
+
+<div class="controls">
+    <div class="control-button" id="Up">↑</div>
+</div>
+<div class="controls">
+    <div class="control-button" id="Left">←</div>
+    <div class="control-button" id="Super">⚡</div>
+    <div class="control-button" id="Right">→</div>
+</div>
+<div class="controls">
+    <div class="control-button" id="Down">↓</div>
+</div>
+<div class="controls">
+    <div id="nextLevel">NEXT LEVEL!</div>
+</div>
+<div id="playerColorControls">
+    <div>
+        <label for="sliderX">🔴</label>
+        <input type="range" id="sliderX" min="0" max="15" value="0">
+        <span id="valueX">0</span>
+    </div>
+    <div>
+        <label for="sliderY">🟢</label>
+        <input type="range" id="sliderY" min="0" max="15" value="0">
+        <span id="valueY">0</span>
+    </div>
+    <div>
+        <label for="sliderZ">🔵</label>
+        <input type="range" id="sliderZ" min="0" max="15" value="15">
+        <span id="valueZ">f</span>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    const canvas = $("#gameCanvas")[0];
+    const ctx = canvas.getContext("2d");
+    const cellSize = 20;
+    let currentLevel = 0;
+    let gameOver = false;
+    let livesCollected = 0;
+    let superPowersCollected = 0;
+    let scoreCollected = 0;
+    let keyCollected = false;
+
+    const levels = [
+        // {
+        //     maze: [
+        //         ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+        //         ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+        //     ],
+        //     text: "You awake in a room...",
+        //     colors: {
+        //         ground: "#fff",
+        //         walked: "#eee",
+        //         creeped:"#ddd",
+        //         burned: "#ccc",
+        //         broken: "#bbb"
+        //     }
+        // },
+
+        {
+            maze: [
+                ["W","W","W","W","x","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".","P",".","C","W"],
+                ["W","W","-","W","W","W"]
+            ],
+            text: "Build a level, or continue to play :)",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","x","W","W","W","W","W","W"],
+                ["W",".","H",".","W",".",".",".",".",".",".","!","W",".","W","W","C",".",".","W"],
+                ["W",".",".",".","W",".",".",".",".",".",".","W","W",".","W","W","W","W",".","W"],
+                ["W",".",".",".","W",".","W","W","W","W","W","W","W",".","W","W","W","W",".","W"],
+                ["W",".",".","k","W",".","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
+                ["W","w","w","W","W",".",".",".",".",".",".",".",".",".",".","L","L","L","L","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".",".","V",".","B","B","B","B","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".","B","B","B","B","W"],
+                ["W",".","e",".",".",".",".",".",".",".",".",".",".",".",".",".",".","B","B","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".","B","B","B","B","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".","S","S","S","S","B"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".",".","W","W","W","W","W","W","W"],
+                ["W","S","S","S",".",".",".",".",".",".",".",".",".","W","V",".",".",".","E","W"],
+                ["W","S","S","S",".",".",".",".",".",".",".",".",".","W",".",".",".",".",".","W"],
+                ["W","S","L","S",".",".",".",".",".",".",".",".",".","W",".",".",".",".",".","W"],
+                ["W","S","P","S",".",".",".",".",".",".",".",".",".","W","F",".","e",".","L","W"],
+                ["W","W","-","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "This is a testing level :)",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W"],
+                ["W",".",".",".","W","C",".",".","W"],
+                ["W",".",".",".","W","W",".",".","W"],
+                ["W",".","W",".",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".","W"],
+                ["W","P","W",".",".",".",".",".","x"],
+                ["W","-","W","W","W","W","W","W","W"]
+            ],
+            text: "You awake in a room...",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","!","W","W","W","W"],
+                ["W",".",".",".",".",".","W",".",".",".",".","W"],
+                ["-","P",".",".",".","V","W",".",".",".",".","W"],
+                ["W",".",".",".",".",".","W","W","W","W",".","W"],
+                ["W","w","w","W","W","W","W",".",".",".",".","W"],
+                ["W",".",".",".","W","V",".",".",".",".",".","W"],
+                ["W",".",".",".","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W",".",".",".",".",".",".","W"],
+                ["W","C",".",".","W",".",".",".",".",".",".","W"],
+                ["W","W","W","W","W","W","W","W","W","x","W","W"]
+            ],
+            text: "The coin unlocked a room with... vortexes?",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","-","W","W","W","W","W","W"],
+                ["W",".","B","B","W","P",".",".",".",".","S","W"],
+                ["W",".","B","C","W","W","W","W","W",".","W","W"],
+                ["W",".","W","W","W",".",".",".",".",".",".","W"],
+                ["W",".","W","V",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".",".","e",".",".",".",".",".","x"],
+                ["W",".","W",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W","e",".",".",".",".",".","W","W","W"],
+                ["W","V","W",".",".",".",".",".",".",".","S","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "Enemies roam these halls...",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W","k","S",".","W","C","B","B","w",".",".",".","W"],
+                ["W","S","S",".","W","W","B","B","w",".",".",".","!"],
+                ["W","S","L",".","W","W","B","B","w",".",".",".","W"],
+                ["W","w","w","w","W","W","W","W","W","W",".","W","W"],
+                ["W",".",".",".","W","W","e","E","e",".",".",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W","H",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W","W","W","W","W",".",".","W"],
+                ["W",".",".",".","W","W","S",".",".",".","W",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".","W",".","W"],
+                ["W",".","W",".","W","W",".",".",".",".","W",".","W"],
+                ["W",".","W",".",".",".",".",".","W",".","W",".","W"],
+                ["W",".","W",".",".",".",".",".","W",".","W",".","W"],
+                ["W","P","W","S",".",".",".",".","W","E",".","S","x"],
+                ["W","-","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "There may be treasure here...",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W",".",".",".","W","S","S","w",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","S","S","w",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","W","W","W","W","W",".","W",".",".","W","W","W","W",".","W",".","W",".",".","W","W","W","W","W","W","W","W","w","w","W","W"],
+                ["-","P",".",".","W",".",".",".",".",".",".","W",".",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","S","S","S","W"],
+                ["W","W","W",".","W",".","W","W","W",".",".",".","W",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","S","S","S","W"],
+                ["W",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","W","W","W","W"],
+                ["W",".",".",".","W",".",".",".",".","W",".",".","w",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W","W",".",".",".",".",".","W",".",".","w",".",".","W",".",".","W","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".",".",".",".","W","W","W",".","W",".",".","W","W","W","W",".","W","W","W",".","W",".",".","W",".",".",".",".",".",".","W","W","W","H","W"],
+                ["W","W","W","W","W",".",".",".",".","W",".","W","W",".",".",".",".","W","W",".",".","W",".",".","w",".",".","W",".",".","W","W",".",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".","W","S","e",".",".",".","W",".",".","W","W",".",".","w",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".","W","S",".",".",".","W","W",".","W","W",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W","W","W","W","W","W","W","W",".","W","S","e",".","W","W",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".",".",".",".","W","S",".","W","W",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".",".",".","W","W","S","W","W",".",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W",".",".","W","W","W","W","W","W",".","W","W",".",".",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W","W",".",".",".","W"],
+                ["W",".","W",".",".","W","W","W","W","W",".",".",".","W",".",".",".","W","W","W",".",".",".",".","W",".",".","W",".",".",".","W","W",".",".","W"],
+                ["W",".","W",".",".","W","W",".",".",".",".",".",".",".","W",".",".","W",".",".",".",".",".",".","w",".",".","W","W",".",".",".","W",".",".","W"],
+                ["W",".",".",".",".","W","W",".","e",".",".",".",".",".",".","W","H","W",".",".",".",".",".","w","w",".",".",".","W","W",".",".","W",".",".","W"],
+                ["W","W","W","W","!","W","W",".",".",".","W","W",".",".",".","W",".","W",".",".",".",".","W","w",".",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W","W","W","W","W","W",".",".",".",".","W",".",".",".","W","W",".","W",".",".",".",".","W","W",".",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".",".",".","W","W",".",".","W",".",".",".","W","W","W","W",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W",".",".",".",".",".",".",".","W",".",".",".","W","W",".",".",".","W",".",".","W","W","S","S","W","W",".",".","W","W",".",".","W",".",".","W"],
+                ["x",".","E",".",".",".",".","W",".",".",".","W","W",".",".",".","W","W",".",".","W",".","E",".",".","W","W","W","W",".",".",".","W",".",".","W"],
+                ["W",".",".",".",".",".","W",".",".",".","W","W",".",".",".","W","W",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".","W",".",".","W"],
+                ["W","W","W","W","W","W",".",".",".","W","W",".",".",".","W","W",".",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".","W",".",".","W"],
+                ["W",".",".","E",".",".",".",".",".","W",".",".",".","W","W",".",".",".",".","W","W",".","E",".",".",".",".",".",".",".",".","W","W",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".","W","W","S",".",".","W"],
+                ["W","E",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W","k",".",".",".",".",".",".",".",".",".","W","W","L","S",".",".","W"],
+                ["W",".",".",".","E",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".",".","W","k","L","S",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W","W",".",".",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".","W","L","L","S","e","e","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+            ],
+            text: "Things are getting interesting...",
+            colors: {
+                ground: "#fff",
+                walked: "#eee",
+                creeped:"#ddd",
+                burned: "#ccc",
+                broken: "#bbb"
+            }
+        },
+    ];
+
+    function drawShape(shape, x, y, size, color, bgColor="", orientation="") {
+        if (bgColor === "") {
+            ctx.fillStyle = levels[currentLevel].colors.ground;
+        } else {
+            ctx.fillStyle = bgColor;
+        }
+        if (orientation === "") {
+            orientation = currentPlayerOrientation
+        }
+        
+        ctx.fillRect(x * size, y * size, size, size); // Fill background color for negative space
+
+        switch(shape) {
+            case 'square':
+                ctx.fillStyle = color;
+                ctx.fillRect(x * size, y * size, size, size);
+                break;
+            case 'circle':
+                ctx.beginPath();
+                ctx.arc(x * size + size / 2, y * size + size / 2, size / 2, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                break;
+            case 'dot':
+                ctx.beginPath();
+                ctx.arc(x * size + size / 2, y * size + size / 2, size / 4, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                break;
+            case 'triangle':
+                ctx.beginPath();
+                if (orientation === 'Up') {
+                    ctx.moveTo(x * size + size / 2, y * size);
+                    ctx.lineTo(x * size, y * size + size);
+                    ctx.lineTo(x * size + size, y * size + size);
+                } else if (orientation === 'Down') {
+                    ctx.moveTo(x * size, y * size);
+                    ctx.lineTo(x * size + size, y * size);
+                    ctx.lineTo(x * size + size / 2, y * size + size);
+                } else if (orientation === 'Left') {
+                    ctx.moveTo(x * size + size, y * size);
+                    ctx.lineTo(x * size, y * size + size / 2);
+                    ctx.lineTo(x * size + size, y * size + size);
+                } else if (orientation === 'Right') {
+                    ctx.moveTo(x * size, y * size);
+                    ctx.lineTo(x * size + size, y * size + size / 2);
+                    ctx.lineTo(x * size, y * size + size);
+                }
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+                break;
+            case 'diamond':
+                ctx.beginPath();
+                ctx.moveTo(x * size + size / 2, y * size); // Top point
+                ctx.lineTo(x * size + size, y * size + size / 2); // Right point
+                ctx.lineTo(x * size + size / 2, y * size + size); // Bottom point
+                ctx.lineTo(x * size, y * size + size / 2); // Left point
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+                break;
+            case 'chest':
+                // Bottom half rectangle
+                ctx.fillStyle = color; // Color for the chest
+                const bottomRectY = y * size + size / 2; // Start Y for bottom rectangle
+                ctx.fillRect(x * size, bottomRectY, size, size / 2);
+
+                // Top with rounded corners
+                const topArcCenterY = y * size + size / 4; // Adjust for desired look
+                const topArcRadius = size / 4; // Adjust based on your size preference
+
+                ctx.beginPath();
+                // Start at left corner of the top arc
+                ctx.moveTo(x * size, bottomRectY);
+                // Top left rounded corner
+                ctx.arc(x * size + topArcRadius, topArcCenterY, topArcRadius, Math.PI, 1.5 * Math.PI, false);
+                // Top right rounded corner
+                ctx.arc(x * size + size - topArcRadius, topArcCenterY, topArcRadius, 1.5 * Math.PI, 0, false);
+                // Close the path by drawing the right side down and bottom line
+                ctx.lineTo(x * size + size, bottomRectY + size / 2); // Right side down
+                ctx.lineTo(x * size, bottomRectY + size / 2); // Bottom line
+                ctx.closePath();
+                ctx.fill();
+                break;
+            default:
+                console.log('Unknown shape');
+        }
+    }
+
+    function resizeCanvas(width, height) {
+        $("#gameCanvas").attr({
+            'width': width,
+            'height': height
+        });
+    }
+
+    let maze = levels[currentLevel].maze;
+    let player;
+    let coin;
+    let exit;
+    let enemies = [];
+    let lives = [];
+    let superPowers = []; 
+    let vortexes = []; 
+
+    function initializeGame() {
+        resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
+        enemies = [[], [], []];
+        lives = [];
+        vortexes = [];
+        superPowers = [];
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === "P") {
+                    player = { x, y };
+                } else if (maze[y][x] === "C") {
+                    coin = { x, y, collected: false };
+                } else if (maze[y][x] === "x") {
+                    exit = { x, y };
+                } else if (maze[y][x] === "e") {
+                    enemies[0].push({ x, y, orientation: "Up", currentSpaceType: "." });
+                } else if (maze[y][x] === "E") {
+                    enemies[1].push({ x, y, orientation: "Up", currentSpaceType: "." });
+                } else if (maze[y][x] === "F") {
+                    enemies[2].push({ x, y, orientation: "Up", currentSpaceType: "." });
+                } else if (maze[y][x] === "L") {
+                    lives.push({ x, y, collected: false });
+                } else if (maze[y][x] === "S") {
+                    superPowers.push({ x, y, collected: false });
+                } else if (maze[y][x] === "V") {
+                    vortexes.push({ x, y, collected: false });
+                }
+            }
+        }
+        updateLivesCountDisplay();
+        updateSuperPowerCountDisplay();
+    }
+
+    function updateLivesCountDisplay() {
+        $("#livesCount").text(`❤️ ${livesCollected}`);
+    }
+
+    function updateSuperPowerCountDisplay() {
+        $("#superPowerCount").text(`⚡ ${superPowersCollected}`);
+    }
+
+    function updateScoreCountDisplay() {
+        $("#scoreCount").text(`⭐ ${scoreCollected}`);
+    }
+
+    let colors = {
+        wall: "#000",
+        breakable_wall: "#222",
+        start: "#843",
+        closed_exit: "#888",
+        player: "#00f",
+        coin: "#ff0",
+        enemy: ["#f80", "#f00", "#909"],
+        life: "#0f0",
+        super: "#0ff",
+        vortex: "#d6f",
+        switch: {
+            off: "#f00",
+            on: "#0f0",
+        }
+    }
+
+    let currentPlayerOrientation = "Up";
+
+    function drawMaze() {
+        maze.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                switch (cell) {
+                    case "W":
+                        drawShape("square", colIndex, rowIndex, cellSize, colors.wall);
+                        break;
+                    case "w":
+                        drawShape("dot", colIndex, rowIndex, cellSize, levels[currentLevel].colors.ground, colors.wall);
+                        break;
+                    case "!":
+                        if (switchActivated) {
+                            drawShape("dot", colIndex, rowIndex, cellSize, colors.switch.on, colors.wall);
+                        } else {
+                            drawShape("dot", colIndex, rowIndex, cellSize, colors.switch.off, colors.wall);
+                        }
+                        break;
+                    case "B":
+                        drawShape("dot", colIndex, rowIndex, cellSize, colors.wall, colors.breakable_wall);
+                        break;
+                    case "b":
+                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.broken);
+                        break;
+                    case "-":
+                        drawShape("square", colIndex, rowIndex, cellSize, colors.start);
+                        break;
+                    case "x":
+                        drawShape("square", colIndex, rowIndex, cellSize, colors.closed_exit);
+                        break;
+                    case "X":
+                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.ground);
+                        break;
+                    case ".":
+                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.ground);
+                        break;
+                    case ",":
+                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.walked);
+                        break;
+                    case "'":
+                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.burned);
+                        break;
+                    case "*":
+                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.creeped);
+                        break;
+                    case "P":
+                        drawShape("triangle", colIndex, rowIndex, cellSize, colors.player, levels[currentLevel].colors.walked);
+                        break;
+                    case "C":
+                        drawShape("circle", colIndex, rowIndex, cellSize, colors.coin);
+                        break;
+                    case "e":
+                        for (let i = 0; i < enemies[0].length; i++) {
+                            if (colIndex == enemies[0][i].x && rowIndex == enemies[0][i].y) {
+                                drawShape("triangle", colIndex, rowIndex, cellSize, colors.enemy[0], enemies[0][i].orientation);
+                            }
+                        }
+                        break;
+                    case "E":
+                        for (let i = 0; i < enemies[1].length; i++) {
+                            if (colIndex == enemies[1][i].x && rowIndex == enemies[1][i].y) {
+                                drawShape("triangle", colIndex, rowIndex, cellSize, colors.enemy[1], enemies[1][i].orientation);
+                            }
+                        }
+                        break;
+                    case "F":
+                        for (let i = 0; i < enemies[2].length; i++) {
+                            if (colIndex == enemies[2][i].x && rowIndex == enemies[2][i].y) {
+                                drawShape("triangle", colIndex, rowIndex, cellSize, colors.enemy[2], enemies[2][i].orientation);
+                            }
+                        }
+                        drawShape("square", colIndex, rowIndex, cellSize, colors.enemy[2]);
+                        break;
+                    case "L":
+                        drawShape("diamond", colIndex, rowIndex, cellSize, colors.life);
+                        break;
+                    case "S":
+                        drawShape("diamond",  colIndex, rowIndex, cellSize, colors.super);
+                        break;
+                    case "V":
+                        for (let i = 0; i < vortexes.length; i++) {
+                            if (colIndex == vortexes[i].x && rowIndex == vortexes[i].y) {
+                                if (vortexes[i].collected) {
+                                    drawShape("circle", colIndex, rowIndex, cellSize, colors.vortex, levels[currentLevel].colors.walked);
+                                } else {
+                                    drawShape("circle", colIndex, rowIndex, cellSize, colors.vortex);
+                                }
+                            }
+                        }
+                        break;
+                    case "H":
+                        drawShape("chest",  colIndex, rowIndex, cellSize, colors.start);
+                        break;
+                    case "k":
+                        drawShape("dot",  colIndex, rowIndex, cellSize, colors.closed_exit);
+                        break;
+                }
+            });
+        });
+    }
+
+    function collectLife() {
+        lives.forEach((life, index) => {
+            if (player.x === life.x && player.y === life.y && !life.collected) {
+                livesCollected++;
+                maze[life.y][life.x] = ".";
+                life.collected = true;
+                updateLivesCountDisplay();
+                scoreCollected += 2;
+                updateScoreCountDisplay();
+            }
+        });
+    }
+
+    function collectSuperPower() {
+        superPowers.forEach((power, index) => {
+            if (player.x === power.x && player.y === power.y && !power.collected) {
+                maze[power.y][power.x] = ".";
+                power.collected = true;
+                superPowersCollected++;
+                updateSuperPowerCountDisplay();
+                scoreCollected += 2;
+                updateScoreCountDisplay();
+            }
+        });
+    }
+
+    function activateSuperPower() {
+        if (superPowersCollected > 0) {
+            const directions = [-1, 0, 1];
+            directions.forEach(dx => {
+                directions.forEach(dy => {
+                    const newX = player.x + dx;
+                    const newY = player.y + dy;
+                    if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+                        if (maze[newY][newX] === "B") {
+                            scoreCollected += 3;
+                            updateScoreCountDisplay();
+                            maze[newY][newX] = "b";
+                        } else if (maze[newY][newX] === "L") {
+                            livesCollected++;
+                            scoreCollected += 2;
+                            updateScoreCountDisplay();
+                            maze[newY][newX] = "b";
+                            for (let i = lives.length - 1; i >= 0; i--) {
+                                if (lives[i].x == newX && lives[i].y == newY) {
+                                    lives[i].collected = true;
+                                }
+                            }
+                        } else if (maze[newY][newX] === "S") {
+                            superPowersCollected++;
+                            scoreCollected += 2;
+                            updateScoreCountDisplay();
+                            maze[newY][newX] = "b";
+                            for (let i = superPowers.length - 1; i >= 0; i--) {
+                                if (superPowers[i].x == newX && superPowers[i].y == newY) {
+                                    superPowers[i].collected = true;
+                                }
+                            }
+                        } else if (maze[newY][newX] === "e" || maze[newY][newX] === "E" || maze[newY][newX] === "F") {
+                            for (let j = 0; j < 3; j++) {
+                                for (let i = enemies[j].length - 1; i >= 0; i--) {
+                                    if (enemies[j][i].x == newX && enemies[j][i].y == newY) {
+                                        maze[newY][newX] = "b";
+                                        enemies[j].splice(i, 1);
+                                        scoreCollected += 5;
+                                        updateScoreCountDisplay();
+                                    }
+                                }
+                            }
+                        } else if (maze[newY][newX] === "." || maze[newY][newX] === ",") {
+                            maze[newY][newX] = "'";
+                        }
+                    }
+                });
+            });
+            superPowersCollected--;
+            updateSuperPowerCountDisplay();
+        }
+    }
+
+    $(document).keydown(function(event) {
+        if ([32, 38, 40, 37, 39].includes(event.which)) { // Arrow key codes: up (38), down (40), left (37), right (39)
+            event.preventDefault(); // Prevent the default action (scrolling)
+        }
+        if (event.key === " " || event.key === "Spacebar") { // Use super power with space bar
+            activateSuperPower();
+        } else {
+            playerMove(event.key.replace("Arrow", ""));
+        }
+    });
+
+    $(".control-button").click(function() {
+        const action = $(this).attr('id');
+        if (action === "Super") {
+            activateSuperPower();
+        } else {
+            playerMove(action);
+        }
+    });
+
+    $("#nextLevel").click(function() {
+        nextGame();
+    });
+
+    function checkGameOver() {
+        if (checkEnemyCollisions()) {
+            if (livesCollected == 0) {
+                gameOver = true;
+                draw();
+                alert(`GAME OVER!!!\nYOU SCORED ${scoreCollected}!!!`);
+                location.reload();
+            } else if (livesCollected > 0) {
+                livesCollected--;
+                draw();
+                alert("TRY AGAIN!!!");
+            } else {
+                alert("an error occurred! :(")
+                location.reload();
+            }
+            
+        }
+    }
+
+    let playerCurrentSpaceType = ".";
+
+    function playerMove(direction){
+        if (gameOver) return;
+        currentPlayerOrientation = direction;
+        
+        let newX = player.x;
+        let newY = player.y;
+
+        switch (direction) {
+            case "Up":    newY--; break;
+            case "Down":  newY++; break;
+            case "Left":  newX--; break;
+            case "Right": newX++; break;
+            default:      return;
+        }
+
+        if (checkCollision(newX, newY)) {
+            if (maze[player.y][player.x] != "V" && maze[player.y][player.x] != "b" && maze[player.y][player.x] != "'" && maze[player.y][player.x] != "*") {
+                maze[player.y][player.x] = ",";
+            }
+            playerCurrentSpaceType = maze[newY][newX];
+            if (playerCurrentSpaceType == "k") {
+                keyCollected = true;
+                scoreCollected += 3;
+                updateScoreCountDisplay();
+            }
+            player.x = newX;
+            player.y = newY;
+            vortexResult = collectVortex();
+            if (vortexResult[0] === 1) {
+                player.x = vortexResult[1];
+                player.y = vortexResult[2];
+            }
+            collectCoin();
+            exitLevel();
+            collectLife();
+            collectSuperPower();
+            checkSwitchActivation();
+            checkChestActivation();
+            draw();
+        }
+        checkGameOver();
+    }
+
+    function drawPlayer() {
+        if (playerCurrentSpaceType == "." || playerCurrentSpaceType == "S" || playerCurrentSpaceType == "L" || playerCurrentSpaceType == "k" || playerCurrentSpaceType == "C") {
+            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.ground);
+        } else if (playerCurrentSpaceType == ",") {
+            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.walked);
+        } else if (playerCurrentSpaceType == "'") {
+            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.burned);
+        } else if (playerCurrentSpaceType == "b") {
+            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.broken);
+        } else if (playerCurrentSpaceType == "*") {
+            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.creeped);
+        } else if (playerCurrentSpaceType == "V") {
+            drawShape("triangle", player.x, player.y, cellSize, colors.player, colors.vortex);
+        } 
+    }
+
+    function drawEnemies() {
+        for (let j = 0; j < 3; j++) {
+            for (let i = 0; i < enemies[j].length; i++) {
+                if (enemies[j][i].currentSpaceType == ".") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.ground, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == ",") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.walked, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "'") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.burned, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "b") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.broken, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "*") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.creeped, enemies[j][i].orientation);
+                }
+            }
+        }
+    }
+
+    let switchActivated = false;
+
+    function showLevelCreationUI() {
+        const levelCreationHtml = `
+            <div id="levelCreationUI" style="padding: 10px; display: block;">
+                <h2>Create Your Level</h2>
+                <label for="blockType">Block Type:</label>
+                <select id="blockType">
+                    <option value="W">Wall</option>
+                    <option value=".">Ground</option>
+                    <option value="P">Player</option>
+                    <option value="-">Entrance</option>
+                    <option value="x">Exit</option>
+                    <option value="C">Coin</option>
+                    <option value="S">Super</option>
+                    <option value="L">Life</option>
+                    <option value="V">Vortex</option>
+                    <option value="H">Chest</option>
+                    <option value="k">Key</option>
+                    <option value="!">Button</option>
+                    <option value="w">Barrier</option>
+                    <option value="B">Weak Wall</option>
+                    <!-- Add more options as needed -->
+                </select>
+                <br>
+                <label for="levelWidth">Level Width:</label>
+                <button id="decreaseWidth">-</button>
+                <span id="levelWidthValue">10</span> <!-- Default or current width value -->
+                <button id="increaseWidth">+</button>
+                <br>
+                <label for="levelHeight">Level Height:</label>
+                <button id="decreaseHeight">-</button>
+                <span id="levelHeightValue">10</span> <!-- Default or current height value -->
+                <button id="increaseHeight">+</button>
+                <br>
+                <button id="cleanGround">Clean Ground</button>
+                <button id="doneCreatingLevel">Done</button>
+            </div>
+        `;
+
+        $("body").append(levelCreationHtml);
+
+        $("#increaseWidth").click(function() {
+            for (let i = 0; i < maze.length; i++) {
+                if (maze[i][maze[i].length - 1] == "W") {
+                    if (i == 0 || i == maze.length - 1) {
+                        maze[i][maze[i].length - 1] = "W";
+                    } else {
+                        maze[i][maze[i].length - 1] = ".";
+                    }
+                }
+                maze[i].push("W");
+            }
+            initializeGame();
+        });
+
+        $("#decreaseWidth").click(function() {
+            for (let i = 0; i < maze.length; i++) {
+                maze[i].pop();
+            }
+            for (let i = 0; i < maze.length; i++) {
+                if (maze[i][maze[i].length - 1] == ".") {
+                    maze[i][maze[i].length - 1] = "W";
+                }
+            }
+            initializeGame();
+        });
+
+        $("#increaseHeight").click(function() {
+            let newRow = [];
+            for (let i = 0; i < maze[0].length; i++) {
+                if (maze[maze.length - 1][i] == "W" || maze[maze.length - 1][i] == "-") {
+                    if (i != 0 && i != maze[0].length - 1) {
+                        maze[maze.length - 1][i] = ".";
+                    }
+                }
+                newRow.push("W");
+            }
+            maze.push(newRow);
+            initializeGame();
+        });
+
+        $("#decreaseHeight").click(function() {
+            maze.pop();
+            for (let i = 0; i < maze[0].length; i ++) {
+                if (maze[maze.length - 1][i] == ".") {
+                    maze[maze.length - 1][i] = "W";
+                }
+            }
+            initializeGame();
+        });
+
+        // Handle block placement on canvas click
+        $("#gameCanvas").click(function(e) {
+            if (currentLevel === 0) { // Ensure this is only active on the last level
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const gridX = Math.floor(x / cellSize);
+                const gridY = Math.floor(y / cellSize);
+                const blockType = $("#blockType").val();
+                
+                if (gridX >= 0 && gridX < maze[0].length && gridY >= 0 && gridY < maze.length) {
+                    const prevBlockType = maze[gridY][gridX]; // use?
+
+                    maze[gridY][gridX] = blockType;
+                    
+                    if (blockType == "P") {
+                        maze[player.y][player.x] = ".";
+                    }
+
+                    initializeGame();
+                    //draw();
+                }
+            }
+        });
+
+        $("#doneCreatingLevel").click(function() {
+            $("#levelCreationUI").hide(); // Hide the UI
+            // Here, you could save the created level, transition to a "play" mode, etc.
+        });
+
+        $("#cleanGround").click(function() {
+            for (let j = 0; j < maze.length; j++){
+                for (let i = 0; i < maze[j].length; i++) {
+                    if (maze[j][i] == "," || maze[j][i] == "'" || maze[j][i] == "b" || maze[j][i] == "*") {
+                        maze[j][i] = ".";
+                    }
+                }
+            }
+        });
+    }
+
+    function hideLevelCreationUI() {
+        // Remove the level creation UI from the DOM
+        $("#levelCreationUI").remove();
+        $("#playerColorControls").remove();
+
+        // Remove the click event handler from the canvas
+        // This assumes you've set up the click event handler as shown in the showLevelCreationUI function
+        $("#gameCanvas").off("click");
+
+        // Optional: Reset any other UI elements or game state as necessary
+    }
+
+    function nextGame() {
+        currentLevel = (currentLevel + 1) % levels.length;
+        maze = levels[currentLevel].maze;
+        if (currentLevel == 0) {
+            showLevelCreationUI();
+            
+        } else {
+            hideLevelCreationUI();
+        }
+        initializeGame();
+        playerCurrentSpaceType = ".";
+        switchActivated = false;
+        keyCollected = false;
+    }
+
+    
+    function collectVortex() {
+        for (let i = vortexes.length - 1; i >= 0; i--) {
+            if (player.x === vortexes[i].x && player.y === vortexes[i].y) {
+                vortexes[i].collected = true;
+                drawShape("circle", vortexes[0].x, vortexes[0].y, cellSize, colors.vortex, levels[currentLevel].colors.walked);
+                drawShape("circle", vortexes[1].x, vortexes[1].y, cellSize, colors.vortex, levels[currentLevel].colors.walked);
+                if (i === 0) {
+                    return [1, vortexes[1].x, vortexes[1].y];
+                } else {
+                    return [1, vortexes[0].x, vortexes[0].y];
+                }
+            }
+        }
+        return [0, 0, 0];
+    }
+
+    function collectCoin() {
+        if (coin && coin.x != null && coin.y != null && player.x === coin.x && player.y === coin.y) {
+            coin.collected = true;
+            maze[exit.y][exit.x] = "X";
+            scoreCollected += 10;
+            updateScoreCountDisplay();
+        }
+    }
+
+    function exitLevel() {
+        if (exit && exit.x != null && exit.y != null && player.x === exit.x && player.y === exit.y) {
+            scoreCollected += 10;
+            updateScoreCountDisplay();
+            nextGame();
+        }
+    }
+
+    function checkCollision(x, y) {
+        return maze[y][x] !== "W" && maze[y][x] !== "w" && maze[y][x] !== "H" && maze[y][x] !== "!" && maze[y][x] !== "B" && maze[y][x] !== "-" && maze[y][x] !== "x";
+    }
+
+    function checkEnemyCollisions() {
+        for (let j = 0; j < 3; j++) {
+            for (let i = enemies[j].length - 1; i >= 0; i--) {
+                if (player.x === enemies[j][i].x && player.y === enemies[j][i].y) {
+                    enemies[j].splice(i, 1);
+                    scoreCollected -= 5;
+                    updateScoreCountDisplay();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function checkSwitchActivation() {
+        const directions = [-1, 0, 1];
+        directions.forEach(dx => {
+            directions.forEach(dy => {
+                if (dx == 0 || dy == 0) {
+                    const newX = player.x + dx;
+                    const newY = player.y + dy;
+                    if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+                        if (maze[newY][newX] === "!") {
+                            scoreCollected += 4;
+                            updateScoreCountDisplay();
+                            switchActivated = true;
+                            for (let j = 0; j < maze.length; j++) {
+                                for (let i = 0; i < maze[j].length; i++) {
+                                    if (maze[j][i] == "w") {
+                                        maze[j][i] = ".";
+                                    }
+                                }
+                            }
+                        } 
+                    }
+                }
+            });
+        });
+    }
+
+    function checkChestActivation() {
+        if (keyCollected) {
+            const directions = [-1, 0, 1];
+            directions.forEach(dx => {
+                directions.forEach(dy => {
+                    if (dx == 0 || dy == 0) {
+                        const newX = player.x + dx;
+                        const newY = player.y + dy;
+                        if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+                            if (maze[newY][newX] === "H") {
+                                scoreCollected += 6;
+                                updateScoreCountDisplay();
+                                randomChoices = ["S", "L"];
+                                maze[newY][newX] = randomChoices[Math.floor(Math.random() * randomChoices.length)];
+                                keyCollected = false;
+                            } 
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    function updateEnemies(levelIndex) {
+        for (let i = 0; i < enemies[levelIndex].length; i++) {
+            let currentEnemyOrientation = "Up";
+            if (Math.random() < 0.5) {
+                if (Math.random() < 0.5) {
+                    var dx = Math.floor(Math.random() * 3) - 1;
+                    var dy = 0;
+                    if (dx > 0) {
+                        currentEnemyOrientation = "Right";
+                    } else {
+                        currentEnemyOrientation = "Left";
+                    }
+                } else {
+                    var dx = 0;
+                    var dy = Math.floor(Math.random() * 3) - 1;
+                    if (dy > 0) {
+                        currentEnemyOrientation = "Down";
+                    } else {
+                        currentEnemyOrientation = "Up";
+                    }
+                }
+                let spaceEnemyIsMovingTo = maze[enemies[levelIndex][i].y + dy][enemies[levelIndex][i].x + dx];
+                if (spaceEnemyIsMovingTo === "." || spaceEnemyIsMovingTo === "," || spaceEnemyIsMovingTo === "'" || spaceEnemyIsMovingTo === "b" || spaceEnemyIsMovingTo === "*") {
+                    
+                    enemies[levelIndex][i].currentSpaceType = spaceEnemyIsMovingTo;
+                    if (spaceEnemyIsMovingTo == "." || spaceEnemyIsMovingTo == ",") {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "*";
+                    } else {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = enemies[levelIndex][i].currentSpaceType;
+                    }
+                    enemies[levelIndex][i].x += dx;
+                    enemies[levelIndex][i].y += dy;
+                    enemies[levelIndex][i].orientation = currentEnemyOrientation;
+
+                    if (levelIndex === 0) {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "e";
+                    } else if (levelIndex === 1) {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "E";
+                    } else if (levelIndex === 2) {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "F";
+                    }
+                }
+            }
+        }
+    }
+
+    function logMaze() {
+        var line = "";
+        for (let j = 0; j < maze.length; j++) {
+            for (let i = 0; i < maze[j].length; i++) {
+                line += maze[j][i];
+            }
+            //console.log(line);
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMaze();
+        drawPlayer();
+        drawEnemies();
+        $("#levelTitle").text("Level " + (currentLevel + 1));
+        $("#levelText").text(levels[currentLevel].text);
+        logMaze();
+    }
+    showLevelCreationUI();
+    initializeGame();
+    draw();
+    setInterval(function() {
+        if (!gameOver) {
+            updateEnemies(1);
+        }
+    }, 150);
+    setInterval(function() {
+        if (!gameOver) {
+            updateEnemies(0);
+            updateEnemies(2);
+            draw();
+            checkGameOver();
+        }
+    }, 500);
+
+    function updateColor() {
+        const x = parseInt($('#sliderX').val(), 10).toString(16);
+        const y = parseInt($('#sliderY').val(), 10).toString(16);
+        const z = parseInt($('#sliderZ').val(), 10).toString(16);
+        
+        const hexColor = `#${x}${y}${z}`;
+        colors.player = hexColor;
+        $('#hexColor').text(hexColor);
+        $('#colorDisplay').css('background-color', hexColor);
+        
+        // Update slider value displays
+        $('#valueX').text(x);
+        $('#valueY').text(y);
+        $('#valueZ').text(z);
+    }
+    $('#sliderX').on('input', updateColor);
+    $('#sliderY').on('input', updateColor);
+    $('#sliderZ').on('input', updateColor);
+
+});
+</script>
+
+</body>
+</html>
