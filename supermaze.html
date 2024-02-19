@@ -78,6 +78,7 @@
     }
     
     .control-button, #nextLevel {
+      opacity: 0.75;
       display: inline-block;
       width: 50px;
       height: 50px;
@@ -110,19 +111,42 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
-        padding: 5px 0;
-        text-align: center;
+        display: flex;
+        justify-content: center; /* Center the controls container */
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2); /* Optional: for better visibility */
+    }
+
+    .controls-row {
+        display: flex;
+        justify-content: space-around; /* Space between movement and action controls */
+    }
+
+    .movement-controls, .action-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center align the buttons vertically */
+    }
+
+    .horizontal-controls {
+        display: flex;
+        justify-content: center; /* Center align left/right buttons horizontally */
     }
 
     .control-button {
+        margin: 5px; /* Adjust spacing around buttons */
         touch-action: manipulation; /* Improve responsiveness */
+    }
+
+    #decreaseWidth, #increaseWidth, #decreaseHeight, #increaseHeight, #toggleLevelBuilder {
+        cursor: pointer;
     }
 
 </style>
 </head>
 <body>
 <h1>Battle Maze Ultra 9K</h1>
+
 <span id="levelTitle">Title Above Maze</span>
 <span id="livesCount">❤️ 0</span>
 <span id="coinsCount">🪙 0</span>
@@ -131,43 +155,28 @@
 <span id="bombsCount"></span>
 <span id="scoreCount">⭐ 0</span>
 <h2 id="levelText">Level description below maze.</h2>
-
+<span id="toggleLevelBuilder">PLAY</span>
 <div id="gameContainer">
     <canvas id="gameCanvas" width="800" height="800"></canvas>
 </div>
-<div id="controlsContainer">
-    <div class="controls">
-        <div class="control-button" id="Up">⬆️</div>
-    </div>
-    <div class="controls">
-        <div class="control-button" id="Left">⬅️</div>
-        <div class="control-button" id="Right">➡️</div>
-    </div>
-    <div class="controls">
-        <div class="control-button" id="Down">⬇️</div>
-    </div>
-    <div class="controls">
-        <div class="control-button" id="super"></div>
-        <div class="control-button" id="shoot"></div>
-        <div class="control-button" id="bomb"></div>
-    </div>
-</div>
+<div id="controlsContainer" >
+    <div class="controls-row" style="display: none;">
+        <!-- Movement Controls -->
+        <div class="movement-controls">
+            <div class="control-button" id="Up">⬆️</div>
+            <div class="horizontal-controls">
+                <div class="control-button" id="Left">⬅️</div>
+                <div class="control-button" id="Right">➡️</div>
+            </div>
+            <div class="control-button" id="Down">⬇️</div>
+        </div>
 
-<div id="playerColorControls">
-    <div>
-        <label for="sliderX">🔴</label>
-        <input type="range" id="sliderX" min="0" max="15" value="0">
-        <span id="valueX">0</span>
-    </div>
-    <div>
-        <label for="sliderY">🟢</label>
-        <input type="range" id="sliderY" min="0" max="15" value="0">
-        <span id="valueY">0</span>
-    </div>
-    <div>
-        <label for="sliderZ">🔵</label>
-        <input type="range" id="sliderZ" min="0" max="15" value="15">
-        <span id="valueZ">f</span>
+        <!-- Action Controls -->
+        <div class="action-controls">
+            <div class="control-button" id="super"></div>
+            <div class="control-button" id="shoot"></div>
+            <div class="control-button" id="bomb"></div>
+        </div>
     </div>
 </div>
 
@@ -200,7 +209,7 @@ $(document).ready(function() {
                 ["W",".","P",".","G","W"],
                 ["W","W","-","W","W","W"]
             ],
-            text: "Build a level, or continue to play :)",
+            text: "Build, or tap PLAY 🙂",
             colors: {
                 ground: "#fff",
                 walked: "#eee",
@@ -1451,7 +1460,6 @@ $(document).ready(function() {
     function showLevelCreationUI() {
         const levelCreationHtml = `
             <div id="levelCreationUI" style="padding: 10px; display: block;">
-                <h2>Create Your Level</h2>
                 <label for="blockType">Block Type:</label>
                 <select id="blockType">
                     <option value="W">Wall</option>
@@ -1472,24 +1480,46 @@ $(document).ready(function() {
                 </select>
                 <br>
                 <label for="levelWidth">Level Width:</label>
-                <button id="decreaseWidth">-</button>
-                <span id="levelWidthValue">10</span> <!-- Default or current width value -->
-                <button id="increaseWidth">+</button>
+                <span id="decreaseWidth">➖</span>
+                <span id="levelWidthValue"></span> <!-- Default or current width value -->
+                <span id="increaseWidth">➕</span>
                 <br>
                 <label for="levelHeight">Level Height:</label>
-                <button id="decreaseHeight">-</button>
-                <span id="levelHeightValue">10</span> <!-- Default or current height value -->
-                <button id="increaseHeight">+</button>
+                <span id="decreaseHeight">➖</span>
+                <span id="levelHeightValue"></span> <!-- Default or current height value -->
+                <span id="increaseHeight">➕</span>
                 <br>
                 <button id="cleanGround">Clean Ground</button>
-                <button id="doneCreatingLevel">Done</button>
+                <button id="doneCreatingLevel">Add</button>
+                <div style="background-color: white; color: black;">bit.ly/BattleMaze?</div>
+                <br>
+                <div id="playerColorControls">
+                    <div>
+                        <label for="sliderX">🔴</label>
+                        <input type="range" id="sliderX" min="0" max="15" value="0">
+                        <span id="valueX">0</span>
+                    </div>
+                    <div>
+                        <label for="sliderY">🟢</label>
+                        <input type="range" id="sliderY" min="0" max="15" value="0">
+                        <span id="valueY">0</span>
+                    </div>
+                    <div>
+                        <label for="sliderZ">🔵</label>
+                        <input type="range" id="sliderZ" min="0" max="15" value="15">
+                        <span id="valueZ">f</span>
+                    </div>
+                </div>
+                <br>
                 <div id="tileLegend" style="margin-top: 20px;">
                     <table id="tileLegendTable"></table>
                 </div>
             </div>
         `;
 
-        $("#playerColorControls").append(levelCreationHtml);
+        $("#gameContainer").append(levelCreationHtml);
+        $("#levelWidthValue").html(maze[0].length);
+        $("#levelHeightValue").html(maze.length);
 
         $("#increaseWidth").click(function() {
             for (let i = 0; i < maze.length; i++) {
@@ -1503,18 +1533,22 @@ $(document).ready(function() {
                 maze[i].push("W");
             }
             initializeGame();
+            $("#levelWidthValue").html(maze[0].length);
         });
 
         $("#decreaseWidth").click(function() {
-            for (let i = 0; i < maze.length; i++) {
-                maze[i].pop();
-            }
-            for (let i = 0; i < maze.length; i++) {
-                if (maze[i][maze[i].length - 1] == ".") {
-                    maze[i][maze[i].length - 1] = "W";
+            if (maze[0].length > 0) {
+                for (let i = 0; i < maze.length; i++) {
+                    maze[i].pop();
                 }
+                for (let i = 0; i < maze.length; i++) {
+                    if (maze[i][maze[i].length - 1] == ".") {
+                        maze[i][maze[i].length - 1] = "W";
+                    }
+                }
+                initializeGame();
+                $("#levelWidthValue").html(maze[0].length);
             }
-            initializeGame();
         });
 
         $("#increaseHeight").click(function() {
@@ -1529,16 +1563,21 @@ $(document).ready(function() {
             }
             maze.push(newRow);
             initializeGame();
+            $("#levelHeightValue").html(maze.length);
         });
 
         $("#decreaseHeight").click(function() {
-            maze.pop();
-            for (let i = 0; i < maze[0].length; i ++) {
-                if (maze[maze.length - 1][i] == ".") {
-                    maze[maze.length - 1][i] = "W";
+            //levelHeightValue
+            if (maze.length > 0) {
+                maze.pop();
+                for (let i = 0; i < maze[0].length; i ++) {
+                    if (maze[maze.length - 1][i] == ".") {
+                        maze[maze.length - 1][i] = "W";
+                    }
                 }
+                initializeGame();
+                $("#levelHeightValue").html(maze.length);
             }
-            initializeGame();
         });
 
         // Handle block placement on canvas click
@@ -1566,6 +1605,19 @@ $(document).ready(function() {
             }
         });
 
+        $("#toggleLevelBuilder").click(function() {
+            if ($("#levelCreationUI").is(":visible")) {
+                hideLevelCreationUI();
+                $(".controls-row").show();
+                $(this).text("BUILD"); // Change button text accordingly
+            } else {
+                showLevelCreationUI();
+                $(".controls-row").hide();
+                $("#playGame").hide(); // Ensure "PLAY!" button is hidden in this state
+                $(this).text("PLAY"); // Change button text accordingly
+            }
+        });
+
         $("#doneCreatingLevel").click(function() {
             $("#levelCreationUI").hide(); // Hide the UI
             // Here, you could save the created level, transition to a "play" mode, etc.
@@ -1583,15 +1635,8 @@ $(document).ready(function() {
     }
 
     function hideLevelCreationUI() {
-        // Remove the level creation UI from the DOM
         $("#levelCreationUI").remove();
-        $("#playerColorControls").remove();
-
-        // Remove the click event handler from the canvas
-        // This assumes you've set up the click event handler as shown in the showLevelCreationUI function
         $("#gameCanvas").off("click");
-
-        // Optional: Reset any other UI elements or game state as necessary
     }
 
     function nextGame() {
@@ -1601,6 +1646,8 @@ $(document).ready(function() {
             showLevelCreationUI();
             
         } else {
+            $("#toggleLevelBuilder").hide();
+            $('.controls-row').show();
             hideLevelCreationUI();
         }
         initializeGame();
@@ -1957,6 +2004,22 @@ $(document).ready(function() {
 
     // Call this function every time a powerUp is collected or used
     updateStylesBasedOnPowerUps();
+
+    function updateHeadingWithQueryParam() {
+        // Create a URLSearchParams object from the current URL
+        const queryParams = new URLSearchParams(window.location.search);
+        
+        // Check if the "test" parameter exists
+        if (queryParams.has('test')) {
+            // Get the value of the "test" parameter
+            const testValue = queryParams.get('test');
+            
+            // Find the first H1 tag in the document and update its text content
+            $("h1").text(testValue);
+        }
+    }
+
+    updateHeadingWithQueryParam();
 
 });
 </script>
