@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Super Maze Runner</title>
+<title>Battle Maze Ultra 9K</title>
 <style>
     body {
         margin: 10px;
@@ -37,7 +37,7 @@
         }
     }
 
-    h1, h2, .controls, #livesCount, #superPowerCount, #scoreCount, #levelTitle {
+    h1, h2, .controls, #livesCount, #coinsCount, #superPowerCount, #ammoCount, #bombsCount, #scoreCount, #levelTitle {
         animation: txtColorChange 10s infinite alternate;
     }
 
@@ -91,32 +91,61 @@
       height: 50px;
       margin: 0 10px;
     }
+
+    #gameContainer {
+        max-height: calc(100vh - 120px); /* Adjust based on control area height */
+        overflow: auto;
+        padding-bottom: 5px; /* Space for controls */
+    }
+
+    #controlsContainer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
+        padding: 5px 0;
+        text-align: center;
+    }
+
+    .control-button {
+        touch-action: manipulation; /* Improve responsiveness */
+    }
+
 </style>
 </head>
 <body>
 <h1>Battle Maze Ultra 9K</h1>
 <span id="levelTitle">Title Above Maze</span>
 <span id="livesCount">❤️ 0</span>
-<span id="superPowerCount">⚡ 0</span>
+<span id="coinsCount">🪙 0</span>
+<span id="superPowerCount"></span>
+<span id="ammoCount"></span>
+<span id="bombsCount"></span>
 <span id="scoreCount">⭐ 0</span>
 <h2 id="levelText">Level description below maze.</h2>
 
-<canvas id="gameCanvas" width="800" height="800"></canvas>
+<div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="800"></canvas>
+</div>
+<div id="controlsContainer">
+    <div class="controls">
+        <div class="control-button" id="Up">↑</div>
+    </div>
+    <div class="controls">
+        <div class="control-button" id="Left">←</div>
+        <div class="control-button" id="Right">→</div>
+    </div>
+    <div class="controls">
+        <div class="control-button" id="Down">↓</div>
+    </div>
+    <div class="controls">
+        <div class="control-button" id="super"></div>
+        <div class="control-button" id="shoot"></div>
+        <div class="control-button" id="bomb"></div>
+    </div>
+</div>
 
-<div class="controls">
-    <div class="control-button" id="Up">↑</div>
-</div>
-<div class="controls">
-    <div class="control-button" id="Left">←</div>
-    <div class="control-button" id="Super">⚡</div>
-    <div class="control-button" id="Right">→</div>
-</div>
-<div class="controls">
-    <div class="control-button" id="Down">↓</div>
-</div>
-<div class="controls">
-    <div id="nextLevel">NEXT LEVEL!</div>
-</div>
 <div id="playerColorControls">
     <div>
         <label for="sliderX">🔴</label>
@@ -137,70 +166,31 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+
 $(document).ready(function() {
     const canvas = $("#gameCanvas")[0];
     const ctx = canvas.getContext("2d");
     const cellSize = 20;
     let currentLevel = 0;
     let gameOver = false;
-    let livesCollected = 0;
+    let livesCollected = 1;
+    let coinsCollected = 0;
     let superPowersCollected = 0;
+    let ammoCollected = 0;
+    let bombsCollected = 0;
     let scoreCollected = 0;
-    let keyCollected = false;
+    let key1Collected = false;
+    let key2Collected = false;
+    let key3Collected = false;
+    let powerUps = [0, 0, 0];
 
     const levels = [
-        // {
-        //     maze: [
-        //         ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","W"],
-        //         ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
-        //     ],
-        //     text: "You awake in a room...",
-        //     colors: {
-        //         ground: "#fff",
-        //         walked: "#eee",
-        //         creeped:"#ddd",
-        //         burned: "#ccc",
-        //         broken: "#bbb"
-        //     }
-        // },
-
         {
             maze: [
                 ["W","W","W","W","x","W"],
                 ["W",".",".",".",".","W"],
                 ["W",".",".",".",".","W"],
-                ["W",".","P",".","C","W"],
+                ["W",".","P",".","G","W"],
                 ["W","W","-","W","W","W"]
             ],
             text: "Build a level, or continue to play :)",
@@ -214,22 +204,22 @@ $(document).ready(function() {
         },
         {
             maze: [
-                ["W","W","W","W","W","W","W","W","W","W","W","W","W","x","W","W","W","W","W","W"],
-                ["W",".","H",".","W",".",".",".",".",".",".","!","W",".","W","W","C",".",".","W"],
-                ["W",".",".",".","W",".",".",".",".",".",".","W","W",".","W","W","W","W",".","W"],
-                ["W",".",".",".","W",".","W","W","W","W","W","W","W",".","W","W","W","W",".","W"],
-                ["W",".",".","k","W",".","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
-                ["W","w","w","W","W",".",".",".",".",".",".",".",".",".",".","L","L","L","L","W"],
-                ["W",".",".",".",".",".",".",".",".",".",".",".",".","V",".","B","B","B","B","W"],
-                ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".","B","B","B","B","W"],
-                ["W",".","e",".",".",".",".",".",".",".",".",".",".",".",".",".",".","B","B","W"],
-                ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".","B","B","B","B","W"],
-                ["W",".",".",".",".",".",".",".",".",".",".",".",".",".",".","S","S","S","S","B"],
-                ["W",".",".",".",".",".",".",".",".",".",".",".",".","W","W","W","W","W","W","W"],
-                ["W","S","S","S",".",".",".",".",".",".",".",".",".","W","V",".",".",".","E","W"],
-                ["W","S","S","S",".",".",".",".",".",".",".",".",".","W",".",".",".",".",".","W"],
-                ["W","S","L","S",".",".",".",".",".",".",".",".",".","W",".",".",".",".",".","W"],
-                ["W","S","P","S",".",".",".",".",".",".",".",".",".","W","F",".","e",".","L","W"],
+                ["W","W","W","W","W","W","W","W","W","i","W","W","W","x","W","W","W","W","W","W"],
+                ["W","Y",".","H","W","C","C","C","C","C","C","!","W","m","W","W","G",".",".","W"],
+                ["W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".",".","W","C","W","j","W","W","W","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".","K","W","C","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
+                ["W","M","M","W","W","C","C","C",".",".",".",".",".",".",".","L","L","L","L","W"],
+                ["W",".",".",".",".","C","C","C","C",".",".",".",".","V",".","w","w","w","w","W"],
+                ["W",".",".",".",".","C","C","C","C","C",".",".",".",".",".","w","w","w","w","W"],
+                ["W","L","Z","L",".","C","C","C","C","C",".",".",".",".",".",".",".","w","w","W"],
+                ["W","L","Z","L",".","C","C","C","C",".",".",".",".",".",".","w","w","w","w","W"],
+                ["W","S","Z","B",".","C","C","C",".",".",".",".",".",".",".","S","S","S","S","w"],
+                ["W","S","Z","B",".",".",".",".",".","N",".",".","U","W","W","W","W","W","W","W"],
+                ["W","S","Z","B",".",".",".",".","N","k","N","U","t","W","V","u",".",".","E","W"],
+                ["W","S","Z","B",".","s","z","b","N",".","N","U",".","W","n",".",".",".",".","W"],
+                ["W","S","Z","B",".","s","z","b","N",".","N","U",".","W",".",".",".",".",".","W"],
+                ["W","S","P","B",".","s","z","b","N","h","N","U","T","W","F",".","e",".","L","W"],
                 ["W","W","-","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
             ],
             text: "This is a testing level :)",
@@ -244,7 +234,7 @@ $(document).ready(function() {
         {
             maze: [
                 ["W","W","W","W","W","W","W","W","W"],
-                ["W",".",".",".","W","C",".",".","W"],
+                ["W",".",".",".","W","G",".",".","W"],
                 ["W",".",".",".","W","W",".",".","W"],
                 ["W",".","W",".",".",".",".",".","W"],
                 ["W",".","W",".",".",".",".",".","W"],
@@ -266,14 +256,14 @@ $(document).ready(function() {
                 ["W",".",".",".",".",".","W",".",".",".",".","W"],
                 ["-","P",".",".",".","V","W",".",".",".",".","W"],
                 ["W",".",".",".",".",".","W","W","W","W",".","W"],
-                ["W","w","w","W","W","W","W",".",".",".",".","W"],
+                ["W","M","M","W","W","W","W",".",".",".",".","W"],
                 ["W",".",".",".","W","V",".",".",".",".",".","W"],
                 ["W",".",".",".","W",".",".",".",".",".",".","W"],
                 ["W",".",".",".","W",".",".",".",".",".",".","W"],
-                ["W","C",".",".","W",".",".",".",".",".",".","W"],
+                ["W","G",".",".","W",".",".",".",".",".",".","W"],
                 ["W","W","W","W","W","W","W","W","W","x","W","W"]
             ],
-            text: "The coin unlocked a room with... vortexes?",
+            text: "The gateKey unlocked a room with... vortexes?",
             colors: {
                 ground: "#fff",
                 walked: "#eee",
@@ -285,8 +275,8 @@ $(document).ready(function() {
         {
             maze: [
                 ["W","W","W","W","W","-","W","W","W","W","W","W"],
-                ["W",".","B","B","W","P",".",".",".",".","S","W"],
-                ["W",".","B","C","W","W","W","W","W",".","W","W"],
+                ["W",".","w","w","W","P",".",".",".",".","S","W"],
+                ["W",".","w","G","W","W","W","W","W",".","W","W"],
                 ["W",".","W","W","W",".",".",".",".",".",".","W"],
                 ["W",".","W","V",".",".",".",".",".",".",".","W"],
                 ["W",".","W",".",".","e",".",".",".",".",".","x"],
@@ -308,10 +298,10 @@ $(document).ready(function() {
         {
             maze: [
                 ["W","W","W","W","W","W","W","W","W","W","W","W","W"],
-                ["W","k","S",".","W","C","B","B","w",".",".",".","W"],
-                ["W","S","S",".","W","W","B","B","w",".",".",".","!"],
-                ["W","S","L",".","W","W","B","B","w",".",".",".","W"],
-                ["W","w","w","w","W","W","W","W","W","W",".","W","W"],
+                ["W","K","S",".","W","G","w","w","M",".",".",".","W"],
+                ["W","S","S",".","W","W","w","w","M",".",".",".","!"],
+                ["W","S","L",".","W","W","w","w","M",".",".",".","W"],
+                ["W","M","M","M","W","W","W","W","W","W",".","W","W"],
                 ["W",".",".",".","W","W","e","E","e",".",".",".","W"],
                 ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
                 ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
@@ -338,26 +328,26 @@ $(document).ready(function() {
         {
             maze: [
                 ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
-                ["W",".",".",".","W","S","S","w",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
-                ["W",".",".",".","W","S","S","w",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
-                ["W",".",".",".","W","W","W","W","W","W",".","W",".",".","W","W","W","W",".","W",".","W",".",".","W","W","W","W","W","W","W","W","w","w","W","W"],
+                ["W",".",".",".","W","S","S","M",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","S","S","M",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","W","W","W","W","W",".","W",".",".","W","W","W","W",".","W",".","W",".",".","W","W","W","W","W","W","W","W","M","M","W","W"],
                 ["-","P",".",".","W",".",".",".",".",".",".","W",".",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","S","S","S","W"],
                 ["W","W","W",".","W",".","W","W","W",".",".",".","W",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","S","S","S","W"],
                 ["W",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","W","W","W","W"],
-                ["W",".",".",".","W",".",".",".",".","W",".",".","w",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
-                ["W",".","W","W",".",".",".",".",".","W",".",".","w",".",".","W",".",".","W","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W",".",".",".",".","W",".",".","M",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W","W",".",".",".",".",".","W",".",".","M",".",".","W",".",".","W","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
                 ["W",".",".",".",".","W","W","W",".","W",".",".","W","W","W","W",".","W","W","W",".","W",".",".","W",".",".",".",".",".",".","W","W","W","H","W"],
-                ["W","W","W","W","W",".",".",".",".","W",".","W","W",".",".",".",".","W","W",".",".","W",".",".","w",".",".","W",".",".","W","W",".",".",".","W"],
-                ["W",".",".",".",".",".",".",".",".","W",".","W","S","e",".",".",".","W",".",".","W","W",".",".","w",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W","W","W","W","W",".",".",".",".","W",".","W","W",".",".",".",".","W","W",".",".","W",".",".","M",".",".","W",".",".","W","W",".",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".","W","S","e",".",".",".","W",".",".","W","W",".",".","M",".",".","W",".",".","W",".",".",".",".","W"],
                 ["W",".",".",".",".",".",".",".",".","W",".","W","S",".",".",".","W","W",".","W","W",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
                 ["W",".","W","W","W","W","W","W","W","W",".","W","S","e",".","W","W",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
                 ["W",".","W",".",".",".",".",".",".",".",".","W","S",".","W","W",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
                 ["W",".","W",".",".",".",".",".",".",".","W","W","S","W","W",".",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
                 ["W",".","W",".",".","W","W","W","W","W","W",".","W","W",".",".",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W","W",".",".",".","W"],
                 ["W",".","W",".",".","W","W","W","W","W",".",".",".","W",".",".",".","W","W","W",".",".",".",".","W",".",".","W",".",".",".","W","W",".",".","W"],
-                ["W",".","W",".",".","W","W",".",".",".",".",".",".",".","W",".",".","W",".",".",".",".",".",".","w",".",".","W","W",".",".",".","W",".",".","W"],
-                ["W",".",".",".",".","W","W",".","e",".",".",".",".",".",".","W","H","W",".",".",".",".",".","w","w",".",".",".","W","W",".",".","W",".",".","W"],
-                ["W","W","W","W","!","W","W",".",".",".","W","W",".",".",".","W",".","W",".",".",".",".","W","w",".",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W",".","W",".",".","W","W",".",".",".",".",".",".",".","W",".",".","W",".",".",".",".",".",".","M",".",".","W","W",".",".",".","W",".",".","W"],
+                ["W",".",".",".",".","W","W",".","e",".",".",".",".",".",".","W","H","W",".",".",".",".",".","M","M",".",".",".","W","W",".",".","W",".",".","W"],
+                ["W","W","W","W","!","W","W",".",".",".","W","W",".",".",".","W",".","W",".",".",".",".","W","M",".",".",".",".",".","W",".",".","W",".",".","W"],
                 ["W","W","W","W","W","W",".",".",".",".","W",".",".",".","W","W",".","W",".",".",".",".","W","W",".",".",".",".",".","W",".",".","W",".",".","W"],
                 ["W",".",".",".",".",".",".",".",".","W",".",".",".","W","W",".",".","W",".",".",".","W","W","W","W",".",".",".",".","W",".",".","W",".",".","W"],
                 ["W",".",".",".",".",".",".",".","W",".",".",".","W","W",".",".",".","W",".",".","W","W","S","S","W","W",".",".","W","W",".",".","W",".",".","W"],
@@ -366,8 +356,8 @@ $(document).ready(function() {
                 ["W","W","W","W","W","W",".",".",".","W","W",".",".",".","W","W",".",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".","W",".",".","W"],
                 ["W",".",".","E",".",".",".",".",".","W",".",".",".","W","W",".",".",".",".","W","W",".","E",".",".",".",".",".",".",".",".","W","W",".",".","W"],
                 ["W",".",".",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".","W","W","S",".",".","W"],
-                ["W","E",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W","k",".",".",".",".",".",".",".",".",".","W","W","L","S",".",".","W"],
-                ["W",".",".",".","E",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".",".","W","k","L","S",".",".","W"],
+                ["W","E",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W","K",".",".",".",".",".",".",".",".",".","W","W","L","S",".",".","W"],
+                ["W",".",".",".","E",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".",".","W","K","L","S",".",".","W"],
                 ["W",".",".",".",".",".",".",".",".","W","W",".",".",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".","W","L","L","S","e","e","W"],
                 ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
             ],
@@ -382,91 +372,205 @@ $(document).ready(function() {
         },
     ];
 
-    function drawShape(shape, x, y, size, color, bgColor="", orientation="") {
+    function drawShape(shape, x, y, color, bgColor="", orientation="", decalShape="", decalColor="", c="") {
+        if (c === "") {
+            c = ctx;
+        }
         if (bgColor === "") {
-            ctx.fillStyle = levels[currentLevel].colors.ground;
+            c.fillStyle = levels[currentLevel].colors.ground;
         } else {
-            ctx.fillStyle = bgColor;
+            c.fillStyle = bgColor;
         }
         if (orientation === "") {
             orientation = currentPlayerOrientation
         }
         
-        ctx.fillRect(x * size, y * size, size, size); // Fill background color for negative space
-
+        c.fillRect(x * cellSize, y * cellSize, cellSize, cellSize); // Fill background color for negative space
+        let centerX;
+        let centerY;
         switch(shape) {
             case 'square':
-                ctx.fillStyle = color;
-                ctx.fillRect(x * size, y * size, size, size);
+                c.fillStyle = color;
+                c.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 break;
             case 'circle':
-                ctx.beginPath();
-                ctx.arc(x * size + size / 2, y * size + size / 2, size / 2, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.fill();
+                c.beginPath();
+                c.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 2, 0, Math.PI * 2);
+                c.fillStyle = color;
+                c.fill();
                 break;
             case 'dot':
-                ctx.beginPath();
-                ctx.arc(x * size + size / 2, y * size + size / 2, size / 4, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.fill();
+                c.beginPath();
+                c.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
+                c.fillStyle = color;
+                c.fill();
                 break;
             case 'triangle':
-                ctx.beginPath();
+                c.beginPath();
                 if (orientation === 'Up') {
-                    ctx.moveTo(x * size + size / 2, y * size);
-                    ctx.lineTo(x * size, y * size + size);
-                    ctx.lineTo(x * size + size, y * size + size);
+                    c.moveTo(x * cellSize + cellSize / 2, y * cellSize);
+                    c.lineTo(x * cellSize, y * cellSize + cellSize);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize);
                 } else if (orientation === 'Down') {
-                    ctx.moveTo(x * size, y * size);
-                    ctx.lineTo(x * size + size, y * size);
-                    ctx.lineTo(x * size + size / 2, y * size + size);
+                    c.moveTo(x * cellSize, y * cellSize);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize);
+                    c.lineTo(x * cellSize + cellSize / 2, y * cellSize + cellSize);
                 } else if (orientation === 'Left') {
-                    ctx.moveTo(x * size + size, y * size);
-                    ctx.lineTo(x * size, y * size + size / 2);
-                    ctx.lineTo(x * size + size, y * size + size);
+                    c.moveTo(x * cellSize + cellSize, y * cellSize);
+                    c.lineTo(x * cellSize, y * cellSize + cellSize / 2);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize);
                 } else if (orientation === 'Right') {
-                    ctx.moveTo(x * size, y * size);
-                    ctx.lineTo(x * size + size, y * size + size / 2);
-                    ctx.lineTo(x * size, y * size + size);
+                    c.moveTo(x * cellSize, y * cellSize);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize / 2);
+                    c.lineTo(x * cellSize, y * cellSize + cellSize);
                 }
-                ctx.closePath();
-                ctx.fillStyle = color;
-                ctx.fill();
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'smallTriangle':
+                c.beginPath();
+                let smallTriangleSize = cellSize / 4; // Adjust for desired size
+                centerX = x * cellSize + cellSize / 2;
+                centerY = y * cellSize + cellSize / 2;
+                
+                if (orientation === 'Up') {
+                    c.moveTo(centerX, centerY - smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY + smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY + smallTriangleSize);
+                } else if (orientation === 'Down') {
+                    c.moveTo(centerX, centerY + smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY - smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY - smallTriangleSize);
+                } else if (orientation === 'Left') {
+                    c.moveTo(centerX - smallTriangleSize, centerY);
+                    c.lineTo(centerX + smallTriangleSize, centerY - smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY + smallTriangleSize);
+                } else if (orientation === 'Right') {
+                    c.moveTo(centerX + smallTriangleSize, centerY);
+                    c.lineTo(centerX - smallTriangleSize, centerY - smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY + smallTriangleSize);
+                }
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
                 break;
             case 'diamond':
-                ctx.beginPath();
-                ctx.moveTo(x * size + size / 2, y * size); // Top point
-                ctx.lineTo(x * size + size, y * size + size / 2); // Right point
-                ctx.lineTo(x * size + size / 2, y * size + size); // Bottom point
-                ctx.lineTo(x * size, y * size + size / 2); // Left point
-                ctx.closePath();
-                ctx.fillStyle = color;
-                ctx.fill();
+                c.beginPath();
+                c.moveTo(x * cellSize + cellSize / 2, y * cellSize); // Top point
+                c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize / 2); // Right point
+                c.lineTo(x * cellSize + cellSize / 2, y * cellSize + cellSize); // Bottom point
+                c.lineTo(x * cellSize, y * cellSize + cellSize / 2); // Left point
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'smallDiamond':
+                c.beginPath();
+                centerX = x * cellSize + cellSize / 2;
+                centerY = y * cellSize + cellSize / 2;
+                let smallDiamondSize = cellSize / 4; // Adjust for desired size
+                c.moveTo(centerX, centerY - smallDiamondSize);
+                c.lineTo(centerX + smallDiamondSize, centerY);
+                c.lineTo(centerX, centerY + smallDiamondSize);
+                c.lineTo(centerX - smallDiamondSize, centerY);
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
                 break;
             case 'chest':
                 // Bottom half rectangle
-                ctx.fillStyle = color; // Color for the chest
-                const bottomRectY = y * size + size / 2; // Start Y for bottom rectangle
-                ctx.fillRect(x * size, bottomRectY, size, size / 2);
+                c.fillStyle = color; // Color for the chest
+                const bottomRectY = y * cellSize + cellSize / 2; // Start Y for bottom rectangle
+                c.fillRect(x * cellSize, bottomRectY, cellSize, cellSize / 2);
 
                 // Top with rounded corners
-                const topArcCenterY = y * size + size / 4; // Adjust for desired look
-                const topArcRadius = size / 4; // Adjust based on your size preference
+                const topArcCenterY = y * cellSize + cellSize / 4; // Adjust for desired look
+                const topArcRadius = cellSize / 4; // Adjust based on your size preference
 
-                ctx.beginPath();
+                c.beginPath();
                 // Start at left corner of the top arc
-                ctx.moveTo(x * size, bottomRectY);
+                c.moveTo(x * cellSize, bottomRectY);
                 // Top left rounded corner
-                ctx.arc(x * size + topArcRadius, topArcCenterY, topArcRadius, Math.PI, 1.5 * Math.PI, false);
+                c.arc(x * cellSize + topArcRadius, topArcCenterY, topArcRadius, Math.PI, 1.5 * Math.PI, false);
                 // Top right rounded corner
-                ctx.arc(x * size + size - topArcRadius, topArcCenterY, topArcRadius, 1.5 * Math.PI, 0, false);
+                c.arc(x * cellSize + cellSize - topArcRadius, topArcCenterY, topArcRadius, 1.5 * Math.PI, 0, false);
                 // Close the path by drawing the right side down and bottom line
-                ctx.lineTo(x * size + size, bottomRectY + size / 2); // Right side down
-                ctx.lineTo(x * size, bottomRectY + size / 2); // Bottom line
-                ctx.closePath();
-                ctx.fill();
+                c.lineTo(x * cellSize + cellSize, bottomRectY + cellSize / 2); // Right side down
+                c.lineTo(x * cellSize, bottomRectY + cellSize / 2); // Bottom line
+                c.closePath();
+                c.fill();
+                
+                if (decalShape == "dot") {
+                    c.beginPath();
+                    c.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
+                    c.fillStyle = decalColor;
+                    c.fill();
+                } else if (decalShape == "smallTriangle") {
+                    c.beginPath();
+                    let smallTriangleSize = cellSize / 4; // Adjust for desired size
+                    centerX = x * cellSize + cellSize / 2;
+                    centerY = y * cellSize + cellSize / 2;
+                    c.moveTo(centerX, centerY - smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY + smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY + smallTriangleSize);
+                    c.closePath();
+                    c.fillStyle = decalColor;
+                    c.fill();
+                } else if ("smallDiamond") {
+                    c.beginPath();
+                    let smallDiamondSize = cellSize / 4; // Adjust for desired size
+                    centerX = x * cellSize + cellSize / 2;
+                    centerY = y * cellSize + cellSize / 2;
+                    c.moveTo(centerX, centerY - smallDiamondSize);
+                    c.lineTo(centerX + smallDiamondSize, centerY);
+                    c.lineTo(centerX, centerY + smallDiamondSize);
+                    c.lineTo(centerX - smallDiamondSize, centerY);
+                    c.closePath();
+                    c.fillStyle = decalColor;
+                    c.fill();
+                }
                 break;
+            case 'heart':
+                c.beginPath();
+                // Center top of the heart
+                let topCenterX = x * cellSize + cellSize / 2;
+                let topCenterY = y * cellSize + cellSize / 3;
+                
+                // Starting point for the left top lobe, moving a bit right to make the top smoother
+                let startLobeX = x * cellSize + cellSize / 4;
+                let startLobeY = y * cellSize + cellSize / 4;
+
+                // Control points for the left curve to create smoother lobes
+                let leftCtrlX1 = x * cellSize + cellSize / 4;
+                let leftCtrlY1 = y * cellSize;
+                let leftCtrlX2 = x * cellSize;
+                let leftCtrlY2 = y * cellSize + cellSize / 4;
+
+                // Bottom tip of the heart
+                let bottomTipX = x * cellSize + cellSize / 2;
+                let bottomTipY = y * cellSize + cellSize * 0.75;
+
+                // Control points for the right curve, mirrored from the left
+                let rightCtrlX1 = x * cellSize + cellSize * 3 / 4;
+                let rightCtrlY1 = y * cellSize;
+                let rightCtrlX2 = x * cellSize + cellSize;
+                let rightCtrlY2 = y * cellSize + cellSize / 4;
+
+                // Draw left top lobe
+                c.moveTo(topCenterX, topCenterY);
+                c.bezierCurveTo(leftCtrlX1, leftCtrlY1, leftCtrlX2, leftCtrlY2, bottomTipX, bottomTipY);
+
+                // Draw right top lobe, mirroring the left one
+                c.moveTo(topCenterX, topCenterY);
+                c.bezierCurveTo(rightCtrlX1, rightCtrlY1, rightCtrlX2, rightCtrlY2, bottomTipX, bottomTipY);
+
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+
+
             default:
                 console.log('Unknown shape');
         }
@@ -481,25 +585,40 @@ $(document).ready(function() {
 
     let maze = levels[currentLevel].maze;
     let player;
-    let coin;
+    let gateKey;
     let exit;
     let enemies = [];
+    let powerUpgrades = [];
     let lives = [];
-    let superPowers = []; 
-    let vortexes = []; 
+    let superPowers = [];
+    let ammo = [];
+    let bullets = [];
+    let lasers = [];
+    let bombs = [];
+    let vortexes = [];
+    let coins = [];
+    let switch1Activated = false;
+    let switch2Activated = false;
+    let switch3Activated = false;
 
     function initializeGame() {
         resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
         enemies = [[], [], []];
+        powerUpgrades = [[], [], []];
         lives = [];
         vortexes = [];
         superPowers = [];
+        ammo = [];
+        bullets = [];
+        lasers = [];
+        bombs = [];
+        coins = [];
         for (let y = 0; y < maze.length; y++) {
             for (let x = 0; x < maze[y].length; x++) {
                 if (maze[y][x] === "P") {
                     player = { x, y };
-                } else if (maze[y][x] === "C") {
-                    coin = { x, y, collected: false };
+                } else if (maze[y][x] === "G") {
+                    gateKey = { x, y, collected: false };
                 } else if (maze[y][x] === "x") {
                     exit = { x, y };
                 } else if (maze[y][x] === "e") {
@@ -512,8 +631,20 @@ $(document).ready(function() {
                     lives.push({ x, y, collected: false });
                 } else if (maze[y][x] === "S") {
                     superPowers.push({ x, y, collected: false });
+                } else if (maze[y][x] === "s") {
+                    powerUpgrades[0].push({ x, y, collected: false });
+                } else if (maze[y][x] === "Z") {
+                    ammo.push({ x, y, collected: false });
+                } else if (maze[y][x] === "z") {
+                    powerUpgrades[1].push({ x, y, collected: false });
+                } else if (maze[y][x] === "B") {
+                    bombs.push({ x, y, collected: false });
+                } else if (maze[y][x] === "b") {
+                    powerUpgrades[2].push({ x, y, collected: false });
                 } else if (maze[y][x] === "V") {
                     vortexes.push({ x, y, collected: false });
+                } else if (maze[y][x] === "C") {
+                    coins.push({ x, y, collected: false });
                 }
             }
         }
@@ -525,11 +656,47 @@ $(document).ready(function() {
         $("#livesCount").text(`❤️ ${livesCollected}`);
     }
 
-    function updateSuperPowerCountDisplay() {
-        $("#superPowerCount").text(`⚡ ${superPowersCollected}`);
+    function updateCoinsCountDisplay(amount) {
+        coinsCollected += amount;
+        $("#coinsCount").text(`🪙 ${coinsCollected}`);
     }
 
-    function updateScoreCountDisplay() {
+    let superPowerEmoji = "";
+    function updateSuperPowerCountDisplay() {
+        if (powerUps[0] > 0) {
+            $("#superPowerCount").text(`${superPowerEmoji} ${superPowersCollected}`);
+            $("#super").text(superPowerEmoji);
+        } else {
+            $("#superPowerCount").text(``);
+            $("#super").text(``);
+        }
+        
+    }
+
+    let ammoEmoji = "";
+    function updateAmmoCountDisplay() {
+        if (powerUps[1] > 0) {
+            $("#ammoCount").text(`${ammoEmoji} ${ammoCollected}`);
+            $("#shoot").text(ammoEmoji);
+        } else {
+            $("#ammoCount").text(``);
+            $("#shoot").text(``);
+        }
+    }
+
+    let bombsEmoji = "";
+    function updateBombsCountDisplay() {
+        if (powerUps[2] > 0) {
+            $("#bombsCount").text(`${bombsEmoji} ${bombsCollected}`);
+            $("#bomb").text(bombsEmoji);
+        } else {
+            $("#bombsCount").text(``);
+            $("#bomb").text(``);
+        }
+    }
+
+    function updateScoreCountDisplay(amount) {
+        scoreCollected += amount;
         $("#scoreCount").text(`⭐ ${scoreCollected}`);
     }
 
@@ -537,12 +704,17 @@ $(document).ready(function() {
         wall: "#000",
         breakable_wall: "#222",
         start: "#843",
-        closed_exit: "#888",
+        chest: "#843",
+        upgrade: "#666",
+        key: "#888",
+        closed_exit: "#444",
         player: "#00f",
-        coin: "#ff0",
+        coin: "#fd0",
+        gateKey: "#0f0",
         enemy: ["#f80", "#f00", "#909"],
-        life: "#0f0",
-        super: "#0ff",
+        life: "#f00",
+        super: "#0df",
+        ammo: "#2f6",
         vortex: "#d6f",
         switch: {
             off: "#f00",
@@ -557,95 +729,163 @@ $(document).ready(function() {
             row.forEach((cell, colIndex) => {
                 switch (cell) {
                     case "W":
-                        drawShape("square", colIndex, rowIndex, cellSize, colors.wall);
+                        drawShape("square", colIndex, rowIndex, colors.wall);
                         break;
-                    case "w":
-                        drawShape("dot", colIndex, rowIndex, cellSize, levels[currentLevel].colors.ground, colors.wall);
+                    case "M":
+                        drawShape("dot", colIndex, rowIndex, levels[currentLevel].colors.ground, colors.wall);
+                        break;
+                    case "m":
+                        drawShape("dot", colIndex, rowIndex, levels[currentLevel].colors.walked, colors.ground);
                         break;
                     case "!":
-                        if (switchActivated) {
-                            drawShape("dot", colIndex, rowIndex, cellSize, colors.switch.on, colors.wall);
+                        if (switch1Activated) {
+                            drawShape("dot", colIndex, rowIndex, colors.switch.on, colors.wall);
                         } else {
-                            drawShape("dot", colIndex, rowIndex, cellSize, colors.switch.off, colors.wall);
+                            drawShape("dot", colIndex, rowIndex, colors.switch.off, colors.wall);
                         }
                         break;
-                    case "B":
-                        drawShape("dot", colIndex, rowIndex, cellSize, colors.wall, colors.breakable_wall);
+                    case "N":
+                        drawShape("smallTriangle", colIndex, rowIndex, levels[currentLevel].colors.ground, colors.wall, "Up");
                         break;
-                    case "b":
-                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.broken);
+                    case "n":
+                        drawShape("smallTriangle", colIndex, rowIndex, levels[currentLevel].colors.walked, colors.ground, "Up");
+                        break;
+                    case "i":
+                        if (switch2Activated) {
+                            drawShape("smallTriangle", colIndex, rowIndex, colors.switch.on, colors.wall, "Up");
+                        } else {
+                            drawShape("smallTriangle", colIndex, rowIndex, colors.switch.off, colors.wall, "Up");
+                        }
+                        break;
+                    case "U":
+                        drawShape("smallDiamond", colIndex, rowIndex, levels[currentLevel].colors.ground, colors.wall);
+                        break;
+                    case "u":
+                        drawShape("smallDiamond", colIndex, rowIndex, levels[currentLevel].colors.walked, colors.ground);
+                        break;
+                    case "j":
+                        if (switch3Activated) {
+                            drawShape("smallDiamond", colIndex, rowIndex, colors.switch.on, colors.wall);
+                        } else {
+                            drawShape("smallDiamond", colIndex, rowIndex, colors.switch.off, colors.wall);
+                        }
+                        break;
+                    case "w":
+                        drawShape("dot", colIndex, rowIndex, colors.wall, colors.breakable_wall);
+                        break;
+                    case "q":
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.broken);
                         break;
                     case "-":
-                        drawShape("square", colIndex, rowIndex, cellSize, colors.start);
+                        drawShape("square", colIndex, rowIndex, colors.start);
                         break;
                     case "x":
-                        drawShape("square", colIndex, rowIndex, cellSize, colors.closed_exit);
+                        drawShape("circle", colIndex, rowIndex, colors.switch.off, colors.closed_exit);
                         break;
                     case "X":
-                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.ground);
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.ground);
                         break;
                     case ".":
-                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.ground);
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.ground);
                         break;
                     case ",":
-                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.walked);
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.walked);
                         break;
                     case "'":
-                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.burned);
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.burned);
                         break;
                     case "*":
-                        drawShape("square", colIndex, rowIndex, cellSize, levels[currentLevel].colors.creeped);
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.creeped);
                         break;
                     case "P":
-                        drawShape("triangle", colIndex, rowIndex, cellSize, colors.player, levels[currentLevel].colors.walked);
+                        drawShape("triangle", colIndex, rowIndex, colors.player, levels[currentLevel].colors.walked);
                         break;
-                    case "C":
-                        drawShape("circle", colIndex, rowIndex, cellSize, colors.coin);
+                    case "G":
+                        drawShape("circle", colIndex, rowIndex, colors.gateKey);
                         break;
                     case "e":
                         for (let i = 0; i < enemies[0].length; i++) {
                             if (colIndex == enemies[0][i].x && rowIndex == enemies[0][i].y) {
-                                drawShape("triangle", colIndex, rowIndex, cellSize, colors.enemy[0], enemies[0][i].orientation);
+                                drawShape("triangle", colIndex, rowIndex, colors.enemy[0], '', enemies[0][i].orientation);
                             }
                         }
                         break;
                     case "E":
                         for (let i = 0; i < enemies[1].length; i++) {
                             if (colIndex == enemies[1][i].x && rowIndex == enemies[1][i].y) {
-                                drawShape("triangle", colIndex, rowIndex, cellSize, colors.enemy[1], enemies[1][i].orientation);
+                                drawShape("triangle", colIndex, rowIndex, colors.enemy[1], '', enemies[1][i].orientation);
                             }
                         }
                         break;
                     case "F":
                         for (let i = 0; i < enemies[2].length; i++) {
                             if (colIndex == enemies[2][i].x && rowIndex == enemies[2][i].y) {
-                                drawShape("triangle", colIndex, rowIndex, cellSize, colors.enemy[2], enemies[2][i].orientation);
+                                drawShape("triangle", colIndex, rowIndex, colors.enemy[2], '', enemies[2][i].orientation);
                             }
                         }
-                        drawShape("square", colIndex, rowIndex, cellSize, colors.enemy[2]);
+                        drawShape("square", colIndex, rowIndex, colors.enemy[2]);
                         break;
                     case "L":
-                        drawShape("diamond", colIndex, rowIndex, cellSize, colors.life);
+                        drawShape("heart", colIndex, rowIndex, colors.life);
+                        break;
+                    case "l":
+                        drawShape("heart", colIndex, rowIndex, colors.life, levels[currentLevel].colors.broken);
                         break;
                     case "S":
-                        drawShape("diamond",  colIndex, rowIndex, cellSize, colors.super);
+                        drawShape("smallDiamond", colIndex, rowIndex, colors.super);
+                        break;
+                    case "s":
+                    drawShape("chest",  colIndex, rowIndex, colors.upgrade, "", "U", "smallDiamond", colors.super);
+                        break;
+                    case "Z":
+                        drawShape("smallTriangle", colIndex, rowIndex, colors.ammo, "", "Up");
+                        break;
+                    case "z":
+                    drawShape("chest",  colIndex, rowIndex, colors.upgrade, "", "", "smallTriangle", colors.ammo);
+                        break;
+                    case "B":
+                        drawShape("dot", colIndex, rowIndex, colors.wall);
+                        break;
+                    case "b":
+                    drawShape("chest",  colIndex, rowIndex, colors.upgrade, "", "", "dot", colors.wall);
                         break;
                     case "V":
                         for (let i = 0; i < vortexes.length; i++) {
                             if (colIndex == vortexes[i].x && rowIndex == vortexes[i].y) {
                                 if (vortexes[i].collected) {
-                                    drawShape("circle", colIndex, rowIndex, cellSize, colors.vortex, levels[currentLevel].colors.walked);
+                                    drawShape("circle", colIndex, rowIndex, colors.vortex, levels[currentLevel].colors.walked);
                                 } else {
-                                    drawShape("circle", colIndex, rowIndex, cellSize, colors.vortex);
+                                    drawShape("circle", colIndex, rowIndex, colors.vortex);
                                 }
                             }
                         }
                         break;
+                    case "Y":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "dot", colors.coin);
+                        break;
                     case "H":
-                        drawShape("chest",  colIndex, rowIndex, cellSize, colors.start);
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "dot", colors.key);
+                        break;
+                    case "K":
+                        drawShape("dot",  colIndex, rowIndex, colors.key);
+                        break;
+                    case "h":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "smallTriangle", colors.key);
                         break;
                     case "k":
-                        drawShape("dot",  colIndex, rowIndex, cellSize, colors.closed_exit);
+                        drawShape("smallTriangle",  colIndex, rowIndex, colors.key, "", "Up");
+                        break;
+                    case "T":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "smallDiamond", colors.key);
+                        break;
+                    case "t":
+                        drawShape("smallDiamond",  colIndex, rowIndex, colors.key);
+                        break;
+                    case "C":
+                        drawShape("dot",  colIndex, rowIndex, colors.coin);
+                        break;
+                    case "c":
+                        drawShape("dot",  colIndex, rowIndex, colors.coin, levels[currentLevel].colors.broken);
                         break;
                 }
             });
@@ -659,8 +899,7 @@ $(document).ready(function() {
                 maze[life.y][life.x] = ".";
                 life.collected = true;
                 updateLivesCountDisplay();
-                scoreCollected += 2;
-                updateScoreCountDisplay();
+                updateScoreCountDisplay(2);
             }
         });
     }
@@ -672,58 +911,232 @@ $(document).ready(function() {
                 power.collected = true;
                 superPowersCollected++;
                 updateSuperPowerCountDisplay();
-                scoreCollected += 2;
-                updateScoreCountDisplay();
+                updateScoreCountDisplay(2);
             }
         });
     }
 
-    function activateSuperPower() {
-        if (superPowersCollected > 0) {
+    function collectSuperPowerUpgrade() {
+        powerUpgrades[0].forEach((upgrade, index) => {
+            if (player.x === upgrade.x && player.y === upgrade.y && !upgrade.collected) {
+                maze[upgrade.y][upgrade.x] = ".";
+                upgrade.collected = true;
+                if (powerUps[0] < 3) {
+                    powerUps[0]++;
+                    if (powerUps[0] == 1) {
+                        superPowerEmoji = "🗡️";
+                    } else if (powerUps[0] == 2) {
+                        superPowerEmoji = "⚔️";
+                    } else if (powerUps[0] == 3) {
+                        superPowerEmoji = "🔥";
+                    }
+                }
+                updateSuperPowerCountDisplay();
+                updateScoreCountDisplay(5);
+            }
+        });
+    }
+
+    function collectAmmo() {
+        ammo.forEach((bullet, index) => {
+            if (player.x === bullet.x && player.y === bullet.y && !bullet.collected) {
+                maze[bullet.y][bullet.x] = ".";
+                bullet.collected = true;
+                ammoCollected++;
+                updateAmmoCountDisplay();
+                updateScoreCountDisplay(2);
+            }
+        });
+    }
+
+    function collectAmmoUpgrade() {
+        powerUpgrades[1].forEach((upgrade, index) => {
+            if (player.x === upgrade.x && player.y === upgrade.y && !upgrade.collected) {
+                maze[upgrade.y][upgrade.x] = ".";
+                upgrade.collected = true;
+                if (powerUps[1] < 3) {
+                    powerUps[1]++;
+                    if (powerUps[1] == 1) {
+                        ammoEmoji = "🏹";
+                    } else if (powerUps[1] == 2) {
+                        ammoEmoji = "🔫";
+                    } else if (powerUps[1] == 3) {
+                        ammoEmoji = "⚡";
+                    }
+                }
+                updateAmmoCountDisplay();
+                updateScoreCountDisplay(5);
+            }
+        });
+    }
+
+    function collectBomb() {
+        bombs.forEach((bomb, index) => {
+            if (player.x === bomb.x && player.y === bomb.y && !bomb.collected) {
+                maze[bomb.y][bomb.x] = ".";
+                bomb.collected = true;
+                bombsCollected++;
+                updateBombsCountDisplay();
+                updateScoreCountDisplay(2);
+            }
+        });
+    }
+
+    function collectBombUpgrade() {
+        powerUpgrades[2].forEach((upgrade, index) => {
+            if (player.x === upgrade.x && player.y === upgrade.y && !upgrade.collected) {
+                maze[upgrade.y][upgrade.x] = ".";
+                upgrade.collected = true;
+                if (powerUps[2] < 3) {
+                    powerUps[2]++;
+                    if (powerUps[2] == 1) {
+                        bombsEmoji = "💣";
+                    } else if (powerUps[2] == 2) {
+                        bombsEmoji = "🧨";
+                    } else if (powerUps[2] == 3) {
+                        bombsEmoji = "💥";
+                    }
+                }
+                updateBombsCountDisplay();
+                updateScoreCountDisplay(5);
+            }
+        });
+    }
+
+    function attack(newX, newY) {
+        let returnValue = false;
+        if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+            if (maze[newY][newX] === "w") {
+                updateScoreCountDisplay(3);
+                if (Math.random() < 0.5) {
+                    maze[newY][newX] = "c";
+                } else {
+                    maze[newY][newX] = "q";
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "W") {
+                returnValue = true;
+            } else if (maze[newY][newX] === "L" || maze[newY][newX] === "l") {
+                maze[newY][newX] = "q";
+                for (let i = lives.length - 1; i >= 0; i--) {
+                    if (lives[i].x == newX && lives[i].y == newY) {
+                        lives[i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "S") {
+                maze[newY][newX] = "q";
+                for (let i = superPowers.length - 1; i >= 0; i--) {
+                    if (superPowers[i].x == newX && superPowers[i].y == newY) {
+                        superPowers[i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "s") {
+                maze[newY][newX] = "q";
+                for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
+                    if (powerUpgrades[0][i].x == newX && powerUpgrades[0][i].y == newY) {
+                        powerUpgrades[0][i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "Z") {
+                maze[newY][newX] = "q";
+                for (let i = ammo.length - 1; i >= 0; i--) {
+                    if (ammo[i].x == newX && ammo[i].y == newY) {
+                        ammo[i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "z") {
+                maze[newY][newX] = "q";
+                for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
+                    if (powerUpgrades[1][i].x == newX && powerUpgrades[1][i].y == newY) {
+                        powerUpgrades[1][i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "B") {
+                maze[newY][newX] = "q";
+                for (let i = bombs.length - 1; i >= 0; i--) {
+                    if (bombs[i].x == newX && bombs[i].y == newY) {
+                        bombs[i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "b") {
+                maze[newY][newX] = "q";
+                for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
+                    if (powerUpgrades[2][i].x == newX && powerUpgrades[2][i].y == newY) {
+                        powerUpgrades[2][i].collected = true;
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "C" || maze[newY][newX] === "c") {
+                maze[newY][newX] = "q";
+                if (coins.length > 0) {
+                    for (let i = coins.length - 1; i >= 0; i--) {
+                        if (coins[i].x == newX && coins[i].y == newY) {
+                            coins[i].collected = true;
+                        }
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "e" || maze[newY][newX] === "E" || maze[newY][newX] === "F") {
+                for (let j = 0; j < 3; j++) {
+                    for (let i = enemies[j].length - 1; i >= 0; i--) {
+                        if (enemies[j][i].x == newX && enemies[j][i].y == newY) {
+                            if (Math.random() < 0.5) {
+                                maze[newY][newX] = "c";
+                            } else {
+                                maze[newY][newX] = "l";
+                                lives.push({ newX, newY, collected: false });
+                            }
+                            enemies[j].splice(i, 1);
+                            updateScoreCountDisplay(5);
+                        }
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "." || maze[newY][newX] === "," || maze[newY][newX] === "*") {
+                maze[newY][newX] = "'";
+                returnValue = true;
+            } else if (maze[newY][newX] === "H" || maze[newY][newX] === "K" || maze[newY][newX] === "h" || maze[newY][newX] === "k" || maze[newY][newX] === "T" || maze[newY][newX] === "t" || maze[newY][newX] === "Y") {
+                maze[newY][newX] = "q";
+                returnValue = true;
+            }
+        }
+        return returnValue;
+    }
+
+    function activateSuperPower(x, y, powerLevel, override=false) {
+        if ((superPowersCollected > 0 && powerUps[0] > 0) || override) {
+            if (!override) {
+                playerCurrentSpaceType = "'";
+            }
             const directions = [-1, 0, 1];
             directions.forEach(dx => {
                 directions.forEach(dy => {
-                    const newX = player.x + dx;
-                    const newY = player.y + dy;
-                    if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
-                        if (maze[newY][newX] === "B") {
-                            scoreCollected += 3;
-                            updateScoreCountDisplay();
-                            maze[newY][newX] = "b";
-                        } else if (maze[newY][newX] === "L") {
-                            livesCollected++;
-                            scoreCollected += 2;
-                            updateScoreCountDisplay();
-                            maze[newY][newX] = "b";
-                            for (let i = lives.length - 1; i >= 0; i--) {
-                                if (lives[i].x == newX && lives[i].y == newY) {
-                                    lives[i].collected = true;
-                                }
-                            }
-                        } else if (maze[newY][newX] === "S") {
-                            superPowersCollected++;
-                            scoreCollected += 2;
-                            updateScoreCountDisplay();
-                            maze[newY][newX] = "b";
-                            for (let i = superPowers.length - 1; i >= 0; i--) {
-                                if (superPowers[i].x == newX && superPowers[i].y == newY) {
-                                    superPowers[i].collected = true;
-                                }
-                            }
-                        } else if (maze[newY][newX] === "e" || maze[newY][newX] === "E" || maze[newY][newX] === "F") {
-                            for (let j = 0; j < 3; j++) {
-                                for (let i = enemies[j].length - 1; i >= 0; i--) {
-                                    if (enemies[j][i].x == newX && enemies[j][i].y == newY) {
-                                        maze[newY][newX] = "b";
-                                        enemies[j].splice(i, 1);
-                                        scoreCollected += 5;
-                                        updateScoreCountDisplay();
-                                    }
-                                }
-                            }
-                        } else if (maze[newY][newX] === "." || maze[newY][newX] === ",") {
-                            maze[newY][newX] = "'";
-                        }
+                    const newX = x + dx;
+                    const newY = y + dy;
+                    console.log(`* ${newX}, ${newY}`);
+                    let xInFrontOfPlayer;
+                    let yInFrontOfPlayer;
+                    if (currentPlayerOrientation == "Up") {
+                        xInFrontOfPlayer = 0;
+                        yInFrontOfPlayer = -1;
+                    } else if (currentPlayerOrientation == "Down") {
+                        xInFrontOfPlayer = 0;
+                        yInFrontOfPlayer = 1;
+                    } else if (currentPlayerOrientation == "Left") {
+                        xInFrontOfPlayer = -1;
+                        yInFrontOfPlayer = 0;
+                    } else if (currentPlayerOrientation == "Right") {
+                        xInFrontOfPlayer = 1;
+                        yInFrontOfPlayer = 0;
+                    } 
+                    if (override || (powerLevel == 1 && dx == xInFrontOfPlayer && dy == yInFrontOfPlayer) || (powerLevel == 2 && ((dy == yInFrontOfPlayer && (currentPlayerOrientation == "Up" || currentPlayerOrientation == "Down")) || (dx == xInFrontOfPlayer && (currentPlayerOrientation == "Left" || currentPlayerOrientation == "Right")))) || (powerLevel == 3)) {
+                        attack(newX, newY);
                     }
                 });
             });
@@ -732,23 +1145,92 @@ $(document).ready(function() {
         }
     }
 
-    $(document).keydown(function(event) {
-        if ([32, 38, 40, 37, 39].includes(event.which)) { // Arrow key codes: up (38), down (40), left (37), right (39)
-            event.preventDefault(); // Prevent the default action (scrolling)
+    function activateGun() {
+        if (ammoCollected > 0 && powerUps[1] > 0) {
+            let dx;
+            let dy;
+            if (currentPlayerOrientation == "Up") {
+                dx = 0;
+                dy = -1;
+            } else if (currentPlayerOrientation == "Down") {
+                dx = 0;
+                dy = 1;
+            } else if (currentPlayerOrientation == "Left") {
+                dx = -1;
+                dy = 0;
+            } else if (currentPlayerOrientation == "Right") {
+                dx = 1;
+                dy = 0;
+            } 
+            let bgTile = maze[player.y][player.x];
+            let bgTileColor;
+            if (bgTile == ".") {
+                bgTileColor = levels[currentLevel].colors.ground;
+            } else if (bgTile == ",") {
+                bgTileColor = levels[currentLevel].colors.walked;
+            } else if (bgTile == "'") {
+                bgTileColor = levels[currentLevel].colors.burned;
+            } else if (bgTile == "q") {
+                bgTileColor = levels[currentLevel].colors.broken;
+            } else if (bgTile == "*") {
+                bgTileColor = levels[currentLevel].colors.creeped;
+            }
+
+            if (powerUps[1] == 3) {
+                drawLasers(player.x + dx, player.y + dy, currentPlayerOrientation);
+                lasers.push({ Sonichu: true, health: 30, x: player.x + dx, y: player.y + dy, orientation: currentPlayerOrientation })
+            } else {
+                bullets.push({ x: player.x, y: player.y, dx, dy, level: powerUps[1], bgColor: bgTileColor });
+            }
+            ammoCollected--;
+            updateAmmoCountDisplay();
         }
-        if (event.key === " " || event.key === "Spacebar") { // Use super power with space bar
-            activateSuperPower();
-        } else {
-            playerMove(event.key.replace("Arrow", ""));
+    }
+
+    $(document).keydown(function(event) {
+        // Include SHIFT (16) in the array to ignore its default action
+        if ([16, 32, 38, 40, 37, 39].includes(event.which)) {
+            event.preventDefault(); // Prevent the default action (scrolling or other)
+        }
+        
+        switch (event.key) {
+            case "U":
+            case "u":
+                nextGame();
+            case "C":
+            case "c": // Handle both uppercase and lowercase
+                activateSuperPower(player.x, player.y, powerUps[0]);
+                break;
+            case "V":
+            case "v": // Handle both uppercase and lowercase
+                activateGun();
+                break;
+            case "B":
+            case "b": // Handle both uppercase and lowercase
+                activateBomb();
+                break;
+            default:
+                // Replace the arrow key names with direction names if necessary
+                playerMove(event.key.replace("Arrow", ""));
+                break;
         }
     });
 
     $(".control-button").click(function() {
         const action = $(this).attr('id');
-        if (action === "Super") {
-            activateSuperPower();
-        } else {
-            playerMove(action);
+        switch (action) {
+            case "super":
+                activateSuperPower(player.x, player.y, powerUps[0]);
+                break;
+            case "shoot":
+                activateGun();
+                break;
+            case "bomb":
+                activateBomb();
+                break;
+            default:
+                playerMove(action);
+                break;
         }
     });
 
@@ -758,21 +1240,33 @@ $(document).ready(function() {
 
     function checkGameOver() {
         if (checkEnemyCollisions()) {
-            if (livesCollected == 0) {
+            if (livesCollected == 1) {
                 gameOver = true;
                 draw();
                 alert(`GAME OVER!!!\nYOU SCORED ${scoreCollected}!!!`);
                 location.reload();
-            } else if (livesCollected > 0) {
+            } else if (livesCollected > 1) {
                 livesCollected--;
+                updateLivesCountDisplay();
                 draw();
-                alert("TRY AGAIN!!!");
             } else {
                 alert("an error occurred! :(")
                 location.reload();
             }
             
         }
+    }
+
+    function scrollMazeToCenterPlayer() {
+        const gameContainer = document.getElementById('gameContainer');
+        const playerPosX = player.x * cellSize + cellSize / 2;
+        const playerPosY = player.y * cellSize + cellSize / 2;
+
+        const visibleAreaX = gameContainer.offsetWidth / 2;
+        const visibleAreaY = gameContainer.offsetHeight / 2;
+
+        gameContainer.scrollLeft = playerPosX - visibleAreaX;
+        gameContainer.scrollTop = playerPosY - visibleAreaY;
     }
 
     let playerCurrentSpaceType = ".";
@@ -793,26 +1287,41 @@ $(document).ready(function() {
         }
 
         if (checkCollision(newX, newY)) {
-            if (maze[player.y][player.x] != "V" && maze[player.y][player.x] != "b" && maze[player.y][player.x] != "'" && maze[player.y][player.x] != "*") {
+            if (maze[player.y][player.x] != "V" && maze[player.y][player.x] != "q" && maze[player.y][player.x] != "'" && maze[player.y][player.x] != "*" && maze[player.y][player.x] != "m" && maze[player.y][player.x] != "n" && maze[player.y][player.x] != "u" && maze[player.y][player.x] != "c") {
                 maze[player.y][player.x] = ",";
+            } else if (maze[player.y][player.x] == "c") {
+                maze[player.y][player.x] = "q";
             }
             playerCurrentSpaceType = maze[newY][newX];
-            if (playerCurrentSpaceType == "k") {
-                keyCollected = true;
-                scoreCollected += 3;
-                updateScoreCountDisplay();
+            if (playerCurrentSpaceType == "K") {
+                key1Collected = true;
+                updateScoreCountDisplay(3);
+            } else if (playerCurrentSpaceType == "k") {
+                key2Collected = true;
+                updateScoreCountDisplay(3);
+            } else if (playerCurrentSpaceType == "t") {
+                key3Collected = true;
+                updateScoreCountDisplay(3);
+            } else if (playerCurrentSpaceType == "C" || playerCurrentSpaceType == "c") {
+                updateCoinsCountDisplay(1);
             }
             player.x = newX;
             player.y = newY;
+            scrollMazeToCenterPlayer();
             vortexResult = collectVortex();
             if (vortexResult[0] === 1) {
                 player.x = vortexResult[1];
                 player.y = vortexResult[2];
             }
-            collectCoin();
+            collectExitKey();
             exitLevel();
             collectLife();
             collectSuperPower();
+            collectSuperPowerUpgrade();
+            collectAmmo();
+            collectAmmoUpgrade();
+            collectBomb();
+            collectBombUpgrade();
             checkSwitchActivation();
             checkChestActivation();
             draw();
@@ -821,40 +1330,103 @@ $(document).ready(function() {
     }
 
     function drawPlayer() {
-        if (playerCurrentSpaceType == "." || playerCurrentSpaceType == "S" || playerCurrentSpaceType == "L" || playerCurrentSpaceType == "k" || playerCurrentSpaceType == "C") {
-            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.ground);
+        if (playerCurrentSpaceType == "." || playerCurrentSpaceType == "S" || playerCurrentSpaceType == "s" || playerCurrentSpaceType == "Z" || playerCurrentSpaceType == "z" || playerCurrentSpaceType == "B" || playerCurrentSpaceType == "b" || playerCurrentSpaceType == "L" || playerCurrentSpaceType == "l" || playerCurrentSpaceType == "K"|| playerCurrentSpaceType == "k"|| playerCurrentSpaceType == "t" || playerCurrentSpaceType == "G" || playerCurrentSpaceType == "m" || playerCurrentSpaceType == "n" || playerCurrentSpaceType == "u" || playerCurrentSpaceType == "C") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.ground);
         } else if (playerCurrentSpaceType == ",") {
-            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.walked);
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.walked);
         } else if (playerCurrentSpaceType == "'") {
-            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.burned);
-        } else if (playerCurrentSpaceType == "b") {
-            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.broken);
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.burned);
+        } else if (playerCurrentSpaceType == "q" || playerCurrentSpaceType == "c") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.broken);
         } else if (playerCurrentSpaceType == "*") {
-            drawShape("triangle", player.x, player.y, cellSize, colors.player, levels[currentLevel].colors.creeped);
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.creeped);
         } else if (playerCurrentSpaceType == "V") {
-            drawShape("triangle", player.x, player.y, cellSize, colors.player, colors.vortex);
-        } 
+            drawShape("triangle", player.x, player.y, colors.player, colors.vortex);
+        }
     }
 
     function drawEnemies() {
         for (let j = 0; j < 3; j++) {
             for (let i = 0; i < enemies[j].length; i++) {
                 if (enemies[j][i].currentSpaceType == ".") {
-                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.ground, enemies[j][i].orientation);
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.ground, enemies[j][i].orientation);
                 } else if (enemies[j][i].currentSpaceType == ",") {
-                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.walked, enemies[j][i].orientation);
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.walked, enemies[j][i].orientation);
                 } else if (enemies[j][i].currentSpaceType == "'") {
-                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.burned, enemies[j][i].orientation);
-                } else if (enemies[j][i].currentSpaceType == "b") {
-                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.broken, enemies[j][i].orientation);
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.burned, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "q") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.broken, enemies[j][i].orientation);
                 } else if (enemies[j][i].currentSpaceType == "*") {
-                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, cellSize, colors.enemy[j], levels[currentLevel].colors.creeped, enemies[j][i].orientation);
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.creeped, enemies[j][i].orientation);
                 }
             }
         }
     }
 
-    let switchActivated = false;
+    function drawBullets() {
+        for (let i = 0; i < bullets.length; i++) {
+            let o;
+            if (bullets[i].dy < 0) {
+                o = "Up";
+            } else if (bullets[i].dy > 0) {
+                o = "Down";
+            } else if (bullets[i].dx < 0) {
+                o = "Left";
+            }  else if (bullets[i].dx > 0) {
+                o = "Right";
+            }
+            if (bullets[i].level == 1) {
+                drawShape("smallTriangle", bullets[i].x, bullets[i].y, colors.ammo, bullets[i].bgColor, o);
+            } else if (bullets[i].level == 2) {
+                drawShape("triangle", bullets[i].x, bullets[i].y, colors.ammo, bullets[i].bgColor, o);
+            }
+        }
+    }
+
+    function drawLasers(x, y, o) {
+        if (o == "Up") {
+            for (let i = y; i >= 0; i--) {
+                if (maze[i][x] != "W" && maze[i][x] != "M" && maze[i][x] != "N" && maze[i][x] != "U" && maze[i][x] != "x" && maze[i][x] != "V") {
+                    drawShape("square", x, i, colors.ammo);
+                    attack(x, i);
+                } else {
+                    return true;
+                }
+                
+            }
+            return false;
+        } else if (o == "Down") {
+            for (let i = y; i < maze.length; i++) {
+                if (maze[i][x] != "W" && maze[i][x] != "M" && maze[i][x] != "N" && maze[i][x] != "U" && maze[i][x] != "x" && maze[i][x] != "V") {
+                    drawShape("square", x, i, colors.ammo);
+                    attack(x, i);
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        } else if (o == "Left") {
+            for (let i = x; i >= 0; i--) {
+                if (maze[y][i] != "W" && maze[y][i] != "M" && maze[y][i] != "N" && maze[y][i] != "U" && maze[y][i] != "x" && maze[y][i] != "V") {
+                    drawShape("square", i, y, colors.ammo);
+                    attack(i, y);
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        } else if (o == "Right") {
+            for (let i = x; i < maze[0].length; i++) {
+                if (maze[y][i] != "W" && maze[y][i] != "M" && maze[y][i] != "N" && maze[y][i] != "U" && maze[y][i] != "x" && maze[y][i] != "V") {
+                    drawShape("square", i, y, colors.ammo);
+                    attack(i, y);
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
     function showLevelCreationUI() {
         const levelCreationHtml = `
@@ -867,15 +1439,15 @@ $(document).ready(function() {
                     <option value="P">Player</option>
                     <option value="-">Entrance</option>
                     <option value="x">Exit</option>
-                    <option value="C">Coin</option>
+                    <option value="G">Gate Key</option>
                     <option value="S">Super</option>
                     <option value="L">Life</option>
                     <option value="V">Vortex</option>
                     <option value="H">Chest</option>
-                    <option value="k">Key</option>
+                    <option value="K">Key</option>
                     <option value="!">Button</option>
-                    <option value="w">Barrier</option>
-                    <option value="B">Weak Wall</option>
+                    <option value="M">Barrier</option>
+                    <option value="w">Weak Wall</option>
                     <!-- Add more options as needed -->
                 </select>
                 <br>
@@ -891,10 +1463,13 @@ $(document).ready(function() {
                 <br>
                 <button id="cleanGround">Clean Ground</button>
                 <button id="doneCreatingLevel">Done</button>
+                <div id="tileLegend" style="margin-top: 20px;">
+                    <table id="tileLegendTable"></table>
+                </div>
             </div>
         `;
 
-        $("body").append(levelCreationHtml);
+        $("#playerColorControls").append(levelCreationHtml);
 
         $("#increaseWidth").click(function() {
             for (let i = 0; i < maze.length; i++) {
@@ -979,7 +1554,7 @@ $(document).ready(function() {
         $("#cleanGround").click(function() {
             for (let j = 0; j < maze.length; j++){
                 for (let i = 0; i < maze[j].length; i++) {
-                    if (maze[j][i] == "," || maze[j][i] == "'" || maze[j][i] == "b" || maze[j][i] == "*") {
+                    if (maze[j][i] == "," || maze[j][i] == "'" || maze[j][i] == "q" || maze[j][i] == "*") {
                         maze[j][i] = ".";
                     }
                 }
@@ -1010,17 +1585,20 @@ $(document).ready(function() {
         }
         initializeGame();
         playerCurrentSpaceType = ".";
-        switchActivated = false;
-        keyCollected = false;
+        switch1Activated = false;
+        switch2Activated = false;
+        switch3Activated = false;
+        key1Collected = false;
+        key2Collected = false;
+        key3Collected = false;
     }
 
-    
     function collectVortex() {
         for (let i = vortexes.length - 1; i >= 0; i--) {
             if (player.x === vortexes[i].x && player.y === vortexes[i].y) {
                 vortexes[i].collected = true;
-                drawShape("circle", vortexes[0].x, vortexes[0].y, cellSize, colors.vortex, levels[currentLevel].colors.walked);
-                drawShape("circle", vortexes[1].x, vortexes[1].y, cellSize, colors.vortex, levels[currentLevel].colors.walked);
+                drawShape("circle", vortexes[0].x, vortexes[0].y, colors.vortex, levels[currentLevel].colors.walked);
+                drawShape("circle", vortexes[1].x, vortexes[1].y, colors.vortex, levels[currentLevel].colors.walked);
                 if (i === 0) {
                     return [1, vortexes[1].x, vortexes[1].y];
                 } else {
@@ -1031,25 +1609,23 @@ $(document).ready(function() {
         return [0, 0, 0];
     }
 
-    function collectCoin() {
-        if (coin && coin.x != null && coin.y != null && player.x === coin.x && player.y === coin.y) {
-            coin.collected = true;
+    function collectExitKey() {
+        if (gateKey && gateKey.x != null && gateKey.y != null && player.x === gateKey.x && player.y === gateKey.y) {
+            gateKey.collected = true;
             maze[exit.y][exit.x] = "X";
-            scoreCollected += 10;
-            updateScoreCountDisplay();
+            updateScoreCountDisplay(10);
         }
     }
 
     function exitLevel() {
         if (exit && exit.x != null && exit.y != null && player.x === exit.x && player.y === exit.y) {
-            scoreCollected += 10;
-            updateScoreCountDisplay();
+            updateScoreCountDisplay(10);
             nextGame();
         }
     }
 
     function checkCollision(x, y) {
-        return maze[y][x] !== "W" && maze[y][x] !== "w" && maze[y][x] !== "H" && maze[y][x] !== "!" && maze[y][x] !== "B" && maze[y][x] !== "-" && maze[y][x] !== "x";
+        return maze[y][x] !== "W" && maze[y][x] !== "M" && maze[y][x] !== "N" && maze[y][x] !== "Y" && maze[y][x] !== "U" && maze[y][x] !== "H" && maze[y][x] !== "h" && maze[y][x] !== "T" && maze[y][x] !== "!" && maze[y][x] !== "i" && maze[y][x] !== "j" && maze[y][x] !== "w" && maze[y][x] !== "x" && maze[y][x] !== "-";
     }
 
     function checkEnemyCollisions() {
@@ -1057,8 +1633,7 @@ $(document).ready(function() {
             for (let i = enemies[j].length - 1; i >= 0; i--) {
                 if (player.x === enemies[j][i].x && player.y === enemies[j][i].y) {
                     enemies[j].splice(i, 1);
-                    scoreCollected -= 5;
-                    updateScoreCountDisplay();
+                    updateScoreCountDisplay(-5);
                     return true;
                 }
             }
@@ -1075,17 +1650,42 @@ $(document).ready(function() {
                     const newY = player.y + dy;
                     if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
                         if (maze[newY][newX] === "!") {
-                            scoreCollected += 4;
-                            updateScoreCountDisplay();
-                            switchActivated = true;
+                            updateScoreCountDisplay(4);
+                            switch1Activated = !switch1Activated;
                             for (let j = 0; j < maze.length; j++) {
                                 for (let i = 0; i < maze[j].length; i++) {
-                                    if (maze[j][i] == "w") {
-                                        maze[j][i] = ".";
+                                    if (maze[j][i] == "M") {
+                                        maze[j][i] = "m";
+                                    } else if (maze[j][i] == "m") {
+                                        maze[j][i] = "M";
                                     }
                                 }
                             }
-                        } 
+                        } else if (maze[newY][newX] === "i") {
+                            updateScoreCountDisplay(4);
+                            switch2Activated = !switch2Activated;
+                            for (let j = 0; j < maze.length; j++) {
+                                for (let i = 0; i < maze[j].length; i++) {
+                                    if (maze[j][i] == "N") {
+                                        maze[j][i] = "n";
+                                    } else if (maze[j][i] == "n") {
+                                        maze[j][i] = "N";
+                                    }
+                                }
+                            }
+                        } else if (maze[newY][newX] === "j") {
+                            updateScoreCountDisplay(4);
+                            switch3Activated = !switch3Activated;
+                            for (let j = 0; j < maze.length; j++) {
+                                for (let i = 0; i < maze[j].length; i++) {
+                                    if (maze[j][i] == "U") {
+                                        maze[j][i] = "u";
+                                    } else if (maze[j][i] == "u") {
+                                        maze[j][i] = "U";
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -1093,7 +1693,8 @@ $(document).ready(function() {
     }
 
     function checkChestActivation() {
-        if (keyCollected) {
+        if (key1Collected || key2Collected || key3Collected || coinsCollected >= 10) {
+            let randomChoices = ["L", "S", "s", "Z", "z", "B", "b"];
             const directions = [-1, 0, 1];
             directions.forEach(dx => {
                 directions.forEach(dy => {
@@ -1101,18 +1702,28 @@ $(document).ready(function() {
                         const newX = player.x + dx;
                         const newY = player.y + dy;
                         if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
-                            if (maze[newY][newX] === "H") {
-                                scoreCollected += 6;
-                                updateScoreCountDisplay();
-                                randomChoices = ["S", "L"];
+                            if (key1Collected && maze[newY][newX] === "H") {
+                                updateScoreCountDisplay(6);
                                 maze[newY][newX] = randomChoices[Math.floor(Math.random() * randomChoices.length)];
-                                keyCollected = false;
-                            } 
+                                key1Collected = false;
+                            } else if (key2Collected && maze[newY][newX] === "h") {
+                                updateScoreCountDisplay(6);
+                                maze[newY][newX] = randomChoices[Math.floor(Math.random() * randomChoices.length)];
+                                key2Collected = false;
+                            } else if (key3Collected && maze[newY][newX] === "T") {
+                                updateScoreCountDisplay(6);
+                                maze[newY][newX] = randomChoices[Math.floor(Math.random() * randomChoices.length)];
+                                key3Collected = false;
+                            } else if (coinsCollected >= 10 && maze[newY][newX] === "Y") {
+                                updateCoinsCountDisplay(-10);
+                                randomChoices = ["L", "s", "z", "b"];
+                                maze[newY][newX] = randomChoices[Math.floor(Math.random() * randomChoices.length)];
+                            }
                         }
                     }
                 });
             });
-        }
+        } 
     }
 
     function updateEnemies(levelIndex) {
@@ -1137,7 +1748,7 @@ $(document).ready(function() {
                     }
                 }
                 let spaceEnemyIsMovingTo = maze[enemies[levelIndex][i].y + dy][enemies[levelIndex][i].x + dx];
-                if (spaceEnemyIsMovingTo === "." || spaceEnemyIsMovingTo === "," || spaceEnemyIsMovingTo === "'" || spaceEnemyIsMovingTo === "b" || spaceEnemyIsMovingTo === "*") {
+                if (spaceEnemyIsMovingTo === "." || spaceEnemyIsMovingTo === "," || spaceEnemyIsMovingTo === "'" || spaceEnemyIsMovingTo === "q" || spaceEnemyIsMovingTo === "*") {
                     
                     enemies[levelIndex][i].currentSpaceType = spaceEnemyIsMovingTo;
                     if (spaceEnemyIsMovingTo == "." || spaceEnemyIsMovingTo == ",") {
@@ -1161,6 +1772,59 @@ $(document).ready(function() {
         }
     }
 
+    function updateBullets() {
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            if (bullets[i].level == 1 || bullets[i].level == 2) {
+                bullets[i].x += bullets[i].dx;
+                bullets[i].y += bullets[i].dy;
+            } else if (bullets[i].level == 3) {
+                bullets[i].x += bullets[i].dx;
+                bullets[i].y += bullets[i].dy;
+            } 
+            
+            if (bullets[i].x >= 0 && bullets[i].x < maze[0].length && bullets[i].y >= 0 && bullets[i].y < maze.length) {
+                let bgTile = maze[bullets[i].y][bullets[i].x];
+                if (bgTile == "." || bgTile == "," || bgTile == "'" || bgTile == "q" || bgTile == "*") {
+                    if (bgTile == ".") {
+                        bullets[i].bgColor = levels[currentLevel].colors.ground;
+                    } else if (bgTile == ",") {
+                        bullets[i].bgColor = levels[currentLevel].colors.walked;
+                    } else if (bgTile == "'") {
+                        bullets[i].bgColor = levels[currentLevel].colors.burned;
+                    } else if (bgTile == "q") {
+                        bullets[i].bgColor = levels[currentLevel].colors.broken;
+                    } else if (bgTile == "*") {
+                        bullets[i].bgColor = levels[currentLevel].colors.creeped;
+                    }
+                } else {
+                    let hitSomething = attack(bullets[i].x, bullets[i].y);
+                    if (bullets[i].level == 2 && hitSomething) {
+                        activateSuperPower(bullets[i].x, bullets[i].y, 3, true);
+                    }
+                    bullets.splice(i, 1);
+                }
+            } else {
+                bullets.splice(i, 1);
+            }
+            
+        }
+    }
+
+    function updateLasers() {
+        for (let i = lasers.length - 1; i >= 0; i--) {
+            if (lasers[i].health > 0) {
+                lasers[i].health--;
+                let hitObstacle = drawLasers(lasers[i].x, lasers[i].y, lasers[i].orientation);
+                if (hitObstacle) {
+                    lasers.splice(i, 1);
+                }
+            } else {
+                lasers.splice(i, 1);
+            }
+            
+        }
+    }
+
     function logMaze() {
         var line = "";
         for (let j = 0; j < maze.length; j++) {
@@ -1176,13 +1840,21 @@ $(document).ready(function() {
         drawMaze();
         drawPlayer();
         drawEnemies();
-        $("#levelTitle").text("Level " + (currentLevel + 1));
+        drawBullets();
+        $("#levelTitle").text("Level " + currentLevel);
         $("#levelText").text(levels[currentLevel].text);
         logMaze();
     }
     showLevelCreationUI();
     initializeGame();
     draw();
+    setInterval(function() {
+        if (!gameOver) {
+            updateBullets();
+            updateLasers();
+            draw();
+        }
+    }, 150);
     setInterval(function() {
         if (!gameOver) {
             updateEnemies(1);
@@ -1216,6 +1888,29 @@ $(document).ready(function() {
     $('#sliderY').on('input', updateColor);
     $('#sliderZ').on('input', updateColor);
 
+    function populateTileLegend() {
+        const tileTypes = [
+            { description: 'Wall', shape: 'square', color: colors.wall, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Ground', shape: 'square', color: colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Ground', shape: 'square', color: colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+        ];
+
+        const table = $('#tileLegendTable');
+
+        tileTypes.forEach(tile => {
+            const canvas = $('<canvas>').attr({width: cellSize, height: cellSize})[0];
+            const cc = canvas.getContext('2d');
+            drawShape(tile.shape, 0, 0, tile.color, "", "", "", "", cc); // Adjust as necessary
+
+            const row = $('<tr>');
+            const canvasCell = $('<td>').append(canvas);
+            const descriptionCell = $('<td>').text(tile.description);
+
+            row.append(canvasCell, descriptionCell);
+            table.append(row);
+        });
+    }
+    populateTileLegend();
 });
 </script>
 
