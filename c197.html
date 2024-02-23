@@ -145,8 +145,29 @@
 </style>
 </head>
 <body>
-<h1>Battle Maze Ultra 9K</h1>
+<audio id="soundTap" src="tap.mp3"></audio>
+<audio id="soundCoin" src="coin.mp3"></audio>
+<audio id="soundBlop" src="blop.mp3"></audio>
+<audio id="soundChime" src="chime.mp3"></audio>
+<audio id="soundUpgrade" src="upgrade.mp3"></audio>
+<audio id="soundUnlock" src="unlock.mp3"></audio>
+<audio id="soundKeys" src="keys.mp3"></audio>
+<audio id="soundGrunt" src="grunt.mp3"></audio>
+<audio id="soundLava" src="lava.mp3"></audio>
+<audio id="soundBreak" src="break.mp3"></audio>
+<audio id="soundKnock" src="knock.mp3"></audio>
+<audio id="soundDead" src="dead.mp3"></audio>
+<audio id="soundPoweringup" src="poweringup.mp3"></audio>
+<audio id="soundPoweringdown" src="poweringdown.mp3"></audio>
+<audio id="soundTing" src="ting.mp3"></audio>
+<audio id="soundVortex0" src="vortex0.mp3"></audio>
+<audio id="soundVortex1" src="vortex1.mp3"></audio>
+<audio id="soundExplosion" src="explosion.mp3"></audio>
+<audio id="soundSplat" src="splat.mp3"></audio>
+<audio id="soundLaser" src="laser.mp3"></audio>
+<audio id="soundGun" src="gun.mp3"></audio>
 
+<h1>Battle Maze Ultra 9K</h1>
 <span id="levelTitle">Title Above Maze</span>
 <span id="livesCount">❤️ 0</span>
 <span id="coinsCount">🪙 0</span>
@@ -186,6 +207,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -251,13 +274,13 @@ $(document).ready(function() {
             maze: [
                 ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","i","W","W","W","x","W","W","W","W","W","W"],
                 ["W","R","R",".","R","R","W","Y",".","H","W","C","C","C","C","C","C","!","W","m","W","W","G",".",".","W"],
-                ["W","e",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
                 ["W",".",".",".","O",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".","o",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".",".",".",".",".","W",".",".",".","W","C","W","j","W","W","W","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","E","o",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","W","j","W","W","W","W","W","m","W","W","W","W",".","W"],
                 ["W","W","w","W","w","W","W",".",".","K","W","C","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
                 ["W",".","w",".","w",".","W","M","M","W","W","C","C","C",".",".",".",".",".",".",".","L","L","L","L","W"],
                 ["W",".","w",".",".",".","W",".",".",".",".","C","C","C","C",".",".",".",".","V",".","J","J","J","w","W"],
@@ -998,6 +1021,7 @@ $(document).ready(function() {
                 life.collected = true;
                 updateLivesCountDisplay();
                 updateScoreCountDisplay(2);
+                playSound("chime");
             }
         });
     }
@@ -1010,6 +1034,7 @@ $(document).ready(function() {
                 superPowersCollected++;
                 updateSuperPowerCountDisplay();
                 updateScoreCountDisplay(2);
+                playSound("blop");
             }
         });
     }
@@ -1036,6 +1061,7 @@ $(document).ready(function() {
                     updateSuperPowerEmoji();
                 }
                 updateScoreCountDisplay(5);
+                playSound("upgrade");
             }
         });
     }
@@ -1048,6 +1074,7 @@ $(document).ready(function() {
                 ammoCollected++;
                 updateAmmoCountDisplay();
                 updateScoreCountDisplay(2);
+                playSound("blop");
             }
         });
     }
@@ -1074,6 +1101,7 @@ $(document).ready(function() {
                     updateAmmoEmoji();
                 }
                 updateScoreCountDisplay(5);
+                playSound("upgrade");
             }
         });
     }
@@ -1086,6 +1114,7 @@ $(document).ready(function() {
                 bombsCollected++;
                 updateBombsCountDisplay();
                 updateScoreCountDisplay(2);
+                playSound("blop");
             }
         });
     }
@@ -1112,6 +1141,7 @@ $(document).ready(function() {
                     updateBombEmoji();
                 }
                 updateScoreCountDisplay(5);
+                playSound("upgrade");
             }
         });
     }
@@ -1130,21 +1160,33 @@ $(document).ready(function() {
                     maze[newY][newX] = "q";
                 }
                 returnValue = true;
-            } else if (maze[newY][newX] === "J" && isStrongAttack) {
-                updateScoreCountDisplay(3);
-                if (Math.random() < 0.75) {
-                    maze[newY][newX] = "c";
+                playSound("break");
+            } else if (maze[newY][newX] === "J") {
+                if (isStrongAttack) {
+                    updateScoreCountDisplay(3);
+                    if (Math.random() < 0.75) {
+                        maze[newY][newX] = "c";
+                    } else {
+                        maze[newY][newX] = "q";
+                    }
+                    playSound("break");
                 } else {
-                    maze[newY][newX] = "q";
+                    playSound("knock");
                 }
                 returnValue = true;
             } else if (maze[newY][newX] === "W") {
+                if (isStrongAttack) {
+
+                } else {
+                    playSound("knock");
+                }
                 returnValue = true;
             } else if (maze[newY][newX] === "L" || maze[newY][newX] === "l") {
                 maze[newY][newX] = "q";
                 for (let i = lives.length - 1; i >= 0; i--) {
                     if (lives[i].x == newX && lives[i].y == newY) {
                         lives[i].collected = true;
+                        playSound("splat");
                     }
                 }
                 returnValue = true;
@@ -1153,6 +1195,7 @@ $(document).ready(function() {
                 for (let i = superPowers.length - 1; i >= 0; i--) {
                     if (superPowers[i].x == newX && superPowers[i].y == newY) {
                         superPowers[i].collected = true;
+                        playSound("break");
                     }
                 }
                 returnValue = true;
@@ -1161,6 +1204,7 @@ $(document).ready(function() {
                 for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
                     if (powerUpgrades[0][i].x == newX && powerUpgrades[0][i].y == newY) {
                         powerUpgrades[0][i].collected = true;
+                        playSound("break");
                     }
                 }
                 returnValue = true;
@@ -1169,6 +1213,7 @@ $(document).ready(function() {
                 for (let i = ammo.length - 1; i >= 0; i--) {
                     if (ammo[i].x == newX && ammo[i].y == newY) {
                         ammo[i].collected = true;
+                        playSound("break");
                     }
                 }
                 returnValue = true;
@@ -1177,6 +1222,7 @@ $(document).ready(function() {
                 for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
                     if (powerUpgrades[1][i].x == newX && powerUpgrades[1][i].y == newY) {
                         powerUpgrades[1][i].collected = true;
+                        playSound("break");
                     }
                 }
                 returnValue = true;
@@ -1185,6 +1231,7 @@ $(document).ready(function() {
                 for (let i = bombs.length - 1; i >= 0; i--) {
                     if (bombs[i].x == newX && bombs[i].y == newY) {
                         bombs[i].collected = true;
+                        playSound("break");
                     }
                 }
                 returnValue = true;
@@ -1193,6 +1240,7 @@ $(document).ready(function() {
                 for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
                     if (powerUpgrades[2][i].x == newX && powerUpgrades[2][i].y == newY) {
                         powerUpgrades[2][i].collected = true;
+                        playSound("break");
                     }
                 }
                 returnValue = true;
@@ -1202,6 +1250,7 @@ $(document).ready(function() {
                     for (let i = coins.length - 1; i >= 0; i--) {
                         if (coins[i].x == newX && coins[i].y == newY) {
                             coins[i].collected = true;
+                            playSound("break");
                         }
                     }
                 }
@@ -1218,6 +1267,20 @@ $(document).ready(function() {
                             }
                             enemies[j].splice(i, 1);
                             updateScoreCountDisplay(5);
+                            playSound("dead");
+                        }
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "o" || maze[newY][newX] === "O") {
+                for (let j = 0; j < 2; j++) {
+                    for (let i = turrets[j].length - 1; i >= 0; i--) {
+                        if (turrets[j][i].x == newX && turrets[j][i].y == newY) {
+                            maze[newY][newX] = "l";
+                            lives.push({ newX, newY, collected: false });
+                            turrets[j].splice(i, 1);
+                            updateScoreCountDisplay(25);
+                            playSound("break");
                         }
                     }
                 }
@@ -1236,10 +1299,13 @@ $(document).ready(function() {
                 checkSwitchActivation(newX, newY);
             }
         }
+        if (isStrongAttack) {
+            playSound("explosion");
+        }
         return returnValue;
     }
 
-    function activateSuperPower(x, y, powerLevel, override=false, range=1, forceStrongAttack=false) {
+    function activateSuperPower(x, y, powerLevel, override=false, range=1, forceStrongAttack=false, usesSuperPowerAmmo=true) {
         if (override || (superPowersCollected > 0 && powerUps[0] > 0)) {
             if (!override) {
                 playerCurrentSpaceType = "'";
@@ -1270,13 +1336,15 @@ $(document).ready(function() {
                         yInFrontOfPlayer = 0;
                     } 
                     if (!override && dx == 0 && dy == 0) {
-                        
+                        // prevents player from hitting themselves when using the level 3 melee attack (?Sonichu?)
                     } else if (override || (powerLevel == 1 && dx == xInFrontOfPlayer && dy == yInFrontOfPlayer) || (powerLevel == 2 && ((dy == yInFrontOfPlayer && (currentPlayerOrientation == "Up" || currentPlayerOrientation == "Down")) || (dx == xInFrontOfPlayer && (currentPlayerOrientation == "Left" || currentPlayerOrientation == "Right")))) || (powerLevel == 3)) {
                         attack(x + dx, y + dy, powerUps[0] == 3 || forceStrongAttack);
                     }
                 });
             });
-            superPowersCollected--;
+            if (usesSuperPowerAmmo) {
+                superPowersCollected--;
+            }
             updateSuperPowerCountDisplay();
         }
     }
@@ -1315,8 +1383,10 @@ $(document).ready(function() {
             if (powerUps[1] == 3) {
                 drawLasers(player.x + dx, player.y + dy, currentPlayerOrientation, true);
                 lasers.push({ Sonichu: true, health: 30, x: player.x + dx, y: player.y + dy, orientation: currentPlayerOrientation })
+                playSound("laser");
             } else {
                 bullets.push({ x: player.x, y: player.y, dx, dy, level: powerUps[1], bgColor: bgTileColor });
+                playSound("gun");
             }
             ammoCollected--;
             updateAmmoCountDisplay();
@@ -1364,10 +1434,12 @@ $(document).ready(function() {
                             if (k == 0) {
                                 bombX = vortexes[1].x;
                                 bombY = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 bombX = vortexes[0].x;
                                 bombY = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -1377,6 +1449,7 @@ $(document).ready(function() {
                 activeBombs.push({ health: 10, x: bombX, y: bombY, level: powerUps[2], bgTile: bombBg, bgColor: bgTileColor });
                 bombsCollected--;
                 updateBombsCountDisplay();
+                playSound("knock");
             }
         }
     }
@@ -1386,10 +1459,11 @@ $(document).ready(function() {
             const directions = [-1, 0, 1];
             directions.forEach(dx => {
                 directions.forEach(dy => {
+                    let bgTileColor;
                     if ((dx == -1 && dy == 0) || (dx == 1 && dy == 0) || (dx == 0 && dy == -1) || (dx == 0 && dy == 1)) {
                         for (let i = 0; i < turrets[0].length; i++) {
-                            let newX = turrets[0][i].x + dx;
-                            let newY = turrets[0][i].y + dy;
+                            let newX = turrets[0][i].x;
+                            let newY = turrets[0][i].y;
                             let bulletBg = maze[newY][newX];
                             if (bulletBg == ".") {
                                 bgTileColor = levels[currentLevel].colors.ground;
@@ -1408,23 +1482,27 @@ $(document).ready(function() {
                                         if (k == 0) {
                                             newX = vortexes[1].x;
                                             newY = vortexes[1].y;
+                                            playSound("vortex0");
                                             break;
                                         } else if (k == 1) {
                                             newX = vortexes[0].x;
                                             newY = vortexes[0].y;
+                                            playSound("vortex1");
                                             break;
                                         }
                                     }
                                 }
                             }
-                            turretBullets.push({ x: newX, y: newY, dx, dy, level: 1, bgColor: bgTileColor });
+                            turretBullets.push({ x: newX, y: newY, dx, dy, level: 1, bgColor: bgTileColor, drawMe: false });
                         }
                         
                         for (let i = 0; i < turrets[1].length; i++) {
                             let newX = turrets[1][i].x + dx;
                             let newY = turrets[1][i].y + dy;
                             let bulletBg = maze[newY][newX];
-                            if (bulletBg == ".") {
+                            if (bulletBg == "o" || bulletBg == "o") {
+                                bgTileColor = levels[currentLevel].colors.ground;
+                            } else if (bulletBg == ".") {
                                 bgTileColor = levels[currentLevel].colors.ground;
                             } else if (bulletBg == ",") {
                                 bgTileColor = levels[currentLevel].colors.walked;
@@ -1441,21 +1519,23 @@ $(document).ready(function() {
                                         if (k == 0) {
                                             newX = vortexes[1].x;
                                             newY = vortexes[1].y;
+                                            playSound("vortex0");
                                             break;
                                         } else if (k == 1) {
                                             newX = vortexes[0].x;
                                             newY = vortexes[0].y;
+                                            playSound("vortex1");
                                             break;
                                         }
                                     }
                                 }
                             }
-                            turretBullets.push({ x: newX, y: newY, dx, dy, level: 2, bgColor: bgTileColor });
+                            turretBullets.push({ x: newX, y: newY, dx, dy, level: 2, bgColor: bgTileColor, drawMe: false });
                         }
                     }
                 })
             });
-            drawTurretBullets();
+            //drawTurretBullets();
         }
         
     }
@@ -1473,7 +1553,7 @@ $(document).ready(function() {
                 nextGame();
             case "C":
             case "c": // Handle both uppercase and lowercase
-                activateSuperPower(player.x, player.y, powerUps[0]);
+                activateSuperPower(player.x, player.y, powerUps[0], false, 1, false, true);
                 break;
             case "V":
             case "v": // Handle both uppercase and lowercase
@@ -1494,7 +1574,7 @@ $(document).ready(function() {
         const action = $(this).attr('id');
         switch (action) {
             case "super":
-                activateSuperPower(player.x, player.y, powerUps[0]);
+                activateSuperPower(player.x, player.y, powerUps[0], false, 1, false, true);
                 break;
             case "shoot":
                 activateGun();
@@ -1514,6 +1594,7 @@ $(document).ready(function() {
 
     function checkGameOver(override1=false, override2=false) {
         if (checkEnemyCollisions() || override1) {
+            playSound("grunt");
             if (livesCollected == 1 || override2) {
                 gameOver = true;
                 draw();
@@ -1555,9 +1636,158 @@ $(document).ready(function() {
         gameContainer.scrollTop = playerPosY - visibleAreaY;
     }
 
+    function playSound(sound) {
+        if (sound == "tap") {
+            let audioElement = $('#soundTap').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.1;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0;
+            }, 400);
+        } else if (sound == "coin") {
+            let audioElement = $('#soundCoin').get(0);
+            audioElement.currentTime = audioElement.duration / 2; 
+            audioElement.volume = 0.33;
+            audioElement.play();
+        } else if (sound == "blop") {
+            let audioElement = $('#soundBlop').get(0);
+            audioElement.currentTime = audioElement.duration / 2; 
+            audioElement.volume = 0.25;
+            audioElement.play();
+        } else if (sound == "chime") {
+            let audioElement = $('#soundChime').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.25;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 400);
+        } else if (sound == "upgrade") {
+            let audioElement = $('#soundUpgrade').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+        } else if (sound == "unlock") {
+            let audioElement = $('#soundUnlock').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 400);
+        } else if (sound == "keys") {
+            let audioElement = $('#soundKeys').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 400);
+        } else if (sound == "grunt") {
+            let audioElement = $('#soundGrunt').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+        } else if (sound == "lava") {
+            $('#soundLava').get(0).play();
+        } else if (sound == "break") {
+            let audioElement = $('#soundBreak').get(0);
+            audioElement.currentTime = audioElement.duration * 0.5; 
+            audioElement.volume = 0.02;
+            audioElement.play();
+        } else if (sound == "knock") {
+            let audioElement = $('#soundKnock').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.05;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 400);
+        } else if (sound == "dead") {
+            let audioElement = $('#soundDead').get(0);
+            audioElement.currentTime = audioElement.duration * 0.2; 
+            audioElement.volume = 0.25;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 400);
+        } else if (sound == "poweringup") {
+            let audioElement = $('#soundPoweringup').get(0);
+            audioElement.currentTime = audioElement.duration *.5; 
+            audioElement.volume = 0.75;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 1000);
+        } else if (sound == "poweringdown") {
+            let audioElement = $('#soundPoweringdown').get(0);
+            audioElement.currentTime = audioElement.duration *.25; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 1000);
+        } else if (sound == "ting") {
+            let audioElement = $('#soundTing').get(0);
+            audioElement.volume = 0.25;
+            audioElement.play();
+        }  else if (sound == "vortex0") {
+            let audioElement = $('#soundVortex0').get(0);
+            audioElement.currentTime = audioElement.duration *.5; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 700);
+        } else if (sound == "vortex1") {
+            let audioElement = $('#soundVortex1').get(0);
+            audioElement.currentTime = audioElement.duration *.90; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 700);
+        } else if (sound == "explosion") {
+            let audioElement = $('#soundExplosion').get(0);
+            audioElement.volume = 0.1;
+            audioElement.play();
+        } else if (sound == "splat") {
+            let audioElement = $('#soundSplat').get(0);
+            audioElement.currentTime = audioElement.duration * 0.25; 
+            audioElement.volume = 0.3;
+            audioElement.play();
+        } else if (sound == "laser") {
+            let audioElement = $('#soundLaser').get(0);
+            audioElement.currentTime = audioElement.duration * 0.25; 
+            audioElement.volume = 0.5;
+            audioElement.play();
+            setTimeout(function() {
+                audioElement.pause(); 
+                audioElement.currentTime = 0; 
+            }, 500);
+        } else if (sound == "gun") {
+            let audioElement = $('#soundGun').get(0);
+            audioElement.currentTime = audioElement.duration * 0.25; 
+            audioElement.volume = 0.7;
+            audioElement.play();
+        } 
+    }
+
     let playerCurrentSpaceType = ".";
 
     function playerMove(direction){
+
         if (gameOver) return;
         currentPlayerOrientation = direction;
         
@@ -1582,18 +1812,23 @@ $(document).ready(function() {
             if (playerCurrentSpaceType == "K") {
                 key1Collected = true;
                 updateScoreCountDisplay(3);
+                playSound("keys");
             } else if (playerCurrentSpaceType == "k") {
                 key2Collected = true;
                 updateScoreCountDisplay(3);
+                playSound("keys");
             } else if (playerCurrentSpaceType == "t") {
                 key3Collected = true;
                 updateScoreCountDisplay(3);
+                playSound("keys");
             } else if (playerCurrentSpaceType == "C" || playerCurrentSpaceType == "c") {
                 updateCoinsCountDisplay(1);
+                playSound("coin");
             } else if (playerCurrentSpaceType == "R") {
                 player.x = newX;
                 player.y = newY;
                 draw();
+                playSound("lava");
                 setTimeout(() => checkGameOver(true, true), 100);
             }
             player.x = newX;
@@ -1616,6 +1851,7 @@ $(document).ready(function() {
             checkSwitchActivation(player.x, player.y);
             checkChestActivation();
             draw();
+            playSound("tap");
         }
         checkGameOver();
     }
@@ -1678,38 +1914,42 @@ $(document).ready(function() {
 
     function drawTurretBullets() {
         for (let i = 0; i < turretBullets.length; i++) {
-            let o;
-            if (turretBullets[i].dy < 0) {
-                o = "Up";
-            } else if (turretBullets[i].dy > 0) {
-                o = "Down";
-            } else if (turretBullets[i].dx < 0) {
-                o = "Left";
-            }  else if (turretBullets[i].dx > 0) {
-                o = "Right";
+            if (turretBullets[i].drawMe) {
+                let o;
+                if (turretBullets[i].dy < 0) {
+                    o = "Up";
+                } else if (turretBullets[i].dy > 0) {
+                    o = "Down";
+                } else if (turretBullets[i].dx < 0) {
+                    o = "Left";
+                }  else if (turretBullets[i].dx > 0) {
+                    o = "Right";
+                }
+                if (turretBullets[i].level == 1) {
+                    drawShape("smallTriangle", turretBullets[i].x, turretBullets[i].y, colors.turret[0].bullet, turretBullets[i].bgColor, o);
+                } else if (turretBullets[i].level == 2) {
+                    drawShape("triangle", turretBullets[i].x, turretBullets[i].y, colors.turret[1].bullet, turretBullets[i].bgColor, o);
+                }
             }
-            if (turretBullets[i].level == 1) {
-                drawShape("smallTriangle", turretBullets[i].x, turretBullets[i].y, colors.turret[0].bullet, turretBullets[i].bgColor, o);
-            } else if (turretBullets[i].level == 2) {
-                drawShape("triangle", turretBullets[i].x, turretBullets[i].y, colors.turret[1].bullet, turretBullets[i].bgColor, o);
-            }
+            
         }
     }
 
     function drawLasers(x, y, o, doAttack) {
         if (o == "Up") {
             for (let i = y; i >= 0; i--) {
-                console.log(maze[i][x]);
                 if (maze[i][x] == "V") {
                     for (let k = 0; k < vortexes.length; k++) {
                         if (vortexes[k].x == x && vortexes[k].y == i) {
                             if (k == 0) {
                                 x = vortexes[1].x;
                                 i = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 x = vortexes[0].x;
                                 i = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -1735,10 +1975,12 @@ $(document).ready(function() {
                             if (k == 0) {
                                 x = vortexes[1].x;
                                 i = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 x = vortexes[0].x;
                                 i = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -1762,10 +2004,12 @@ $(document).ready(function() {
                             if (k == 0) {
                                 i = vortexes[1].x;
                                 y = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 i = vortexes[0].x;
                                 y = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -1789,10 +2033,12 @@ $(document).ready(function() {
                             if (k == 0) {
                                 i = vortexes[1].x;
                                 y = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 i = vortexes[0].x;
                                 y = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -1845,8 +2091,21 @@ $(document).ready(function() {
                     <option value="M">Barrier</option>
                     <option value="w">Weak Breakable Wall</option>
                     <option value="J">Strong Breakable Wall</option>
-                    <!-- Add more options as needed -->
+                    <option value="e">Enemy Level 1</option>
+                    <option value="E">Enemy Level 2</option>
+                    <option value="F">Enemy Level 3</option>
+                    <option value="o">Turret Level 1</option>
+                    <option value="O">Turret Level 2</option>
+                    <option value="s">Melee Weapon Upgrade</option>
+                    <option value="Z">Melee Weapon Ammo</option>
+                    <option value="z">Ranged Weapon Upgrade</option>
+                    <option value="B">Ranged Weapon Ammo</option>
+                    <option value="b">Bomb Upgrade</option>
+                    <option value="C">Coin</option>
+                    <option value="R">Lava</option>
+                    <!-- More block types can be added here -->
                 </select>
+
                 <br>
                 <label for="levelWidth">Level Width:</label>
                 <span id="decreaseWidth">➖</span>
@@ -1966,7 +2225,14 @@ $(document).ready(function() {
                     
                     if (blockType == "P") {
                         maze[player.y][player.x] = ".";
-                    }
+                    } else if (blockType == "S") {
+                        superPowers.push({ gridX, gridY, collected: false });
+                    } else if (blockType == "Z") {
+                        ammo.push({ gridX, gridY, collected: false });
+                    } else if (blockType == "B") {
+                        bombs.push({ gridX, gridY, collected: false });
+                    } // add more checks after certain block types! 
+                    // Be sure to remove certain things from the list, too!
 
                     initializeGame();
                     //draw();
@@ -2032,8 +2298,10 @@ $(document).ready(function() {
                 drawShape("circle", vortexes[0].x, vortexes[0].y, colors.vortex, levels[currentLevel].colors.walked);
                 drawShape("circle", vortexes[1].x, vortexes[1].y, colors.vortex, levels[currentLevel].colors.walked);
                 if (i === 0) {
+                    playSound("vortex0");
                     return [1, vortexes[1].x, vortexes[1].y];
                 } else {
+                    playSound("vortex1");
                     return [1, vortexes[0].x, vortexes[0].y];
                 }
             }
@@ -2046,6 +2314,8 @@ $(document).ready(function() {
             gateKey.collected = true;
             maze[exit.y][exit.x] = "X";
             updateScoreCountDisplay(10);
+            playSound("ting");
+            playSound("poweringup");
         }
     }
 
@@ -2084,6 +2354,11 @@ $(document).ready(function() {
                         if (maze[newY][newX] === "!") {
                             updateScoreCountDisplay(4);
                             switch1Activated = !switch1Activated;
+                            if (switch1Activated) {
+                                playSound("poweringup");
+                            } else {
+                                playSound("poweringdown");
+                            }
                             for (let j = 0; j < maze.length; j++) {
                                 for (let i = 0; i < maze[j].length; i++) {
                                     if (maze[j][i] == "M") {
@@ -2096,6 +2371,11 @@ $(document).ready(function() {
                         } else if (maze[newY][newX] === "i") {
                             updateScoreCountDisplay(4);
                             switch2Activated = !switch2Activated;
+                            if (switch2Activated) {
+                                playSound("poweringup");
+                            } else {
+                                playSound("poweringdown");
+                            }
                             for (let j = 0; j < maze.length; j++) {
                                 for (let i = 0; i < maze[j].length; i++) {
                                     if (maze[j][i] == "N") {
@@ -2108,6 +2388,11 @@ $(document).ready(function() {
                         } else if (maze[newY][newX] === "j") {
                             updateScoreCountDisplay(4);
                             switch3Activated = !switch3Activated;
+                            if (switch3Activated) {
+                                playSound("poweringup");
+                            } else {
+                                playSound("poweringdown");
+                            }
                             for (let j = 0; j < maze.length; j++) {
                                 for (let i = 0; i < maze[j].length; i++) {
                                     if (maze[j][i] == "U") {
@@ -2157,18 +2442,22 @@ $(document).ready(function() {
                         const newY = player.y + dy;
                         if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
                             if (key1Collected && maze[newY][newX] === "H") {
+                                playSound("unlock");
                                 updateScoreCountDisplay(6);
                                 placeRandomItem(newX, newY);
                                 key1Collected = false;
                             } else if (key2Collected && maze[newY][newX] === "h") {
+                                playSound("unlock");
                                 updateScoreCountDisplay(6);
                                 placeRandomItem(newX, newY);
                                 key2Collected = false;
                             } else if (key3Collected && maze[newY][newX] === "T") {
+                                playSound("unlock");
                                 updateScoreCountDisplay(6);
                                 placeRandomItem(newX, newY);
                                 key3Collected = false;
                             } else if (coinsCollected >= 10 && maze[newY][newX] === "Y") {
+                                playSound("unlock");
                                 updateScoreCountDisplay(7);
                                 updateCoinsCountDisplay(-10);
                                 placeRandomItem(newX, newY, true);
@@ -2181,24 +2470,58 @@ $(document).ready(function() {
     }
 
     function updateEnemies(levelIndex) {
+        let dx = 0;
+        let dy = 0;
         for (let i = 0; i < enemies[levelIndex].length; i++) {
+            let playerInRange = false;
+            if (levelIndex == 2) {
+                if (Math.abs(enemies[levelIndex][i].x - player.x) <= 10 && Math.abs(enemies[levelIndex][i].y - player.y) <= 10) {
+                    playerInRange = true;
+                }
+            }
             let currentEnemyOrientation = "Up";
-            if (Math.random() < 0.5) {
-                if (Math.random() < 0.5) {
-                    var dx = Math.floor(Math.random() * 3) - 1;
-                    var dy = 0;
+            if (Math.random() < 0.5 || playerInRange) {
+                if (Math.random() < 0.5 && !playerInRange) {
+                    dx = Math.floor(Math.random() * 3) - 1;
+                    dy = 0;
                     if (dx > 0) {
                         currentEnemyOrientation = "Right";
                     } else {
                         currentEnemyOrientation = "Left";
                     }
-                } else {
-                    var dx = 0;
-                    var dy = Math.floor(Math.random() * 3) - 1;
+                } else if (!playerInRange) {
+                    dx = 0;
+                    dy = Math.floor(Math.random() * 3) - 1;
                     if (dy > 0) {
                         currentEnemyOrientation = "Down";
                     } else {
                         currentEnemyOrientation = "Up";
+                    }
+                } else if (playerInRange) {
+                    let directionChosen = false;
+                    if (Math.random() < 0.5) {
+                        if (player.y < enemies[levelIndex][i].y) {
+                            dx = 0;
+                            dy = -1;
+                            currentEnemyOrientation = "Up";
+                            directionChosen = true;
+                        } else if (player.y > enemies[levelIndex][i].y) {
+                            dx = 0;
+                            dy = 1;
+                            currentEnemyOrientation = "Down";
+                            directionChosen = true;
+                        }
+                    }
+                    if (!directionChosen) {
+                        if (player.x < enemies[levelIndex][i].x) {
+                            dx = -1;
+                            dy = 0;
+                            currentEnemyOrientation = "Left";
+                        } else if (player.x > enemies[levelIndex][i].x) {
+                            dx = 1;
+                            dy = 0;
+                            currentEnemyOrientation = "Right";
+                        }
                     }
                 }
                 let spaceEnemyIsMovingTo = maze[enemies[levelIndex][i].y + dy][enemies[levelIndex][i].x + dx];
@@ -2210,6 +2533,7 @@ $(document).ready(function() {
                     } else {
                         maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = enemies[levelIndex][i].currentSpaceType;
                     }
+
                     enemies[levelIndex][i].x += dx;
                     enemies[levelIndex][i].y += dy;
                     enemies[levelIndex][i].orientation = currentEnemyOrientation;
@@ -2240,10 +2564,12 @@ $(document).ready(function() {
                             if (k == 0) {
                                 bullets[i].x = vortexes[1].x;
                                 bullets[i].y = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 bullets[i].x = vortexes[0].x;
                                 bullets[i].y = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -2265,7 +2591,7 @@ $(document).ready(function() {
                 } else {
                     let hitSomething = attack(bullets[i].x, bullets[i].y, powerUps[1] > 1);
                     if (bullets[i].level == 2 && hitSomething) {
-                        activateSuperPower(bullets[i].x, bullets[i].y, 3, true);
+                        activateSuperPower(bullets[i].x, bullets[i].y, 3, true, 1, false, false);
                     }
                     bullets.splice(i, 1);
                 }
@@ -2280,6 +2606,9 @@ $(document).ready(function() {
         for (let i = turretBullets.length - 1; i >= 0; i--) {
             turretBullets[i].x += turretBullets[i].dx;
             turretBullets[i].y += turretBullets[i].dy;
+            if (!turretBullets[i].drawMe) {
+                turretBullets[i].drawMe = true;
+            }
             let hitPlayer = turretBullets[i].x == player.x && turretBullets[i].y == player.y;
             
             if (turretBullets[i].x >= 0 && turretBullets[i].x < maze[0].length && turretBullets[i].y >= 0 && turretBullets[i].y < maze.length) {
@@ -2291,10 +2620,12 @@ $(document).ready(function() {
                             if (k == 0) {
                                 turretBullets[i].x = vortexes[1].x;
                                 turretBullets[i].y = vortexes[1].y;
+                                playSound("vortex0");
                                 break;
                             } else if (k == 1) {
                                 turretBullets[i].x = vortexes[0].x;
                                 turretBullets[i].y = vortexes[0].y;
+                                playSound("vortex1");
                                 break;
                             }
                         }
@@ -2316,7 +2647,7 @@ $(document).ready(function() {
                 } else {
                     let hitSomething = attack(turretBullets[i].x, turretBullets[i].y, turretBullets[i].level == 2);
                     if (turretBullets[i].level == 2 && hitSomething) {
-                        activateSuperPower(turretBullets[i].x, turretBullets[i].y, 3, true);
+                        activateSuperPower(turretBullets[i].x, turretBullets[i].y, 3, true, 1, false, false);
                     }
                     turretBullets.splice(i, 1);
                 }
@@ -2348,7 +2679,7 @@ $(document).ready(function() {
                 activeBombs[i].health--;
                 
             } else {
-                activateSuperPower(activeBombs[i].x, activeBombs[i].y, 3, true, activeBombs[i].level, true);
+                activateSuperPower(activeBombs[i].x, activeBombs[i].y, 3, true, activeBombs[i].level, true, false);
                 if (activeBombs[i].bgTile == "V") {
                     maze[activeBombs[i].y][activeBombs[i].x] = "V";
                 } else {
@@ -2402,6 +2733,12 @@ $(document).ready(function() {
     }, 3000);
     setInterval(function() {
         if (!gameOver) {
+            activateTurret();
+            draw();
+        }
+    }, 13550);
+    setInterval(function() {
+        if (!gameOver) {
             updateEnemies(1);
         }
     }, 150);
@@ -2439,6 +2776,15 @@ $(document).ready(function() {
     function populateTileLegend() {
         const tileTypes = [
             { description: 'Player', shape: 'triangle', color: colors.player, bgColor: "", orientation: currentPlayerOrientation, decalShape: "", decalColor: "" },
+
+            { description: 'Enemy 1', shape: 'triangle', color: colors.enemy[0], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { description: 'Enemy 2', shape: 'triangle', color: colors.enemy[1], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { description: 'Enemy 3', shape: 'triangle', color: colors.enemy[2], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+
+            { description: 'Turret 1', shape: 'cross', color: colors.turret[0].decal, bgColor: colors.turret[0].base, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Turret 2', shape: 'cross', color: colors.turret[1].decal, bgColor: colors.turret[1].base, orientation: "", decalShape: "", decalColor: "" },
+
+            { description: 'Lava', shape: 'square', color: colors.lava, bgColor: '', orientation: '', decalShape: '', decalColor: '' },
             
             { description: 'Ground', shape: 'square', color: levels[currentLevel].colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
             { description: 'Player Walked', shape: 'square', color: levels[currentLevel].colors.walked, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
@@ -2449,10 +2795,11 @@ $(document).ready(function() {
             { description: 'Starting Door', shape: 'square', color: colors.start, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
             { description: 'Closed Exit', shape: 'circle', color: colors.switch.off, bgColor: colors.closed_exit, orientation: "", decalShape: "", decalColor: "" },
             { description: 'Exit Key', shape: 'circle', color: colors.switch.on, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-
+            { description: 'Vortex', shape: 'circle', color: colors.vortex, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
 
             { description: 'Wall', shape: 'square', color: colors.wall, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
             { description: 'Weak Breakable Wall', shape: 'dot', color: colors.wall, bgColor: colors.weak_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Strong Breakable Wall', shape: 'dot', color: colors.wall, bgColor: colors.strong_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
             
             { description: 'Closed Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.ground, bgColor: colors.wall, orientation: "", decalShape: "", decalColor: "" },
             { description: 'Open Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
@@ -2485,10 +2832,7 @@ $(document).ready(function() {
             { description: 'Bomb Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'dot', decalColor: colors.wall },
             { description: 'Bomb Ammo', shape: 'dot', color: colors.wall, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
             
-            { description: 'Life', shape: 'heart', color: colors.life, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-
-            { description: 'Vortex', shape: 'circle', color: colors.vortex, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-            { description: 'Lava', shape: 'square', color: colors.lava, bgColor: '', orientation: '', decalShape: '', decalColor: '' },
+            { description: 'Life', shape: 'heart', color: colors.life, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },            
         ];
 
 

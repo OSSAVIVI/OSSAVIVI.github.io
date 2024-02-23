@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~MATHEMATICS~</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #nextArrow,
+        .upArrow,
+        .downArrow {
+            bottom: 33%;
+            font-size: 24px;
+            text-decoration: none;
+            z-index: 999;
+            cursor: pointer;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            animation: colorChange 20s infinite alternate;
+        }
+
+        @keyframes colorChange {
+            0% {
+                background-color: #ff00ff;
+                /* Pink */
+            }
+
+            25% {
+                background-color: #00ff00;
+                /* Green */
+            }
+
+            50% {
+                background-color: #0000ff;
+                /* Blue */
+            }
+
+            75% {
+                background-color: #ffff00;
+                /* Yellow */
+            }
+
+            100% {
+                background-color: #ff0000;
+                /* Red */
+            }
+        }
+
+        .mathProblem {
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col text-center">
+                <div class="mathProblem" id="additionProblem">
+                    ADDITION
+                    <span class="question"></span><span class="answer">0</span>
+                    <div class="arrowControls">
+                        <div class="upArrow">⬆️</div>
+                        <div class="downArrow">⬇️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col text-center">
+                <div class="mathProblem" id="subtractionProblem">
+                    SUBTRACTION
+                    <span class="question"></span><span class="answer">0</span>
+                    <div class="arrowControls">
+                        <div class="upArrow">⬆️</div>
+                        <div class="downArrow">⬇️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col text-center">
+                <div class="mathProblem" id="multiplicationProblem">
+                    MULTIPLICATION
+                    <span class="question"></span><span class="answer">0</span>
+                    <div class="arrowControls">
+                        <div class="upArrow">⬆️</div>
+                        <div class="downArrow">⬇️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col text-center">
+                <a id="nextArrow" style="display: none;">➡️</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            function getRandomNumber(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            // Function to generate a random addition problem
+            function generateAdditionProblem() {
+                var operand1 = getRandomNumber(0, 5);
+                var operand2 = getRandomNumber(0, 5);
+                var answer = operand1 + operand2;
+                $('#additionProblem .question').text(`${operand1} + ${operand2} = `);
+                $('#additionProblem .answer').attr('answer', answer);
+            }
+
+            // Function to generate a random subtraction problem
+            function generateSubtractionProblem() {
+                var operand1 = getRandomNumber(0, 10);
+                var operand2 = getRandomNumber(0, operand1);
+                var answer = operand1 - operand2;
+                $('#subtractionProblem .question').text(`${operand1} - ${operand2} = `);
+                $('#subtractionProblem .answer').attr('answer', answer);
+            }
+
+            // Function to generate a random multiplication problem
+            function generateMultiplicationProblem() {
+                var operand1 = getRandomNumber(0, 3);
+                var operand2 = getRandomNumber(0, 3);
+                var answer = operand1 * operand2;
+                $('#multiplicationProblem .question').text(`${operand1} × ${operand2} = `);
+                $('#multiplicationProblem .answer').attr('answer', answer);
+            }
+
+            generateAdditionProblem();
+            generateSubtractionProblem();
+            generateMultiplicationProblem();
+
+            // Update problems when arrows are clicked
+            $('.mathProblem').each(function () {
+                var problemElement = $(this);
+                var answer = 0;
+
+                // Up arrow clicked
+                problemElement.find('.upArrow').click(function () {
+                    console.log('up!');
+                    answer++;
+                    problemElement.find('.answer').text(answer);
+                    checkAllAnswers();
+                });
+
+                // Down arrow clicked
+                problemElement.find('.downArrow').click(function () {
+                    console.log('down!');
+                    answer--;
+                    problemElement.find('.answer').text(answer);
+                    checkAllAnswers();
+                });
+            });
+
+            // Function to check if all answers are correct
+            function checkAllAnswers() {
+                var isAllCorrect = true;
+                $('.mathProblem').each(function () {
+                    var problemElement = $(this);
+                    var answer = parseInt(problemElement.find('.answer').text());
+                    var correctAnswer = parseInt(problemElement.find('.answer').attr('answer'));
+                    if (answer !== correctAnswer || isNaN(answer)) {
+                        isAllCorrect = false;
+                        console.log('incorrect');
+                        return false; // exit each loop early
+                    }
+                });
+                if (isAllCorrect) {
+                    console.log('correct!');
+                    $('#nextArrow').removeAttr('style');
+                            const q_params = [
+                        'ps=i_love_you',
+                        'ps=u_can_do_it',
+                        'ps=have_fun',
+                        'ps=follow_your_dreams',
+                        'ps=never_give_up',
+                        'ps=hatch_the_eggs',
+                        'ps=the_merge_is_coming',
+                        'ps=greetings_from_c197'
+                    ];
+                    $('#nextArrow').attr('href', `./chicken.html?${q_params[Math.floor(Math.random() * q_params.length)]}`);
+                } else {
+                    $('#nextArrow').css('display', 'none');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

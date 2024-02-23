@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze Runner</title>
+<style>
+    .controls {
+      text-align: center;
+    }
+    
+    .control-button {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    #Up, #Down {
+      width: 50px;
+      height: 50px;
+    }
+    
+    #Left, #Right {
+      width: 50px;
+      height: 50px;
+      margin: 0 10px;
+    }
+    </style>
+    </head>
+    <body>
+    
+    <h1 id="levelTitle">Title Above Maze</h1>
+
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    
+    <div class="controls">
+        <div class="control-button" id="Up">↑</div>
+    </div>
+    <div class="controls">
+        <div class="control-button" id="Left">←</div>
+        <div class="control-button" id="Right">→</div>
+    </div>
+    <div class="controls">
+        <div class="control-button" id="Down">↓</div>
+    </div>
+    
+    
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+
+    const canvas = $("#gameCanvas")[0];
+    const ctx = canvas.getContext("2d");
+    const cellSize = 20;
+    let currentLevel = 0;
+    let gameOver = false;
+
+    const levels = [
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W",".",".",".","W","C",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","W","W","W","W","W","W","W",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W",".",".","W","W","W","W",".","W","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","W","W","W","W","W","W","W",".","W"],
+                ["W","P","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
+            ]
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W","P","W",".","W",".",".",".",".",".",".",".","C","W"],
+                ["W",".","W",".","W","W","W","W","W","W","W","W",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".","E",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","W","W","W","W","W","W","W",".","W"],
+                ["W","E","W","E",".",".",".",".",".",".",".",".",".","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
+            ]
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W","E",".",".","W",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","W","W","W","W","W","W","W",".","W"],
+                ["W",".","W",".","W","E",".",".","W","E",".",".","E","W"],
+                ["W",".","P",".","W","E",".","C","W",".",".",".",".","W"],
+                ["W",".",".",".",".",".",".","W","W",".",".",".",".","W"],
+                ["W","E","W",".","W","E",".","W",".","E",".",".",".","W"],
+                ["W",".","W",".","W","E","E",".",".",".",".",".",".","W"],
+                ["W",".","W",".","W","E",".",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W","W",".","W","W","W","W",".","W"],
+                ["W","E","W","E",".",".",".",".",".",".",".",".","E","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
+            ]
+        }
+    ];
+
+    let maze = levels[currentLevel].maze;
+    let player;
+    let coin;
+    let enemies = [];
+
+    function initializeGame() {
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === "P") {
+                    player = { x, y };
+                } else if (maze[y][x] === "C") {
+                    coin = { x, y, collected: false };
+                } else if (maze[y][x] === "E") {
+                    enemies.push({ x, y });
+                }
+            }
+        }
+    }
+
+
+    function drawMaze() {
+        maze.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                if (cell === "W") {
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(colIndex * cellSize, rowIndex * cellSize, cellSize, cellSize);
+                }
+            });
+        });
+    }
+
+    function drawPlayer() {
+        ctx.fillStyle = "#00f";
+        ctx.fillRect(player.x * cellSize, player.y * cellSize, cellSize, cellSize);
+    }
+
+    function drawCoin() {
+        if (!coin.collected) {
+            ctx.fillStyle = "#ff0";
+            ctx.fillRect(coin.x * cellSize, coin.y * cellSize, cellSize, cellSize);
+        }
+    }
+
+    function drawEnemies() {
+        ctx.fillStyle = "#f00";
+        for (let i = 0; i < enemies.length; i++) {
+            ctx.fillRect(enemies[i].x * cellSize, enemies[i].y * cellSize, cellSize, cellSize);
+        }
+    }
+
+    function collectCoin() {
+        if (player.x === coin.x && player.y === coin.y) {
+            coin.collected = true;
+            currentLevel = (currentLevel + 1) % levels.length;
+            maze = levels[currentLevel].maze;
+            initializeGame();
+        }
+    }
+
+    function checkCollision(x, y) {
+        return maze[y][x] !== "W";
+    }
+
+    function checkEnemyCollisions() {
+        for (let i = 0; i < enemies.length; i++) {
+            if (player.x === enemies[i].x && player.y === enemies[i].y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function updateEnemies() {
+        for (let i = 0; i < enemies.length; i++) {
+            if (Math.random() < 0.5) {
+                const dx = Math.floor(Math.random() * 3) - 1;
+                const dy = Math.floor(Math.random() * 3) - 1;
+                if (maze[enemies[i].y + dy][enemies[i].x + dx] === ".") {
+                    enemies[i].x += dx;
+                    enemies[i].y += dy;
+                }
+            }
+        }
+    }
+
+    function playerMove(direction){
+        if (gameOver) return;
+        
+        let newX = player.x;
+        let newY = player.y;
+
+        switch (direction) {
+            case "Up":    newY--; break;
+            case "Down":  newY++; break;
+            case "Left":  newX--; break;
+            case "Right": newX++; break;
+            default:      return;
+        }
+
+        if (checkCollision(newX, newY)) {
+            player.x = newX;
+            player.y = newY;
+            collectCoin();
+            draw();
+        }
+
+        if (checkEnemyCollisions()) {
+            gameOver = true;
+            draw();
+            alert("Game Over! You were caught by the enemy.");
+            location.reload();
+        }
+    }
+
+    $(document).keydown(function(event) {
+        playerMove(event.key.replace("Arrow", ""));
+    });
+
+    $(".control-button").click(function() {
+        playerMove($(this).attr('id'));
+    });
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMaze();
+        drawPlayer();
+        drawCoin();
+        drawEnemies();
+        document.getElementById("levelTitle").innerText = "Level " + (currentLevel + 1);
+    }
+
+    initializeGame();
+    draw();
+    setInterval(function() {
+        if (!gameOver) {
+            updateEnemies();
+            draw();
+        }
+    }, 500);
+});
+</script>
+
+</body>
+</html>
