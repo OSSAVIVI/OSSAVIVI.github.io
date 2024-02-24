@@ -6,6 +6,7 @@
 <title>Battle Maze Ultra 9K</title>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9441280430139587"
      crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.core.min.js"></script>
 <meta name="google-adsense-account" content="ca-pub-9441280430139587">
 <style>
     body {
@@ -145,27 +146,6 @@
 </style>
 </head>
 <body>
-<audio id="soundTap" src="tap.mp3"></audio>
-<audio id="soundCoin" src="coin.mp3"></audio>
-<audio id="soundBlop" src="blop.mp3"></audio>
-<audio id="soundChime" src="chime.mp3"></audio>
-<audio id="soundUpgrade" src="upgrade.mp3"></audio>
-<audio id="soundUnlock" src="unlock.mp3"></audio>
-<audio id="soundKeys" src="keys.mp3"></audio>
-<audio id="soundGrunt" src="grunt.mp3"></audio>
-<audio id="soundLava" src="lava.mp3"></audio>
-<audio id="soundBreak" src="break.mp3"></audio>
-<audio id="soundKnock" src="knock.mp3"></audio>
-<audio id="soundDead" src="dead.mp3"></audio>
-<audio id="soundPoweringup" src="poweringup.mp3"></audio>
-<audio id="soundPoweringdown" src="poweringdown.mp3"></audio>
-<audio id="soundTing" src="ting.mp3"></audio>
-<audio id="soundVortex0" src="vortex0.mp3"></audio>
-<audio id="soundVortex1" src="vortex1.mp3"></audio>
-<audio id="soundExplosion" src="explosion.mp3"></audio>
-<audio id="soundSplat" src="splat.mp3"></audio>
-<audio id="soundLaser" src="laser.mp3"></audio>
-<audio id="soundGun" src="gun.mp3"></audio>
 
 <h1>Battle Maze Ultra 9K</h1>
 <span id="levelTitle">Title Above Maze</span>
@@ -207,8 +187,6 @@
         </div>
     </div>
 </div>
-
-
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -261,7 +239,7 @@ $(document).ready(function() {
                 ["W",".","P",".","G","W"],
                 ["W","W","-","W","W","W"]
             ],
-            text: "build, or click ▶️",
+            text: "Build your own levels, or click ▶️ and proceed to the game.",
             colors: {
                 ground: "#fff",
                 walked: "#eee",
@@ -1636,151 +1614,355 @@ $(document).ready(function() {
         gameContainer.scrollTop = playerPosY - visibleAreaY;
     }
 
+    var soundTap = new Howl({
+        src: ['tap.mp3'],
+        autoplay: false,
+        loop: false,
+        volume: 0.1,
+        onplay: function() {
+            setTimeout(function() {
+                soundTap.pause();
+                soundTap.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundCoin = new Howl({
+        src: ['coin.mp3'],
+        autoplay: false,
+        loop: false,
+        volume: 0.33,
+        onplay: function() {
+            soundCoin.seek(soundCoin.duration() / 2);
+        }
+    });
+
+    var soundBlop = new Howl({
+        src: ['blop.mp3'],
+        volume: 0.25,
+        onplay: function() {
+            soundBlop.seek(soundBlop.duration() / 2);
+        }
+    });
+
+    var soundChime = new Howl({
+        src: ['chime.mp3'],
+        volume: 0.25,
+        onplay: function() {
+            soundChime.seek(soundChime.duration() * 0.2);
+            setTimeout(function() {
+                soundChime.pause();
+                soundChime.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundUpgrade = new Howl({
+        src: ['upgrade.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundUpgrade.seek(soundUpgrade.duration() * 0.2);
+        }
+    });
+
+    var soundUnlock = new Howl({
+        src: ['unlock.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundUnlock.seek(soundUnlock.duration() * 0.2);
+            setTimeout(function() {
+                soundUnlock.pause();
+                soundUnlock.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundKeys = new Howl({
+        src: ['keys.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundKeys.seek(soundKeys.duration() * 0.2);
+            setTimeout(function() {
+                soundKeys.pause();
+                soundKeys.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundGrunt = new Howl({
+        src: ['grunt.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundGrunt.seek(soundGrunt.duration() * 0.2);
+        }
+    });
+
+    var soundLava = new Howl({
+        src: ['lava.mp3'],
+        volume: 1.0
+    });
+
+    var soundBreak = new Howl({
+        src: ['break.mp3'],
+        volume: 0.02,
+        onplay: function() {
+            soundBreak.seek(soundBreak.duration() / 2);
+        }
+    });
+
+    var soundKnock = new Howl({
+        src: ['knock.mp3'],
+        volume: 0.05,
+        onplay: function() {
+            soundKnock.seek(soundKnock.duration() * 0.2);
+            setTimeout(function() {
+                soundKnock.pause();
+                soundKnock.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundDead = new Howl({
+        src: ['dead.mp3'],
+        volume: 0.1,
+        onplay: function() {
+            soundDead.seek(soundDead.duration() * 0.2);
+            setTimeout(function() {
+                soundDead.pause();
+                soundDead.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundPoweringup = new Howl({
+        src: ['poweringup.mp3'],
+        volume: 0.75,
+        onplay: function() {
+            soundPoweringup.seek(soundPoweringup.duration() / 2);
+            setTimeout(function() {
+                soundPoweringup.pause();
+                soundPoweringup.seek(0);
+            }, 1000);
+        }
+    });
+
+    var soundPoweringdown = new Howl({
+        src: ['poweringdown.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundPoweringdown.seek(soundPoweringdown.duration() * .25);
+            setTimeout(function() {
+                soundPoweringdown.pause();
+                soundPoweringdown.seek(0);
+            }, 1000);
+        }
+    });
+
+    var soundTing = new Howl({
+        src: ['ting.mp3'],
+        volume: 0.25
+    });
+
+    var soundVortex0 = new Howl({
+        src: ['vortex0.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundVortex0.seek(soundVortex0.duration() / 2);
+            setTimeout(function() {
+                soundVortex0.pause();
+                soundVortex0.seek(0);
+            }, 700);
+        }
+    });
+
+    var soundVortex1 = new Howl({
+        src: ['vortex1.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundVortex1.seek(soundVortex1.duration() * 0.9);
+            setTimeout(function() {
+                soundVortex1.pause();
+                soundVortex1.seek(0);
+            }, 700);
+        }
+    });
+
+    var soundExplosion = new Howl({
+        src: ['explosion.mp3'],
+        volume: 0.1
+    });
+
+    var soundSplat = new Howl({
+        src: ['splat.mp3'],
+        volume: 0.3,
+        onplay: function() {
+            soundSplat.seek(soundSplat.duration() * 0.25);
+        }
+    });
+
+    var soundLaser = new Howl({
+        src: ['laser.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundVortex1.seek(soundVortex1.duration() * 0.25);
+            setTimeout(function() {
+                soundVortex1.pause();
+                soundVortex1.seek(0);
+            }, 500);
+        }
+    });
+
+    var soundGun = new Howl({
+        src: ['gun.mp3'],
+        volume: 0.7,
+        onplay: function() {
+            soundVortex1.seek(soundVortex1.duration() * 0.25);
+        }
+    });
+
     function playSound(sound) {
         if (sound == "tap") {
-            let audioElement = $('#soundTap').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.1;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0;
-            }, 400);
+            if (!soundTap.playing()) {
+                soundTap.play();
+            } else {
+                soundTap.stop();
+                soundTap.play();
+            }
         } else if (sound == "coin") {
-            let audioElement = $('#soundCoin').get(0);
-            audioElement.currentTime = audioElement.duration / 2; 
-            audioElement.volume = 0.33;
-            audioElement.play();
+            if (!soundCoin.playing()) {
+                soundCoin.play();
+            } else {
+                soundCoin.stop();
+                soundCoin.play();
+            }
         } else if (sound == "blop") {
-            let audioElement = $('#soundBlop').get(0);
-            audioElement.currentTime = audioElement.duration / 2; 
-            audioElement.volume = 0.25;
-            audioElement.play();
+            if (!soundBlop.playing()) {
+                soundBlop.play();
+            } else {
+                soundBlop.stop();
+                soundBlop.play();
+            }
         } else if (sound == "chime") {
-            let audioElement = $('#soundChime').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.25;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 400);
+            if (!soundChime.playing()) {
+                soundChime.play();
+            } else {
+                soundChime.stop();
+                soundChime.play();
+            }
         } else if (sound == "upgrade") {
-            let audioElement = $('#soundUpgrade').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.5;
-            audioElement.play();
+            if (!soundUpgrade.playing()) {
+                soundUpgrade.play();
+            } else {
+                soundUpgrade.stop();
+                soundUpgrade.play();
+            }
         } else if (sound == "unlock") {
-            let audioElement = $('#soundUnlock').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.5;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 400);
+            if (!soundUnlock.playing()) {
+                soundUnlock.play();
+            } else {
+                soundUnlock.stop();
+                soundUnlock.play();
+            }
         } else if (sound == "keys") {
-            let audioElement = $('#soundKeys').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.5;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 400);
+            if (!soundKeys.playing()) {
+                soundKeys.play();
+            } else {
+                soundKeys.stop();
+                soundKeys.play();
+            }
         } else if (sound == "grunt") {
-            let audioElement = $('#soundGrunt').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.5;
-            audioElement.play();
+            if (!soundGrunt.playing()) {
+                soundGrunt.play();
+            } else {
+                soundGrunt.stop();
+                soundGrunt.play();
+            }
         } else if (sound == "lava") {
-            $('#soundLava').get(0).play();
+            soundLava.play();
         } else if (sound == "break") {
-            let audioElement = $('#soundBreak').get(0);
-            audioElement.currentTime = audioElement.duration * 0.5; 
-            audioElement.volume = 0.02;
-            audioElement.play();
+            if (!soundBreak.playing()) {
+                soundBreak.play();
+            } else {
+                soundBreak.stop();
+                soundBreak.play();
+            }
         } else if (sound == "knock") {
-            let audioElement = $('#soundKnock').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.05;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 400);
+            if (!soundKnock.playing()) {
+                soundKnock.play();
+            } else {
+                soundKnock.stop();
+                soundKnock.play();
+            }
         } else if (sound == "dead") {
-            let audioElement = $('#soundDead').get(0);
-            audioElement.currentTime = audioElement.duration * 0.2; 
-            audioElement.volume = 0.25;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 400);
+            if (!soundDead.playing()) {
+                soundDead.play();
+            } else {
+                soundDead.stop();
+                soundDead.play();
+            }
         } else if (sound == "poweringup") {
-            let audioElement = $('#soundPoweringup').get(0);
-            audioElement.currentTime = audioElement.duration *.5; 
-            audioElement.volume = 0.75;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 1000);
+            if (!soundPoweringup.playing()) {
+                soundPoweringup.play();
+            } else {
+                soundPoweringup.stop();
+                soundPoweringup.play();
+            }
         } else if (sound == "poweringdown") {
-            let audioElement = $('#soundPoweringdown').get(0);
-            audioElement.currentTime = audioElement.duration *.25; 
-            audioElement.volume = 0.5;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 1000);
+            if (!soundPoweringdown.playing()) {
+                soundPoweringdown.play();
+            } else {
+                soundPoweringdown.stop();
+                soundPoweringdown.play();
+            }
         } else if (sound == "ting") {
-            let audioElement = $('#soundTing').get(0);
-            audioElement.volume = 0.25;
-            audioElement.play();
+            if (!soundTing.playing()) {
+                soundTing.play();
+            } else {
+                soundTing.stop();
+                soundTing.play();
+            }
         }  else if (sound == "vortex0") {
-            let audioElement = $('#soundVortex0').get(0);
-            audioElement.currentTime = audioElement.duration *.5; 
-            audioElement.volume = 0.5;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 700);
+            if (!soundVortex0.playing()) {
+                soundVortex0.play();
+            } else {
+                soundVortex0.stop();
+                soundVortex0.play();
+            }
         } else if (sound == "vortex1") {
-            let audioElement = $('#soundVortex1').get(0);
-            audioElement.currentTime = audioElement.duration *.90; 
-            audioElement.volume = 0.5;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 700);
+            if (!soundVortex1.playing()) {
+                soundVortex1.play();
+            } else {
+                soundVortex1.stop();
+                soundVortex1.play();
+            }
         } else if (sound == "explosion") {
-            let audioElement = $('#soundExplosion').get(0);
-            audioElement.volume = 0.1;
-            audioElement.play();
+            if (!soundExplosion.playing()) {
+                soundExplosion.play();
+            } else {
+                soundExplosion.stop();
+                soundExplosion.play();
+            }
         } else if (sound == "splat") {
-            let audioElement = $('#soundSplat').get(0);
-            audioElement.currentTime = audioElement.duration * 0.25; 
-            audioElement.volume = 0.3;
-            audioElement.play();
+            if (!soundSplat.playing()) {
+                soundSplat.play();
+            } else {
+                soundSplat.stop();
+                soundSplat.play();
+            }
         } else if (sound == "laser") {
-            let audioElement = $('#soundLaser').get(0);
-            audioElement.currentTime = audioElement.duration * 0.25; 
-            audioElement.volume = 0.5;
-            audioElement.play();
-            setTimeout(function() {
-                audioElement.pause(); 
-                audioElement.currentTime = 0; 
-            }, 500);
+            if (!soundLaser.playing()) {
+                soundLaser.play();
+            } else {
+                soundLaser.stop();
+                soundLaser.play();
+            }
         } else if (sound == "gun") {
-            let audioElement = $('#soundGun').get(0);
-            audioElement.currentTime = audioElement.duration * 0.25; 
-            audioElement.volume = 0.7;
-            audioElement.play();
+            if (!soundGun.playing()) {
+                soundGun.play();
+            } else {
+                soundGun.stop();
+                soundGun.play();
+            }
         } 
     }
 
