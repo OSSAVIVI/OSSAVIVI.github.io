@@ -143,6 +143,14 @@
         cursor: pointer;
     }
 
+    #sharableLink {
+        display: inline-block; /* Make span behave like an inline-block element */
+        width: 200px; /* Fixed width */
+        white-space: nowrap; /* Prevent text from wrapping to the next line */
+        overflow: hidden; /* Hide overflow content */
+        text-overflow: ellipsis; /* Optional: add ellipsis to indicate hidden text */
+    }
+
 </style>
 </head>
 <body>
@@ -308,7 +316,7 @@ $(document).ready(function() {
                 ["W","W","-","W","W","W"]
             ],
             text: "Build your own levels, or click ▶️ and proceed to the game.",
-            colors_index: 5
+            colors_index: 0
         },
         {
             maze: [
@@ -336,7 +344,7 @@ $(document).ready(function() {
                 ["W","W","W","W","W","W","W","W","-","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
             ],
             text: "This is a testing level :)",
-            colors_index: 7
+            colors_index: 0
         },
         {
             maze: [
@@ -1857,15 +1865,15 @@ $(document).ready(function() {
 
     var soundGun = new Howl({
         src: ['gun.mp3'],
-        volume: 0.8,
+        volume: 1.0,
         onplay: function() {
-            soundGun.seek(soundGun.duration() * 0.25);
+            soundGun.seek(soundGun.duration() * 0.2);
         }
     });
 
     var soundPunch = new Howl({
         src: ['punch.mp3'],
-        volume: 0.1,
+        volume: 0.05,
         onplay: function() {
             soundPunch.seek(soundPunch.duration() * 0.66);
         }
@@ -2314,6 +2322,9 @@ $(document).ready(function() {
         $("#toggleLevelBuilder").text("▶️");
         const levelCreationHtml = `
             <div id="levelCreationUI" style="padding: 10px; display: block;">
+                <label for="author">Aesthetic</label>
+                <input type="text" id="author" placeholder="Author">
+                <br>
                 
                 <label for="aestheticType">Aesthetic</label>
                 <select id="aestheticType">
@@ -2326,7 +2337,7 @@ $(document).ready(function() {
                     <option value="6">Blue</option>
                     <option value="7">Purple</option>
                 </select>
-
+                <br>
                 <label for="blockType">Tile</label>
                 <select id="blockType">
                     <option value="W">Wall</option>
@@ -2360,20 +2371,19 @@ $(document).ready(function() {
                 </select>
 
                 <br>
-                <label for="levelWidth">Level Width:</label>
+                <label for="levelWidth">Width</label>
                 <span id="decreaseWidth">➖</span>
-                <span id="levelWidthValue"></span> <!-- Default or current width value -->
+                <span id="levelWidthValue"></span>
                 <span id="increaseWidth">➕</span>
                 <br>
-                <label for="levelHeight">Level Height:</label>
+                <label for="levelHeight">Height</label>
                 <span id="decreaseHeight">➖</span>
                 <span id="levelHeightValue"></span> <!-- Default or current height value -->
                 <span id="increaseHeight">➕</span>
                 <br>
-                <button id="cleanGround">Clean Ground</button>
-                <button id="doneCreatingLevel">Done</button>
-                <span></span
+                <button id="cleanGround">Clean</button>
                 <br>
+                <span>Player Color</span>
                 <div id="playerColorControls">
                     <div>
                         <label for="sliderX">🔴</label>
@@ -2391,6 +2401,10 @@ $(document).ready(function() {
                         <span id="valueZ">f</span>
                     </div>
                 </div>
+                <br>
+                <button id="copyToClipboardButton">Copy Share to Clipboard</button>
+                <br>
+                <span id="sharableLink"></span>
                 <br>
                 <div id="tileLegend" style="margin-top: 20px; background-color: darkgrey;">
                     <table id="tileLegendTable"></table>
@@ -2497,6 +2511,28 @@ $(document).ready(function() {
                     //draw();
                 }
             }
+            let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
+
+            let author = $("#author").val().trim();
+            author = author ? encodeURIComponent(author) : "Unknown";
+
+            let sharableLink = `https://ossavivi.github.io/c197.html?a=${author}&p=${playerHexCode}`;
+            for (let i = 0; i < levels.length; i++) {
+                let m = levels[i].maze;
+                let rows = m.length;
+                let cols = m[0].length;
+                console.log(m);
+                let colorIndex = levels[i].colors_index;
+                let encodedMazeString = "";
+                for (let r = 0; r < m.length; r++) {
+                    for (let c = 0; c < m[0].length; c++) {
+                        encodedMazeString += m[r][c];
+                    }
+                }
+                sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${colorIndex}`;
+            }
+            $("#sharableLink").text(sharableLink);
+            $("#copyToClipboardButton").show();
         });
 
         $("#toggleLevelBuilder").click(function() {
@@ -2505,10 +2541,6 @@ $(document).ready(function() {
             } else {
                 showLevelCreationUI();
             }
-        });
-
-        $("#doneCreatingLevel").click(function() {
-            //$("#levelCreationUI").hide();
         });
 
         $("#cleanGround").click(function() {
@@ -2520,6 +2552,16 @@ $(document).ready(function() {
                 }
             }
         });
+
+        $("#copyToClipboardButton").on("click", function() {
+            const tempInput = $("<input>");
+            $("body").append(tempInput);
+            tempInput.val($("#sharableLink").text()).select();
+            document.execCommand("copy");
+            tempInput.remove();
+        });
+        $("#copyToClipboardButton").hide(); // hidden until canvas is updated!
+
     }
 
     function hideLevelCreationUI() {
