@@ -1124,9 +1124,24 @@ $(document).ready(function() {
         });
     }
 
+    function collisionWithTurretBulle(x, y) {
+        
+        
+    }
+
     function attack(newX, newY, isStrongAttack=false) {
         let returnValue = false;
         if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+            // for (let i = turretBullets.length - 1; i >= 0; i--) {
+            //     if (turretBullets[i].x == newX && turretBullets[i].y == newY) {
+            //         if (turretBullets[i].level == 2) {
+            //             activateSuperPower(turretBullets[i].x, turretBullets[i].y, 3, true, 1, false, false);
+            //         }
+            //         playSound("splat");
+            //         turretBullets.splice(i, 1);
+            //         returnValue = true;
+            //     }
+            // }
             if (player.x == newX && player.y == newY) {
                 checkGameOver(true);
                 returnValue = true;
@@ -1287,6 +1302,7 @@ $(document).ready(function() {
         if (override || (superPowersCollected > 0 && powerUps[0] > 0)) {
             if (!override) {
                 playerCurrentSpaceType = "'";
+                playSound("punch");
             }
             let directions;
             if (range == 1) {
@@ -1804,19 +1820,27 @@ $(document).ready(function() {
         src: ['laser.mp3'],
         volume: 0.5,
         onplay: function() {
-            soundVortex1.seek(soundVortex1.duration() * 0.25);
+            soundLaser.seek(soundLaser.duration() * 0.25);
             setTimeout(function() {
-                soundVortex1.pause();
-                soundVortex1.seek(0);
+                soundLaser.pause();
+                soundLaser.seek(0);
             }, 500);
         }
     });
 
     var soundGun = new Howl({
         src: ['gun.mp3'],
-        volume: 0.7,
+        volume: 0.8,
         onplay: function() {
-            soundVortex1.seek(soundVortex1.duration() * 0.25);
+            soundGun.seek(soundGun.duration() * 0.25);
+        }
+    });
+
+    var soundPunch = new Howl({
+        src: ['punch.mp3'],
+        volume: 0.1,
+        onplay: function() {
+            soundPunch.seek(soundPunch.duration() * 0.66);
         }
     });
 
@@ -1962,6 +1986,13 @@ $(document).ready(function() {
             } else {
                 soundGun.stop();
                 soundGun.play();
+            }
+        }  else if (sound == "punch") {
+            if (!soundPunch.playing()) {
+                soundPunch.play();
+            } else {
+                soundPunch.stop();
+                soundPunch.play();
             }
         } 
     }
