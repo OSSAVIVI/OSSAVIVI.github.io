@@ -306,6 +306,7 @@ $(document).ready(function() {
     ];
 
 
+    let gameIsInBuildMode = false;
     const levels = [
         {
             maze: [
@@ -701,6 +702,7 @@ $(document).ready(function() {
     let switch3Activated = false;
 
     function initializeGame() {
+        maze = levels[currentLevel].maze;
         levels[currentLevel].colors = levelColors[levels[currentLevel].colors_index];
         resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
         enemies = [[], [], []];
@@ -1030,7 +1032,7 @@ $(document).ready(function() {
         lives.forEach((life, index) => {
             if (player.x === life.x && player.y === life.y && !life.collected) {
                 livesCollected++;
-                maze[life.y][life.x] = ".";
+                maze[life.y][life.x] = ",";
                 life.collected = true;
                 updateLivesCountDisplay();
                 updateScoreCountDisplay(2);
@@ -1291,7 +1293,7 @@ $(document).ready(function() {
                                 maze[newY][newX] = "c";
                             } else {
                                 maze[newY][newX] = "l";
-                                lives.push({ newX, newY, collected: false });
+                                lives.push({ x: newX, y: newY, collected: false });
                             }
                             enemies[j].splice(i, 1);
                             updateScoreCountDisplay(5);
@@ -1305,7 +1307,7 @@ $(document).ready(function() {
                     for (let i = turrets[j].length - 1; i >= 0; i--) {
                         if (turrets[j][i].x == newX && turrets[j][i].y == newY) {
                             maze[newY][newX] = "l";
-                            lives.push({ newX, newY, collected: false });
+                            lives.push({ x: newX, y: newY, collected: false });
                             turrets[j].splice(i, 1);
                             updateScoreCountDisplay(25);
                             playSound("break");
@@ -1572,7 +1574,7 @@ $(document).ready(function() {
 
     $(document).keydown(function(event) {
         // Include SHIFT (16) in the array to ignore its default action
-        if ([16, 32, 38, 40, 37, 39].includes(event.which)) {
+        if ([16, 38, 40, 37, 39].includes(event.which)) { // removed 32 SPACE
             event.preventDefault(); // Prevent the default action (scrolling or other)
         }
         
@@ -2318,14 +2320,13 @@ $(document).ready(function() {
     }
 
     function showLevelCreationUI() {
+        gameIsInBuildMode = true;
         $(".controls-row").hide();
         $("#toggleLevelBuilder").text("▶️");
         const levelCreationHtml = `
             <div id="levelCreationUI" style="padding: 10px; display: block;">
-                <label for="author">Aesthetic</label>
-                <input type="text" id="author" placeholder="Author">
+                <input type="text" id="title" placeholder="Your Game Title :)">
                 <br>
-                
                 <label for="aestheticType">Aesthetic</label>
                 <select id="aestheticType">
                     <option value="0">White</option>
@@ -2369,7 +2370,6 @@ $(document).ready(function() {
                     <option value="R">Lava</option>
                     <!-- More block types can be added here -->
                 </select>
-
                 <br>
                 <label for="levelWidth">Width</label>
                 <span id="decreaseWidth">➖</span>
@@ -2406,6 +2406,9 @@ $(document).ready(function() {
                 <br>
                 <span id="sharableLink"></span>
                 <br>
+                <label for="levelsList">Levels</label>
+                <ul id="levelsList">
+                </ul>
                 <div id="tileLegend" style="margin-top: 20px; background-color: darkgrey;">
                     <table id="tileLegendTable"></table>
                 </div>
@@ -2420,6 +2423,20 @@ $(document).ready(function() {
             levels[currentLevel].colors_index = $("#aestheticType").val();
             initializeGame();
             populateTileLegend();
+            updateLinkAndStuff();
+            $("body").css("background-color", levels[currentLevel].colors.wall);
+        });
+
+        $("#title").on('input', function() {
+            let title = $("#title").val()
+            console.log(title);
+            if (title == "") {
+                $("h1").text("Battle Maze Ultra 9K");
+            } else {
+                $("h1").text(title);
+            }
+            $("h1").text();
+            //updateLinkAndStuff();
         });
 
         $("#increaseWidth").click(function() {
@@ -2435,6 +2452,7 @@ $(document).ready(function() {
             }
             initializeGame();
             $("#levelWidthValue").html(maze[0].length);
+            updateLinkAndStuff();
         });
 
         $("#decreaseWidth").click(function() {
@@ -2449,6 +2467,7 @@ $(document).ready(function() {
                 }
                 initializeGame();
                 $("#levelWidthValue").html(maze[0].length);
+                updateLinkAndStuff();
             }
         });
 
@@ -2465,6 +2484,7 @@ $(document).ready(function() {
             maze.push(newRow);
             initializeGame();
             $("#levelHeightValue").html(maze.length);
+            updateLinkAndStuff();
         });
 
         $("#decreaseHeight").click(function() {
@@ -2478,12 +2498,12 @@ $(document).ready(function() {
                 }
                 initializeGame();
                 $("#levelHeightValue").html(maze.length);
+                updateLinkAndStuff();
             }
         });
 
-        // Handle block placement on canvas click
         $("#gameCanvas").click(function(e) {
-            if (currentLevel === 0) { // Ensure this is only active on the last level
+            if (gameIsInBuildMode) { // Ensure this is only active on the last level
                 const rect = canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
@@ -2504,35 +2524,11 @@ $(document).ready(function() {
                         ammo.push({ gridX, gridY, collected: false });
                     } else if (blockType == "B") {
                         bombs.push({ gridX, gridY, collected: false });
-                    } // add more checks after certain block types! 
-                    // Be sure to remove certain things from the list, too!
-
-                    initializeGame();
-                    //draw();
-                }
-            }
-            let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
-
-            let author = $("#author").val().trim();
-            author = author ? encodeURIComponent(author) : "Unknown";
-
-            let sharableLink = `https://ossavivi.github.io/c197.html?a=${author}&p=${playerHexCode}`;
-            for (let i = 0; i < levels.length; i++) {
-                let m = levels[i].maze;
-                let rows = m.length;
-                let cols = m[0].length;
-                console.log(m);
-                let colorIndex = levels[i].colors_index;
-                let encodedMazeString = "";
-                for (let r = 0; r < m.length; r++) {
-                    for (let c = 0; c < m[0].length; c++) {
-                        encodedMazeString += m[r][c];
                     }
+                    initializeGame();
                 }
-                sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${colorIndex}`;
             }
-            $("#sharableLink").text(sharableLink);
-            $("#copyToClipboardButton").show();
+            updateLinkAndStuff();
         });
 
         $("#toggleLevelBuilder").click(function() {
@@ -2544,7 +2540,7 @@ $(document).ready(function() {
         });
 
         $("#cleanGround").click(function() {
-            for (let j = 0; j < maze.length; j++){
+            for (let j = 0; j < maze.length; j++) {
                 for (let i = 0; i < maze[j].length; i++) {
                     if (maze[j][i] == "," || maze[j][i] == "'" || maze[j][i] == "q" || maze[j][i] == "*") {
                         maze[j][i] = ".";
@@ -2560,11 +2556,36 @@ $(document).ready(function() {
             document.execCommand("copy");
             tempInput.remove();
         });
-        $("#copyToClipboardButton").hide(); // hidden until canvas is updated!
+        $("#copyToClipboardButton").hide();
+    }
 
+    function updateLinkAndStuff() {
+        let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
+        let title = $("#title").val();
+        title = title ? encodeURIComponent(title) : "Unknown";
+
+        let sharableLink = `https://ossavivi.github.io/c197.html?t=${title}&p=${playerHexCode}`;
+        for (let i = 0; i < levels.length; i++) {
+            let m = levels[i].maze;
+            let t = encodeURIComponent(levels[i].text.replace(/_/g, "UNDER---SCORE"));
+            let rows = m.length;
+            let cols = m[0].length;
+            console.log(m);
+            let colorIndex = levels[i].colors_index;
+            let encodedMazeString = "";
+            for (let r = 0; r < m.length; r++) {
+                for (let c = 0; c < m[0].length; c++) {
+                    encodedMazeString += m[r][c];
+                }
+            }
+            sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${t}_${colorIndex}`;
+        }
+        $("#sharableLink").text(sharableLink);
+        $("#copyToClipboardButton").show();
     }
 
     function hideLevelCreationUI() {
+        gameIsInBuildMode = false;
         $("#levelCreationUI").remove();
         $(".controls-row").show();
         $("#gameCanvas").off("click");
@@ -2575,8 +2596,8 @@ $(document).ready(function() {
     function nextGame() {
         currentLevel = (currentLevel + 1) % levels.length;
         maze = levels[currentLevel].maze;
-        if (currentLevel == 0) {
-            showLevelCreationUI();
+        if (gameIsInBuildMode) {
+            //showLevelCreationUI();
             
         } else {
             $("#toggleLevelBuilder").remove();
@@ -3018,37 +3039,37 @@ $(document).ready(function() {
     initializeGame();
     draw();
     setInterval(function() {
-        if (!gameOver) {
+        if (!gameOver && !gameIsInBuildMode) {
             updateBullets();
             updateTurretBullets();
             updateLasers();
             updateBombs();
-            draw();
         }
+        draw();
     }, 150);
     setInterval(function() {
-        if (!gameOver) {
+        if (!gameOver && !gameIsInBuildMode) {
             activateTurret();
             draw();
         }
     }, 3000);
     setInterval(function() {
-        if (!gameOver) {
+        if (!gameOver && !gameIsInBuildMode) {
             activateTurret();
             draw();
         }
     }, 13550);
     setInterval(function() {
-        if (!gameOver) {
+        if (!gameOver && !gameIsInBuildMode) {
             updateEnemies(1);
         }
     }, 150);
     setInterval(function() {
-        if (!gameOver) {
+        if (!gameOver && !gameIsInBuildMode) {
             updateEnemies(0);
             updateEnemies(2);
-            draw();
             checkGameOver();
+            //draw();
         }
     }, 500);
 
@@ -3073,6 +3094,25 @@ $(document).ready(function() {
     $('#sliderZ').on('input', updateColor);
 
     drawMaze();
+
+    function populateLevelsList() {
+        const listOfLevels = $('#levelsList');
+        listOfLevels.empty();
+
+        levels.forEach((level, index) => {
+            const item = $('<li>');
+            item.text(`Level ${index + 1}`); // Display "Level X", with X starting from 1 instead of 0
+            item.on('click', function() {
+                currentLevel = index; // Set currentLevel to the clicked item's index
+                initializeGame(); // Call initializeGame to apply the level change
+                //populateTileLegend(); // Optionally re-populate tile legend if needed
+                //updateLinkAndStuff(); // Optionally update link and other UI elements if needed
+                draw();
+            });
+            listOfLevels.append(item);
+        });
+    }
+
 
     function populateTileLegend() {
         const tileTypes = [
@@ -3153,6 +3193,7 @@ $(document).ready(function() {
             table.append(row);
         });
     }
+    populateLevelsList();
     populateTileLegend();
 
     function updateStylesBasedOnPowerUps() {
@@ -3182,17 +3223,34 @@ $(document).ready(function() {
     updateStylesBasedOnPowerUps();
 
     function updateHeadingWithQueryParam() {
-        // Create a URLSearchParams object from the current URL
         const queryParams = new URLSearchParams(window.location.search);
         
-        // Check if the "test" parameter exists
-        if (queryParams.has('test')) {
-            // Get the value of the "test" parameter
-            const testValue = queryParams.get('test');
-            
-            // Find the first H1 tag in the document and update its text content
-            $("h1").text(testValue);
+        if (queryParams.has('t')) {
+            const titleQueryParameter = queryParams.get('t');
+            $("h1").text(titleQueryParameter);
+            $("#title").val(titleQueryParameter);
+        } else {
+            $("h1").text("Battle Maze Ultra 9K");
         }
+        if (queryParams.has('p')) {
+            const playerColorQueryParameter = queryParams.get('p');
+            const rHex = playerColorQueryParameter.length >= 1 ? playerColorQueryParameter.charAt(0) : '0';
+            const gHex = playerColorQueryParameter.length >= 2 ? playerColorQueryParameter.charAt(1) : '0';
+            const bHex = playerColorQueryParameter.length === 3 ? playerColorQueryParameter.charAt(2) : '0';
+            const rDec = parseInt(rHex, 16);
+            const gDec = parseInt(gHex, 16);
+            const bDec = parseInt(bHex, 16);
+            $('#sliderX').val(rDec);
+            $('#sliderY').val(gDec);
+            $('#sliderZ').val(bDec);
+            updateColor();
+        }
+        if (queryParams.has('0')) {
+            for (let i = 0; i < 100; i++) {
+
+            }
+        }
+        
     }
 
     updateHeadingWithQueryParam();
