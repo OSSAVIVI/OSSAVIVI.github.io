@@ -17,6 +17,10 @@
         text-align: center;
     }
 
+    li {
+        list-style-type: none;
+        cursor: pointer;
+    }
 
     @keyframes bgColorChange {
         0% {
@@ -164,14 +168,14 @@
 <span id="bombsCount"></span>
 <span id="scoreCount">⭐ 0</span>
 <br>
-<span id="levelText">Level description below maze.</span>
+<span id="levelText">Build your own levels! Or click PLAY and proceed to the game.</span>
 <div id="zoomControls">
     🔎
     <span id="decreaseZoom">➖</span>
     <span id="levelZoomValue">20</span>
     <span id="increaseZoom">➕</span>
 </div>
-<span id="toggleLevelBuilder">▶️</span>
+<span id="toggleLevelBuilder">PLAY</span>
 <div id="gameContainer">
     <canvas id="gameCanvas" width="800" height="800"></canvas>
 </div>
@@ -248,20 +252,20 @@ $(document).ready(function() {
             broken: "#BBB" // Dark Grey
         },
         { // 1 Pink (barbie)
-            wall: "#F09", // Deep Pink
-            ground: "#FCC", // Light Pink
-            walked: "#F6C", // Soft Pink
-            creeped: "#F9C", // Peach Pink
-            burned: "#C89", // Burnt Pink
-            broken: "#B78" // Dusty Rose
+            wall: "#F09",
+            ground: "#FEF",
+            walked: "#FDF",
+            creeped: "#FCF",
+            burned: "#EAC",
+            broken: "#E9A"
         },
         { // 2 Red (danger)
-            wall: "#900", // Dark Red
-            ground: "#F00", // Bright Red
-            walked: "#D00", // Medium Red
-            creeped: "#C00", // Deep Red
-            burned: "#A00", // Burnt Red
-            broken: "#800" // Burgundy
+            wall: "#900",
+            ground: "#F45",
+            walked: "#F35",
+            creeped: "#F25",
+            burned: "#A46",
+            broken: "#96A"
         },
         { // 3 Orange (earthy)
             wall: "#940", // Dark Orange
@@ -269,7 +273,7 @@ $(document).ready(function() {
             walked: "#D80", // Medium Orange
             creeped: "#C70", // Deep Orange
             burned: "#A50", // Burnt Orange
-            broken: "#830" // Rust Orange
+            broken: "#930" // Rust Orange
         },
         { // 4 Yellow (desert)
             wall: "#990", // Dark Yellow
@@ -307,7 +311,7 @@ $(document).ready(function() {
 
 
     let gameIsInBuildMode = false;
-    const levels = [
+    let levels = [
         {
             maze: [
                 ["W","W","W","W","x","W"],
@@ -316,7 +320,7 @@ $(document).ready(function() {
                 ["W",".","P",".","G","W"],
                 ["W","W","-","W","W","W"]
             ],
-            text: "Build your own levels, or click ▶️ and proceed to the game.",
+            text: "You awake to somehow find the key to your cell... What does it mean?",
             colors_index: 0
         },
         {
@@ -703,7 +707,10 @@ $(document).ready(function() {
 
     function initializeGame() {
         maze = levels[currentLevel].maze;
+        console.log(`LEVEL COLR IDX: ${levels[currentLevel].colors_index}...`);
         levels[currentLevel].colors = levelColors[levels[currentLevel].colors_index];
+        $("body").css("background-color", levels[currentLevel].colors.wall);
+        console.log(levels[currentLevel].colors);
         resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
         enemies = [[], [], []];
         turrets = [[], []];
@@ -850,6 +857,7 @@ $(document).ready(function() {
     function drawMaze() {
         maze.forEach((row, rowIndex) => {
             row.forEach((cell, colIndex) => {
+                //console.log(levels[currentLevel].colors);
                 switch (cell) {
                     case "W": // Wall
                         drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.wall);
@@ -1032,7 +1040,7 @@ $(document).ready(function() {
         lives.forEach((life, index) => {
             if (player.x === life.x && player.y === life.y && !life.collected) {
                 livesCollected++;
-                maze[life.y][life.x] = ",";
+                //maze[life.y][life.x] = ",";
                 life.collected = true;
                 updateLivesCountDisplay();
                 updateScoreCountDisplay(2);
@@ -1140,7 +1148,7 @@ $(document).ready(function() {
         } else if (powerUps[2] == 2) {
             bombsEmoji = "🧨";
         } else if (powerUps[2] == 3) {
-            bombsEmoji = "💥";
+            bombsEmoji = "🍒";
             updateStylesBasedOnPowerUps();
         }
         updateBombsCountDisplay();
@@ -2322,7 +2330,7 @@ $(document).ready(function() {
     function showLevelCreationUI() {
         gameIsInBuildMode = true;
         $(".controls-row").hide();
-        $("#toggleLevelBuilder").text("▶️");
+        $("#toggleLevelBuilder").text("PLAY");
         const levelCreationHtml = `
             <div id="levelCreationUI" style="padding: 10px; display: block;">
                 <input type="text" id="title" placeholder="Your Game Title :)">
@@ -2560,16 +2568,18 @@ $(document).ready(function() {
     }
 
     function updateLinkAndStuff() {
-        let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
         let title = $("#title").val();
         title = title ? encodeURIComponent(title) : "Unknown";
+        let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
+        let zoomValue = $("#levelZoomValue").html();
 
-        let sharableLink = `https://ossavivi.github.io/c197.html?t=${title}&p=${playerHexCode}`;
+        let sharableLink = `https://ossavivi.github.io/c197.html?autoplay=1&t=${title}&p=${playerHexCode}&z=${zoomValue}`;
         for (let i = 0; i < levels.length; i++) {
             let m = levels[i].maze;
             let t = encodeURIComponent(levels[i].text.replace(/_/g, "UNDER---SCORE"));
             let rows = m.length;
             let cols = m[0].length;
+            
             console.log(m);
             let colorIndex = levels[i].colors_index;
             let encodedMazeString = "";
@@ -2578,7 +2588,7 @@ $(document).ready(function() {
                     encodedMazeString += m[r][c];
                 }
             }
-            sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${t}_${colorIndex}`;
+            sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${t}_${colorIndex}_magichan`;
         }
         $("#sharableLink").text(sharableLink);
         $("#copyToClipboardButton").show();
@@ -3031,7 +3041,9 @@ $(document).ready(function() {
         drawTurretBullets();
         drawBombs();
         $("#levelTitle").text("Level " + currentLevel);
-        $("#levelText").text(levels[currentLevel].text);
+        if (!gameIsInBuildMode) {
+            $("#levelText").text(levels[currentLevel].text);
+        }
         logMaze();
     }
     
@@ -3088,6 +3100,7 @@ $(document).ready(function() {
         $('#valueY').text(y);
         $('#valueZ').text(z);
         populateTileLegend();
+        updateLinkAndStuff();
     }
     $('#sliderX').on('input', updateColor);
     $('#sliderY').on('input', updateColor);
@@ -3100,18 +3113,72 @@ $(document).ready(function() {
         listOfLevels.empty();
 
         levels.forEach((level, index) => {
-            const item = $('<li>');
-            item.text(`Level ${index + 1}`); // Display "Level X", with X starting from 1 instead of 0
-            item.on('click', function() {
-                currentLevel = index; // Set currentLevel to the clicked item's index
-                initializeGame(); // Call initializeGame to apply the level change
-                //populateTileLegend(); // Optionally re-populate tile legend if needed
-                //updateLinkAndStuff(); // Optionally update link and other UI elements if needed
+            const item = $('<li>').text(`Level ${index + 1}`);
+            
+            const deleteButton = $('<button>').text('Delete').on('click', function(e) {
+                e.stopPropagation(); // Prevent triggering the li click event
+                if (window.confirm(`Are you sure you want to delete Level ${index + 1}?`)) {
+                    deleteLevel(index);
+                }
+            });
+
+            const addButton = $('<button>').text('Add Before').on('click', function(e) {
+                e.stopPropagation(); // Prevent triggering the li click event
+                addLevelBefore(index);
+            });
+
+            item.append(deleteButton, addButton).on('click', function() {
+                currentLevel = index;
+                initializeGame();
                 draw();
             });
+
             listOfLevels.append(item);
         });
+        let addButtonToEnd = $('<button>').text('Add at End').on('click', function(e) {
+            e.stopPropagation(); // Prevent triggering the li click event
+            addLevelAtEnd();
+        });
+        listOfLevels.append(addButtonToEnd);
     }
+
+    function deleteLevel(index) {
+        levels.splice(index, 1); // Remove the level at the specified index
+        populateLevelsList(); // Refresh the levels list
+    }
+
+    function addLevelBefore(index) {
+        const newLevel = {
+            maze: [
+                ["W","W","W","W","x","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".","P",".","G","W"],
+                ["W","W","-","W","W","W"]
+            ],
+            text: "New Level",
+            colors_index: 0
+        };
+        levels.splice(index, 0, newLevel); // Insert the new level before the specified index
+        populateLevelsList(); // Refresh the levels list
+    }
+
+    function addLevelAtEnd() {
+        const newLevel = {
+            maze: [
+                ["W","W","W","W","x","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".","P",".","G","W"],
+                ["W","W","-","W","W","W"]
+            ],
+            text: "New Level",
+            colors_index: 0
+        };
+        levels.push(newLevel); // Add a new level at the end of the levels array
+        populateLevelsList(); // Refresh the levels list
+    }
+
 
 
     function populateTileLegend() {
@@ -3222,6 +3289,16 @@ $(document).ready(function() {
     // Call this function every time a powerUp is collected or used
     updateStylesBasedOnPowerUps();
 
+    function stringTo2DArray(str, columns) {
+        let array2D = [];
+        for (let i = 0; i < str.length; i += columns) {
+            let row = str.substring(i, i + columns).split('');
+            array2D.push(row);
+        }
+        return array2D;
+    }
+
+    let isCustomLevelSet = false;
     function updateHeadingWithQueryParam() {
         const queryParams = new URLSearchParams(window.location.search);
         
@@ -3229,9 +3306,11 @@ $(document).ready(function() {
             const titleQueryParameter = queryParams.get('t');
             $("h1").text(titleQueryParameter);
             $("#title").val(titleQueryParameter);
+            isCustomLevelSet = true;
         } else {
             $("h1").text("Battle Maze Ultra 9K");
         }
+
         if (queryParams.has('p')) {
             const playerColorQueryParameter = queryParams.get('p');
             const rHex = playerColorQueryParameter.length >= 1 ? playerColorQueryParameter.charAt(0) : '0';
@@ -3244,10 +3323,61 @@ $(document).ready(function() {
             $('#sliderY').val(gDec);
             $('#sliderZ').val(bDec);
             updateColor();
+            isCustomLevelSet = true;
         }
-        if (queryParams.has('0')) {
-            for (let i = 0; i < 100; i++) {
 
+        if (queryParams.has('0')) {
+            levels = [];
+            for (let i = 0; i < 100; i++) {
+                console.log(`meow ${i}`);
+                if (queryParams.has(i.toString())) {
+                    let levelQueryParameterArray = queryParams.get(i.toString()).split("_");
+                    let checkValue = levelQueryParameterArray[5]; // meow
+                    if (checkValue == "magichan") { // meeooww
+                        console.log("pow");
+                        let rows = parseInt(levelQueryParameterArray[0], 10);
+                        let cols = parseInt(levelQueryParameterArray[1], 10);
+                        let encodedTiles = levelQueryParameterArray[2];
+                        let levelTxt = decodeURIComponent(levelQueryParameterArray[3]).replace(/UNDER---SCORE/g, "_");
+                        let colorIdx = parseInt(levelQueryParameterArray[4], 10);
+                        let decodedMaze = stringTo2DArray(encodedTiles, cols);
+                        levels.push({
+                            maze: decodedMaze,
+                            text: levelTxt,
+                            colors_index: colorIdx,
+                            colors: levelColors[colorIdx]
+                        });
+                        console.log(levels);
+                    } else {
+                        console.log("Code ⚡️💙⚡️: nonchristoric data identified.");
+                        break;
+                    }
+                } else {
+                    console.log("Code ⚡️💙⚡️: merging...");
+                    break;
+                }
+            }
+            maze = levels[currentLevel].maze;
+            populateLevelsList();
+            draw();
+            isCustomLevelSet = true;
+        }
+
+        if (queryParams.has('z')) {
+            let newCellSize = queryParams.get('z');
+            newCellSize = parseInt(newCellSize, 10);
+            if (newCellSize >= 1 && newCellSize <= 100) {
+                setCellSize(newCellSize);
+                $("#levelZoomValue").html(cellSize);
+                isCustomLevelSet = true;
+            }
+        }
+
+
+        if (queryParams.has('autoplay')) {
+            let autoplayValue = queryParams.get('autoplay');
+            if (autoplayValue.charAt(0) == '1' || autoplayValue.charAt(0) == 't') {
+                hideLevelCreationUI();
             }
         }
         
