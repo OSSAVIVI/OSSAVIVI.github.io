@@ -1,0 +1,3392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Battle Maze Ultra 9K</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9441280430139587"
+     crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.core.min.js"></script>
+<meta name="google-adsense-account" content="ca-pub-9441280430139587">
+<style>
+    body {
+        margin: 10px;
+        padding: 10px;
+        background-color: black;
+        color: white;
+        text-align: center;
+    }
+
+    li {
+        list-style-type: none;
+        cursor: pointer;
+    }
+
+    @keyframes bgColorChange {
+        0% {
+            background-color: red;
+        }
+
+        20% {
+            background-color: orange;
+        }
+
+        40% {
+            background-color: yellow;
+        }
+
+        60% {
+            background-color: green;
+        }
+
+        80% {
+            background-color: blue;
+        }
+
+        100% {
+            background-color: purple;
+        }
+    }
+
+    /* h1, h2, .controls, #livesCount, #coinsCount, #superPowerCount, #ammoCount, #bombsCount, #scoreCount, #levelTitle {
+        animation: txtColorChange 10s infinite alternate;
+    } */
+
+    @keyframes txtColorChange {
+        0% {
+            color: red;
+        }
+
+        20% {
+            color: orange;
+        }
+
+        40% {
+            color: yellow;
+        }
+
+        60% {
+            color: green;
+        }
+
+        80% {
+            color: blue;
+        }
+
+        100% {
+            color: purple;
+        }
+    }
+
+    .controls {
+      text-align: center;
+    }
+    
+    .control-button, #nextLevel {
+      opacity: 0.75;
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    #Up, #Down, #Super {
+      width: 50px;
+      height: 50px;
+    }
+    
+    #Left, #Right {
+      width: 50px;
+      height: 50px;
+      margin: 0 10px;
+    }
+
+    #gameContainer {
+        max-height: calc(100vh - 120px); /* Adjust based on control area height */
+        overflow: auto;
+        padding-bottom: 5px; /* Space for controls */
+        
+    }
+
+    #controlsContainer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center; /* Center the controls container */
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2); /* Optional: for better visibility */
+    }
+
+    .controls-row {
+        display: flex;
+        justify-content: space-around; /* Space between movement and action controls */
+    }
+
+    .movement-controls, .action-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center align the buttons vertically */
+    }
+
+    .horizontal-controls {
+        display: flex;
+        justify-content: center; /* Center align left/right buttons horizontally */
+    }
+
+    .control-button {
+        margin: 5px; /* Adjust spacing around buttons */
+        touch-action: manipulation; /* Improve responsiveness */
+    }
+
+    #decreaseWidth, #increaseWidth, #decreaseHeight, #increaseHeight, #decreaseZoom, #increaseZoom, #toggleLevelBuilder {
+        cursor: pointer;
+    }
+
+    #sharableLink {
+        display: inline-block; /* Make span behave like an inline-block element */
+        width: 200px; /* Fixed width */
+        white-space: nowrap; /* Prevent text from wrapping to the next line */
+        overflow: hidden; /* Hide overflow content */
+        text-overflow: ellipsis; /* Optional: add ellipsis to indicate hidden text */
+    }
+
+</style>
+</head>
+<body>
+
+<h1>Battle Maze Ultra 9K</h1>
+<span id="levelTitle">Title Above Maze</span>
+<span id="livesCount">❤️ 0</span>
+<span id="coinsCount">🪙 0</span>
+<span id="superPowerCount"></span>
+<span id="ammoCount"></span>
+<span id="bombsCount"></span>
+<span id="scoreCount">⭐ 0</span>
+<br>
+<span id="levelText">Build your own levels! Or click PLAY and proceed to the game.</span>
+<div id="zoomControls">
+    🔎
+    <span id="decreaseZoom">➖</span>
+    <span id="levelZoomValue">20</span>
+    <span id="increaseZoom">➕</span>
+</div>
+<span id="toggleLevelBuilder">PLAY</span>
+<div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="800"></canvas>
+</div>
+<div id="controlsContainer" >
+    <div class="controls-row" style="display: none;">
+        <!-- Movement Controls -->
+        <div class="movement-controls">
+            <div class="control-button" id="Up">⬆️</div>
+            <div class="horizontal-controls">
+                <div class="control-button" id="Left">⬅️</div>
+                <div class="control-button" id="Right">➡️</div>
+            </div>
+            <div class="control-button" id="Down">⬇️</div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="action-controls">
+            <div class="control-button" id="super"></div>
+            <div class="control-button" id="shoot"></div>
+            <div class="control-button" id="bomb"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+$(document).ready(function() {
+    const canvas = $("#gameCanvas")[0];
+    const ctx = canvas.getContext("2d");
+    let cellSize = 20;
+    let currentLevel = 0;
+    let gameOver = false;
+    let livesCollected = 1;
+    let coinsCollected = 0;
+    let superPowersCollected = 0;
+    let ammoCollected = 0;
+    let bombsCollected = 0;
+    let scoreCollected = 0;
+    let key1Collected = false;
+    let key2Collected = false;
+    let key3Collected = false;
+    let powerUps = [0, 0, 0];
+
+    function setCellSize(amount) {
+        cellSize = amount;
+        resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
+        draw();
+    }
+
+    $("#decreaseZoom").click(function() {
+        if (cellSize > 1) {
+            setCellSize(--cellSize);
+            $("#levelZoomValue").html(cellSize);
+        }
+        
+    });
+
+    $("#increaseZoom").click(function() {
+        if (cellSize < 100) {
+            setCellSize(++cellSize);
+            $("#levelZoomValue").html(cellSize);
+        }
+        
+    });
+
+    const levelColors = [
+        { // 0 White (classic)
+            wall: "#000", // Black
+            ground: "#FFF", // White
+            walked: "#EEE", // Light Grey
+            creeped: "#DDD", // Slightly Darker Grey
+            burned: "#CCC", // Medium Grey
+            broken: "#BBB" // Dark Grey
+        },
+        { // 1 Pink (barbie)
+            wall: "#F09",
+            ground: "#FEF",
+            walked: "#FDF",
+            creeped: "#FCF",
+            burned: "#EAC",
+            broken: "#E9A"
+        },
+        { // 2 Red (danger)
+            wall: "#900",
+            ground: "#F45",
+            walked: "#F35",
+            creeped: "#F25",
+            burned: "#A46",
+            broken: "#96A"
+        },
+        { // 3 Orange (earthy)
+            wall: "#940", // Dark Orange
+            ground: "#F90", // Bright Orange
+            walked: "#D80", // Medium Orange
+            creeped: "#C70", // Deep Orange
+            burned: "#A50", // Burnt Orange
+            broken: "#930" // Rust Orange
+        },
+        { // 4 Yellow (desert)
+            wall: "#990", // Dark Yellow
+            ground: "#FF0", // Bright Yellow
+            walked: "#DD0", // Mustard Yellow
+            creeped: "#CC0", // Gold
+            burned: "#AA0", // Burnt Yellow
+            broken: "#880" // Olive
+        },
+        { // 5 Green (grass)
+            wall: "#040", // Dark Green
+            ground: "#0F0", // Bright Green
+            walked: "#0D0", // Medium Green
+            creeped: "#0B0", // Deep Green
+            burned: "#630", // Brownish (Burned Grass)
+            broken: "#520" // Darker Brown (Broken Dirt)
+        },
+        { // 6 Blue (beautiful)
+            wall: "#009", // Dark Blue
+            ground: "#0CF", // Bright Blue
+            walked: "#06C", // Medium Blue
+            creeped: "#05B", // Deep Blue
+            burned: "#048", // Burnt Blue
+            broken: "#036" // Navy Blue
+        },
+        { // 7 Purple (magic)
+            wall: "#609", // Dark Purple
+            ground: "#C3F", // Light Purple
+            walked: "#A2F", // Medium Purple
+            creeped: "#90E", // Deep Purple
+            burned: "#70C", // Burnt Purple
+            broken: "#509" // Dark Purple
+        },
+    ];
+
+
+    let gameIsInBuildMode = false;
+    let levels = [
+        {
+            maze: [
+                ["W","W","W","W","x","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".","P",".","G","W"],
+                ["W","W","-","W","W","W"]
+            ],
+            text: "You awake to somehow find the key to your cell... What does it mean?",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","i","W","W","W","x","W","W","W","W","W","W"],
+                ["W","R","R",".","R","R","W","Y",".","H","W","C","C","C","C","C","C","!","W","m","W","W","G",".",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".",".","O",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","E","o",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","W","j","W","W","W","W","W","m","W","W","W","W",".","W"],
+                ["W","W","w","W","w","W","W",".",".","K","W","C","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
+                ["W",".","w",".","w",".","W","M","M","W","W","C","C","C",".",".",".",".",".",".",".","L","L","L","L","W"],
+                ["W",".","w",".",".",".","W",".",".",".",".","C","C","C","C",".",".",".",".","V",".","J","J","J","w","W"],
+                ["W",".","w",".",".",".",".",".",".",".",".","C","C","C","C","C",".",".",".",".",".","J","J","J","w","W"],
+                ["W","R","w",".",".",".","W","L","Z","L",".","C","C","C","C","C",".",".",".",".",".",".",".","J","w","W"],
+                ["W","R","R",".",".",".","W","L","Z","L",".","C","C","C","C",".",".",".",".",".",".","J","J","J","w","W"],
+                ["W","R","R","R",".",".","W","S","Z","B",".","C","C","C",".",".",".",".",".",".",".","S","S","S","S","w"],
+                ["W","R","R","R","R",".","W","S","Z","B",".",".",".",".",".","N",".",".","U","W","W","W","W","W","W","W"],
+                ["W","R","R","R","R","R","W","S","Z","B",".",".",".",".","N","k","N","U","t","W","V","u",".",".","E","W"],
+                ["W","R","R","R","R","R","W","S","Z","B",".","s","z","b","N",".","N","U",".","W","n",".",".",".",".","W"],
+                ["W","R","R","R","R","R","W","S","Z","B",".","s","z","b","N",".","N","U",".","W",".",".",".",".",".","W"],
+                ["W","R","J","R","J","R","W","S","P","B",".","s","z","b","N","h","N","U","T","W","F",".","e",".","L","W"],
+                ["W","W","W","W","W","W","W","W","-","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "This is a testing level :)",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W"],
+                ["W",".",".",".","W","G",".",".","W"],
+                ["W",".",".",".","W","W",".",".","W"],
+                ["W",".","W",".",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".","W"],
+                ["W","P","W",".",".",".",".",".","x"],
+                ["W","-","W","W","W","W","W","W","W"]
+            ],
+            text: "You awake in a room...",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","!","W","W","W","W"],
+                ["W",".",".",".",".",".","W",".",".",".",".","W"],
+                ["-","P",".",".",".","V","W",".",".",".",".","W"],
+                ["W",".",".",".",".",".","W","W","W","W",".","W"],
+                ["W","M","M","W","W","W","W",".",".",".",".","W"],
+                ["W",".",".",".","W","V",".",".",".",".",".","W"],
+                ["W",".",".",".","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W",".",".",".",".",".",".","W"],
+                ["W","G",".",".","W",".",".",".",".",".",".","W"],
+                ["W","W","W","W","W","W","W","W","W","x","W","W"]
+            ],
+            text: "The gateKey unlocked a room with... vortexes?",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","-","W","W","W","W","W","W"],
+                ["W",".","w","w","W","P",".",".",".",".","S","W"],
+                ["W",".","w","G","W","W","W","W","W",".","W","W"],
+                ["W",".","W","W","W",".",".",".",".",".",".","W"],
+                ["W",".","W","V",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".",".","e",".",".",".",".",".","x"],
+                ["W",".","W",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W","e",".",".",".",".",".","W","W","W"],
+                ["W","V","W",".",".",".",".",".",".",".","S","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "Enemies roam these halls...",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W","K","S",".","W","G","w","w","M",".",".",".","W"],
+                ["W","S","S",".","W","W","w","w","M",".",".",".","!"],
+                ["W","S","L",".","W","W","w","w","M",".",".",".","W"],
+                ["W","M","M","M","W","W","W","W","W","W",".","W","W"],
+                ["W",".",".",".","W","W","e","E","e",".",".",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W","H",".",".",".",".",".","W"],
+                ["W",".",".",".","W","W","W","W","W","W",".",".","W"],
+                ["W",".",".",".","W","W","S",".",".",".","W",".","W"],
+                ["W",".",".",".","W","W",".",".",".",".","W",".","W"],
+                ["W",".","W",".","W","W",".",".",".",".","W",".","W"],
+                ["W",".","W",".",".",".",".",".","W",".","W",".","W"],
+                ["W",".","W",".",".",".",".",".","W",".","W",".","W"],
+                ["W","P","W","S",".",".",".",".","W","E",".","S","x"],
+                ["W","-","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "There may be treasure here...",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+                ["W",".",".",".","W","S","S","M",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","S","S","M",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".",".","E","W"],
+                ["W",".",".",".","W","W","W","W","W","W",".","W",".",".","W","W","W","W",".","W",".","W",".",".","W","W","W","W","W","W","W","W","M","M","W","W"],
+                ["-","P",".",".","W",".",".",".",".",".",".","W",".",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","S","S","S","W"],
+                ["W","W","W",".","W",".","W","W","W",".",".",".","W",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","S","S","S","W"],
+                ["W",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".","W","W","W","W","W"],
+                ["W",".",".",".","W",".",".",".",".","W",".",".","M",".",".","W",".",".",".","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".","W","W",".",".",".",".",".","W",".",".","M",".",".","W",".",".","W","W",".","W",".",".","W",".",".",".",".",".",".",".",".",".",".","W"],
+                ["W",".",".",".",".","W","W","W",".","W",".",".","W","W","W","W",".","W","W","W",".","W",".",".","W",".",".",".",".",".",".","W","W","W","H","W"],
+                ["W","W","W","W","W",".",".",".",".","W",".","W","W",".",".",".",".","W","W",".",".","W",".",".","M",".",".","W",".",".","W","W",".",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".","W","S","e",".",".",".","W",".",".","W","W",".",".","M",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".","W","S",".",".",".","W","W",".","W","W",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W","W","W","W","W","W","W","W",".","W","S","e",".","W","W",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".",".",".",".","W","S",".","W","W",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W",".",".",".",".",".",".",".","W","W","S","W","W",".",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W",".",".",".",".","W"],
+                ["W",".","W",".",".","W","W","W","W","W","W",".","W","W",".",".",".",".",".","W",".",".",".",".","W",".",".","W",".",".","W","W",".",".",".","W"],
+                ["W",".","W",".",".","W","W","W","W","W",".",".",".","W",".",".",".","W","W","W",".",".",".",".","W",".",".","W",".",".",".","W","W",".",".","W"],
+                ["W",".","W",".",".","W","W",".",".",".",".",".",".",".","W",".",".","W",".",".",".",".",".",".","M",".",".","W","W",".",".",".","W",".",".","W"],
+                ["W",".",".",".",".","W","W",".","e",".",".",".",".",".",".","W","H","W",".",".",".",".",".","M","M",".",".",".","W","W",".",".","W",".",".","W"],
+                ["W","W","W","W","!","W","W",".",".",".","W","W",".",".",".","W",".","W",".",".",".",".","W","M",".",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W","W","W","W","W","W",".",".",".",".","W",".",".",".","W","W",".","W",".",".",".",".","W","W",".",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W",".",".",".","W","W",".",".","W",".",".",".","W","W","W","W",".",".",".",".","W",".",".","W",".",".","W"],
+                ["W",".",".",".",".",".",".",".","W",".",".",".","W","W",".",".",".","W",".",".","W","W","S","S","W","W",".",".","W","W",".",".","W",".",".","W"],
+                ["x",".","E",".",".",".",".","W",".",".",".","W","W",".",".",".","W","W",".",".","W",".","E",".",".","W","W","W","W",".",".",".","W",".",".","W"],
+                ["W",".",".",".",".",".","W",".",".",".","W","W",".",".",".","W","W",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".","W",".",".","W"],
+                ["W","W","W","W","W","W",".",".",".","W","W",".",".",".","W","W",".",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".","W",".",".","W"],
+                ["W",".",".","E",".",".",".",".",".","W",".",".",".","W","W",".",".",".",".","W","W",".","E",".",".",".",".",".",".",".",".","W","W",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".","W","W","S",".",".","W"],
+                ["W","E",".",".",".",".",".",".",".",".",".","W","W",".",".",".",".","W","W","K",".",".",".",".",".",".",".",".",".","W","W","L","S",".",".","W"],
+                ["W",".",".",".","E",".",".",".",".",".","W","W",".",".",".",".","W","W",".",".",".",".",".",".",".",".",".",".",".","W","K","L","S",".",".","W"],
+                ["W",".",".",".",".",".",".",".",".","W","W",".",".",".",".",".","W",".",".",".",".",".",".",".",".",".",".",".",".","W","L","L","S","e","e","W"],
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
+            ],
+            text: "Things are getting interesting...",
+            colors_index: 0
+        },
+    ];
+
+    function drawShape(shape, x, y, color, bgColor="", orientation="", decalShape="", decalColor="", c="") {
+        if (c === "") {
+            c = ctx;
+        }
+        if (bgColor === "") {
+            c.fillStyle = levels[currentLevel].colors.ground;
+        } else {
+            c.fillStyle = bgColor;
+        }
+        if (orientation === "") {
+            orientation = currentPlayerOrientation
+        }
+        
+        c.fillRect(x * cellSize, y * cellSize, cellSize, cellSize); // Fill background color for negative space
+        let centerX;
+        let centerY;
+        switch(shape) {
+            case 'square':
+                c.fillStyle = color;
+                c.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                break;
+            case 'circle':
+                c.beginPath();
+                c.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 2, 0, Math.PI * 2);
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'dot':
+                c.beginPath();
+                c.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'triangle':
+                c.beginPath();
+                if (orientation === 'Up') {
+                    c.moveTo(x * cellSize + cellSize / 2, y * cellSize);
+                    c.lineTo(x * cellSize, y * cellSize + cellSize);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize);
+                } else if (orientation === 'Down') {
+                    c.moveTo(x * cellSize, y * cellSize);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize);
+                    c.lineTo(x * cellSize + cellSize / 2, y * cellSize + cellSize);
+                } else if (orientation === 'Left') {
+                    c.moveTo(x * cellSize + cellSize, y * cellSize);
+                    c.lineTo(x * cellSize, y * cellSize + cellSize / 2);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize);
+                } else if (orientation === 'Right') {
+                    c.moveTo(x * cellSize, y * cellSize);
+                    c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize / 2);
+                    c.lineTo(x * cellSize, y * cellSize + cellSize);
+                }
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'smallTriangle':
+                c.beginPath();
+                let smallTriangleSize = cellSize / 4; // Adjust for desired size
+                centerX = x * cellSize + cellSize / 2;
+                centerY = y * cellSize + cellSize / 2;
+                
+                if (orientation === 'Up') {
+                    c.moveTo(centerX, centerY - smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY + smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY + smallTriangleSize);
+                } else if (orientation === 'Down') {
+                    c.moveTo(centerX, centerY + smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY - smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY - smallTriangleSize);
+                } else if (orientation === 'Left') {
+                    c.moveTo(centerX - smallTriangleSize, centerY);
+                    c.lineTo(centerX + smallTriangleSize, centerY - smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY + smallTriangleSize);
+                } else if (orientation === 'Right') {
+                    c.moveTo(centerX + smallTriangleSize, centerY);
+                    c.lineTo(centerX - smallTriangleSize, centerY - smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY + smallTriangleSize);
+                }
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'diamond':
+                c.beginPath();
+                c.moveTo(x * cellSize + cellSize / 2, y * cellSize); // Top point
+                c.lineTo(x * cellSize + cellSize, y * cellSize + cellSize / 2); // Right point
+                c.lineTo(x * cellSize + cellSize / 2, y * cellSize + cellSize); // Bottom point
+                c.lineTo(x * cellSize, y * cellSize + cellSize / 2); // Left point
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'smallDiamond':
+                c.beginPath();
+                centerX = x * cellSize + cellSize / 2;
+                centerY = y * cellSize + cellSize / 2;
+                let smallDiamondSize = cellSize / 4; // Adjust for desired size
+                c.moveTo(centerX, centerY - smallDiamondSize);
+                c.lineTo(centerX + smallDiamondSize, centerY);
+                c.lineTo(centerX, centerY + smallDiamondSize);
+                c.lineTo(centerX - smallDiamondSize, centerY);
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+            case 'chest':
+                // Bottom half rectangle
+                c.fillStyle = color; // Color for the chest
+                const bottomRectY = y * cellSize + cellSize / 2; // Start Y for bottom rectangle
+                c.fillRect(x * cellSize, bottomRectY, cellSize, cellSize / 2);
+
+                // Top with rounded corners
+                const topArcCenterY = y * cellSize + cellSize / 4; // Adjust for desired look
+                const topArcRadius = cellSize / 4; // Adjust based on your size preference
+
+                c.beginPath();
+                // Start at left corner of the top arc
+                c.moveTo(x * cellSize, bottomRectY);
+                // Top left rounded corner
+                c.arc(x * cellSize + topArcRadius, topArcCenterY, topArcRadius, Math.PI, 1.5 * Math.PI, false);
+                // Top right rounded corner
+                c.arc(x * cellSize + cellSize - topArcRadius, topArcCenterY, topArcRadius, 1.5 * Math.PI, 0, false);
+                // Close the path by drawing the right side down and bottom line
+                c.lineTo(x * cellSize + cellSize, bottomRectY + cellSize / 2); // Right side down
+                c.lineTo(x * cellSize, bottomRectY + cellSize / 2); // Bottom line
+                c.closePath();
+                c.fill();
+                
+                if (decalShape == "dot") {
+                    c.beginPath();
+                    c.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 4, 0, Math.PI * 2);
+                    c.fillStyle = decalColor;
+                    c.fill();
+                } else if (decalShape == "smallTriangle") {
+                    c.beginPath();
+                    let smallTriangleSize = cellSize / 4; // Adjust for desired size
+                    centerX = x * cellSize + cellSize / 2;
+                    centerY = y * cellSize + cellSize / 2;
+                    c.moveTo(centerX, centerY - smallTriangleSize);
+                    c.lineTo(centerX - smallTriangleSize, centerY + smallTriangleSize);
+                    c.lineTo(centerX + smallTriangleSize, centerY + smallTriangleSize);
+                    c.closePath();
+                    c.fillStyle = decalColor;
+                    c.fill();
+                } else if ("smallDiamond") {
+                    c.beginPath();
+                    let smallDiamondSize = cellSize / 4; // Adjust for desired size
+                    centerX = x * cellSize + cellSize / 2;
+                    centerY = y * cellSize + cellSize / 2;
+                    c.moveTo(centerX, centerY - smallDiamondSize);
+                    c.lineTo(centerX + smallDiamondSize, centerY);
+                    c.lineTo(centerX, centerY + smallDiamondSize);
+                    c.lineTo(centerX - smallDiamondSize, centerY);
+                    c.closePath();
+                    c.fillStyle = decalColor;
+                    c.fill();
+                }
+                break;
+            case 'heart':
+                c.beginPath();
+                // Center top of the heart
+                let topCenterX = x * cellSize + cellSize / 2;
+                let topCenterY = y * cellSize + cellSize / 3;
+                
+                // Starting point for the left top lobe, moving a bit right to make the top smoother
+                let startLobeX = x * cellSize + cellSize / 4;
+                let startLobeY = y * cellSize + cellSize / 4;
+
+                // Control points for the left curve to create smoother lobes
+                let leftCtrlX1 = x * cellSize + cellSize / 4;
+                let leftCtrlY1 = y * cellSize;
+                let leftCtrlX2 = x * cellSize;
+                let leftCtrlY2 = y * cellSize + cellSize / 4;
+
+                // Bottom tip of the heart
+                let bottomTipX = x * cellSize + cellSize / 2;
+                let bottomTipY = y * cellSize + cellSize * 0.75;
+
+                // Control points for the right curve, mirrored from the left
+                let rightCtrlX1 = x * cellSize + cellSize * 3 / 4;
+                let rightCtrlY1 = y * cellSize;
+                let rightCtrlX2 = x * cellSize + cellSize;
+                let rightCtrlY2 = y * cellSize + cellSize / 4;
+
+                // Draw left top lobe
+                c.moveTo(topCenterX, topCenterY);
+                c.bezierCurveTo(leftCtrlX1, leftCtrlY1, leftCtrlX2, leftCtrlY2, bottomTipX, bottomTipY);
+
+                // Draw right top lobe, mirroring the left one
+                c.moveTo(topCenterX, topCenterY);
+                c.bezierCurveTo(rightCtrlX1, rightCtrlY1, rightCtrlX2, rightCtrlY2, bottomTipX, bottomTipY);
+
+                c.closePath();
+                c.fillStyle = color;
+                c.fill();
+                break;
+
+            case 'cross':
+                let crossThickness = cellSize / 8; // Adjust the thickness of the cross lines
+                centerX = x * cellSize + cellSize / 2;
+                centerY = y * cellSize + cellSize / 2;
+
+                // Draw vertical part of the cross
+                c.fillStyle = color;
+                c.fillRect(centerX - crossThickness / 2, y * cellSize, crossThickness, cellSize);
+
+                // Draw horizontal part of the cross
+                c.fillRect(x * cellSize, centerY - crossThickness / 2, cellSize, crossThickness);
+                break;
+            default:
+                console.log('Unknown shape');
+        }
+    }
+
+    function resizeCanvas(width, height) {
+        $("#gameCanvas").attr({
+            'width': width,
+            'height': height
+        });
+    }
+
+    let maze = levels[currentLevel].maze;
+    let player;
+    let gateKey;
+    let exit;
+    let enemies = [];
+    let turrets = [];
+    let turretBullets = [];
+    let powerUpgrades = [];
+    let lives = [];
+    let superPowers = [];
+    let ammo = [];
+    let bombs = [];
+    let bullets = [];
+    let lasers = [];
+    let activeBombs = [];
+    let vortexes = [];
+    let coins = [];
+    let switch1Activated = false;
+    let switch2Activated = false;
+    let switch3Activated = false;
+
+    function initializeGame() {
+        maze = levels[currentLevel].maze;
+        console.log(`LEVEL COLR IDX: ${levels[currentLevel].colors_index}...`);
+        levels[currentLevel].colors = levelColors[levels[currentLevel].colors_index];
+        $("body").css("background-color", levels[currentLevel].colors.wall);
+        console.log(levels[currentLevel].colors);
+        resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
+        enemies = [[], [], []];
+        turrets = [[], []];
+        turretBullets = [];
+        powerUpgrades = [[], [], []];
+        lives = [];
+        vortexes = [];
+        superPowers = [];
+        ammo = [];
+        bullets = [];
+        lasers = [];
+        bombs = [];
+        activeBombs = [];
+        coins = [];
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === "P") {
+                    player = { x, y };
+                } else if (maze[y][x] === "G") {
+                    gateKey = { x, y, collected: false };
+                } else if (maze[y][x] === "x") {
+                    exit = { x, y };
+                } else if (maze[y][x] === "e") {
+                    enemies[0].push({ x, y, orientation: "Up", currentSpaceType: "." });
+                } else if (maze[y][x] === "E") {
+                    enemies[1].push({ x, y, orientation: "Up", currentSpaceType: "." });
+                } else if (maze[y][x] === "F") {
+                    enemies[2].push({ x, y, orientation: "Up", currentSpaceType: "." });
+                } else if (maze[y][x] === "o") {
+                    turrets[0].push({ x, y });
+                } else if (maze[y][x] === "O") {
+                    turrets[1].push({ x, y });
+                } else if (maze[y][x] === "L") {
+                    lives.push({ x, y, collected: false });
+                } else if (maze[y][x] === "S") {
+                    superPowers.push({ x, y, collected: false });
+                } else if (maze[y][x] === "s") {
+                    powerUpgrades[0].push({ x, y, collected: false });
+                } else if (maze[y][x] === "Z") {
+                    ammo.push({ x, y, collected: false });
+                } else if (maze[y][x] === "z") {
+                    powerUpgrades[1].push({ x, y, collected: false });
+                } else if (maze[y][x] === "B") {
+                    bombs.push({ x, y, collected: false });
+                } else if (maze[y][x] === "b") {
+                    powerUpgrades[2].push({ x, y, collected: false });
+                } else if (maze[y][x] === "V") {
+                    vortexes.push({ x, y, collected: false });
+                } else if (maze[y][x] === "C") {
+                    coins.push({ x, y, collected: false });
+                }
+            }
+        }
+        updateLivesCountDisplay();
+        updateSuperPowerCountDisplay();
+    }
+
+    function updateLivesCountDisplay() {
+        $("#livesCount").text(`❤️ ${livesCollected}`);
+    }
+
+    function updateCoinsCountDisplay(amount) {
+        coinsCollected += amount;
+        $("#coinsCount").text(`🪙 ${coinsCollected}`);
+    }
+
+    let superPowerEmoji = "";
+    function updateSuperPowerCountDisplay() {
+        if (powerUps[0] > 0) {
+            $("#superPowerCount").text(`${superPowerEmoji} ${superPowersCollected}`);
+            $("#super").text(superPowerEmoji);
+        } else {
+            $("#superPowerCount").text(``);
+            $("#super").text(``);
+        }
+        
+    }
+
+    let ammoEmoji = "";
+    function updateAmmoCountDisplay() {
+        if (powerUps[1] > 0) {
+            $("#ammoCount").text(`${ammoEmoji} ${ammoCollected}`);
+            $("#shoot").text(ammoEmoji);
+        } else {
+            $("#ammoCount").text(``);
+            $("#shoot").text(``);
+        }
+    }
+
+    let bombsEmoji = "";
+    function updateBombsCountDisplay() {
+        if (powerUps[2] > 0) {
+            $("#bombsCount").text(`${bombsEmoji} ${bombsCollected}`);
+            $("#bomb").text(bombsEmoji);
+        } else {
+            $("#bombsCount").text(``);
+            $("#bomb").text(``);
+        }
+    }
+
+    function updateScoreCountDisplay(amount) {
+        scoreCollected += amount;
+        $("#scoreCount").text(`⭐ ${scoreCollected}`);
+    }
+
+    let colors = {
+        weak_breakable_wall: "#321",
+        strong_breakable_wall: "#123",
+        start: "#843",
+        chest: "#843",
+        upgrade: "#666",
+        bomb: "#000",
+        key: "#888",
+        closed_exit: "#444",
+        player: "#00f",
+        coin: "#fd0",
+        gateKey: "#0f0",
+        enemy: ["#f80", "#f00", "#909"],
+        life: "#f00",
+        super: "#0df",
+        ammo: "#2f6",
+        vortex: "#d6f",
+        lava: "#d40",
+        turret: [
+            {
+                base: "#111",
+                decal: "#d40",
+                bullet: "#b47"
+            },
+            {
+                base: "#d40",
+                decal: "#111",
+                bullet: "#b4f"
+            },
+        ],
+        switch: {
+            off: "#f00",
+            on: "#0f0"
+        }
+    }
+
+    let currentPlayerOrientation = "Up";
+
+    function drawMaze() {
+        maze.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                //console.log(levels[currentLevel].colors);
+                switch (cell) {
+                    case "W": // Wall
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.wall);
+                        break;
+                    case "M": // Closed Toggleable Wall 1
+                        drawShape("dot", colIndex, rowIndex, levels[currentLevel].colors.ground, levels[currentLevel].colors.wall);
+                        break;
+                    case "m": // Open Toggleable Wall 1
+                        drawShape("dot", colIndex, rowIndex, levels[currentLevel].colors.walked, colors.ground);
+                        break;
+                    case "!": // Toggleable Wall 1 Switch
+                        if (switch1Activated) {
+                            drawShape("dot", colIndex, rowIndex, colors.switch.on, levels[currentLevel].colors.wall);
+                        } else {
+                            drawShape("dot", colIndex, rowIndex, colors.switch.off, levels[currentLevel].colors.wall);
+                        }
+                        break;
+                    case "N": // Closed Toggleable Wall 2
+                        drawShape("smallTriangle", colIndex, rowIndex, levels[currentLevel].colors.ground, levels[currentLevel].colors.wall, "Up");
+                        break;
+                    case "n": // Open Toggleable Wall 2
+                        drawShape("smallTriangle", colIndex, rowIndex, levels[currentLevel].colors.walked, colors.ground, "Up");
+                        break;
+                    case "i": // Toggleable Wall 2 Switch
+                        if (switch2Activated) {
+                            drawShape("smallTriangle", colIndex, rowIndex, colors.switch.on, levels[currentLevel].colors.wall, "Up");
+                        } else {
+                            drawShape("smallTriangle", colIndex, rowIndex, colors.switch.off, levels[currentLevel].colors.wall, "Up");
+                        }
+                        break;
+                    case "U": // Closed Toggleable Wall 3
+                        drawShape("smallDiamond", colIndex, rowIndex, levels[currentLevel].colors.ground, levels[currentLevel].colors.wall);
+                        break;
+                    case "u": // Open Toggleable Wall 3
+                        drawShape("smallDiamond", colIndex, rowIndex, levels[currentLevel].colors.walked, colors.ground);
+                        break;
+                    case "j": // Toggleable Wall 3 Switch
+                        if (switch3Activated) {
+                            drawShape("smallDiamond", colIndex, rowIndex, colors.switch.on, levels[currentLevel].colors.wall);
+                        } else {
+                            drawShape("smallDiamond", colIndex, rowIndex, colors.switch.off, levels[currentLevel].colors.wall);
+                        }
+                        break;
+                    case "w": // Weak Breakable Wall
+                        drawShape("dot", colIndex, rowIndex, levels[currentLevel].colors.wall, colors.weak_breakable_wall);
+                        break;
+                    case "J": // Strong Breakable Wall
+                        drawShape("dot", colIndex, rowIndex, levels[currentLevel].colors.wall, colors.strong_breakable_wall);
+                        break;
+                    case "q": // Broken Ground (dead players, destroyed walls, destroyed items, etc.)
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.broken);
+                        break;
+                    case "-":
+                        drawShape("square", colIndex, rowIndex, colors.start);
+                        break;
+                    case "x":
+                        drawShape("circle", colIndex, rowIndex, colors.switch.off, colors.closed_exit);
+                        break;
+                    case "X":
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.ground);
+                        break;
+                    case ".":
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.ground);
+                        break;
+                    case ",":
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.walked);
+                        break;
+                    case "'":
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.burned);
+                        break;
+                    case "*":
+                        drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.creeped);
+                        break;
+                    case "P":
+                        drawShape("triangle", colIndex, rowIndex, colors.player);
+                        break;
+                    case "G":
+                        drawShape("circle", colIndex, rowIndex, colors.gateKey);
+                        break;
+                    case "e":
+                        for (let i = 0; i < enemies[0].length; i++) {
+                            if (colIndex == enemies[0][i].x && rowIndex == enemies[0][i].y) {
+                                drawShape("triangle", colIndex, rowIndex, colors.enemy[0], '', enemies[0][i].orientation);
+                            }
+                        }
+                        break;
+                    case "E":
+                        for (let i = 0; i < enemies[1].length; i++) {
+                            if (colIndex == enemies[1][i].x && rowIndex == enemies[1][i].y) {
+                                drawShape("triangle", colIndex, rowIndex, colors.enemy[1], '', enemies[1][i].orientation);
+                            }
+                        }
+                        break;
+                    case "F":
+                        for (let i = 0; i < enemies[2].length; i++) {
+                            if (colIndex == enemies[2][i].x && rowIndex == enemies[2][i].y) {
+                                drawShape("triangle", colIndex, rowIndex, colors.enemy[2], '', enemies[2][i].orientation);
+                            }
+                        }
+                        //drawShape("square", colIndex, rowIndex, colors.enemy[2]);
+                        break;
+                    case "o":
+                        drawShape("cross", colIndex, rowIndex, colors.turret[0].decal, colors.turret[0].base);
+                        break;
+                    case "O":
+                        drawShape("cross", colIndex, rowIndex, colors.turret[1].decal, colors.turret[1].base);
+                        break;
+                    case "L":
+                        drawShape("heart", colIndex, rowIndex, colors.life);
+                        break;
+                    case "l":
+                        drawShape("heart", colIndex, rowIndex, colors.life, levels[currentLevel].colors.broken);
+                        break;
+                    case "S":
+                        drawShape("smallDiamond", colIndex, rowIndex, colors.super);
+                        break;
+                    case "s":
+                    drawShape("chest",  colIndex, rowIndex, colors.upgrade, "", "", "smallDiamond", colors.super);
+                        break;
+                    case "Z":
+                        drawShape("smallTriangle", colIndex, rowIndex, colors.ammo, "", "Up");
+                        break;
+                    case "z":
+                    drawShape("chest",  colIndex, rowIndex, colors.upgrade, "", "", "smallTriangle", colors.ammo);
+                        break;
+                    case "B":
+                        drawShape("dot", colIndex, rowIndex, colors.bomb);
+                        break;
+                    case "b":
+                        drawShape("chest",  colIndex, rowIndex, colors.upgrade, "", "", "dot", colors.bomb);
+                        break;
+                    case "V":
+                        // for (let i = 0; i < vortexes.length; i++) {
+                        //     if (colIndex == vortexes[i].x && rowIndex == vortexes[i].y) {
+                        //         if (vortexes[i].collected) {
+                        //             drawShape("circle", colIndex, rowIndex, colors.vortex, levels[currentLevel].colors.walked);
+                        //         } else {
+                        //             drawShape("circle", colIndex, rowIndex, colors.vortex);
+                        //         }
+                        //     }
+                        // }
+                        drawShape("circle", colIndex, rowIndex, colors.vortex);
+                        break;
+                    case "Y":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "dot", colors.coin);
+                        break;
+                    case "H":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "dot", colors.key);
+                        break;
+                    case "K":
+                        drawShape("dot",  colIndex, rowIndex, colors.key);
+                        break;
+                    case "h":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "smallTriangle", colors.key);
+                        break;
+                    case "k":
+                        drawShape("smallTriangle",  colIndex, rowIndex, colors.key, "", "Up");
+                        break;
+                    case "T":
+                        drawShape("chest",  colIndex, rowIndex, colors.chest, "", "", "smallDiamond", colors.key);
+                        break;
+                    case "t":
+                        drawShape("smallDiamond",  colIndex, rowIndex, colors.key);
+                        break;
+                    case "C":
+                        drawShape("dot",  colIndex, rowIndex, colors.coin);
+                        break;
+                    case "c":
+                        drawShape("dot",  colIndex, rowIndex, colors.coin, levels[currentLevel].colors.broken);
+                        break;
+                    case "R":
+                        drawShape("square",  colIndex, rowIndex, colors.lava);
+                        break;
+                }
+            });
+        });
+    }
+
+    function collectLife() {
+        lives.forEach((life, index) => {
+            if (player.x === life.x && player.y === life.y && !life.collected) {
+                livesCollected++;
+                //maze[life.y][life.x] = ",";
+                life.collected = true;
+                updateLivesCountDisplay();
+                updateScoreCountDisplay(2);
+                playSound("chime");
+            }
+        });
+    }
+
+    function collectSuperPower() {
+        superPowers.forEach((power, index) => {
+            if (player.x === power.x && player.y === power.y && !power.collected) {
+                maze[power.y][power.x] = ".";
+                power.collected = true;
+                superPowersCollected++;
+                updateSuperPowerCountDisplay();
+                updateScoreCountDisplay(2);
+                playSound("blop");
+            }
+        });
+    }
+
+    function updateSuperPowerEmoji() {
+        if (powerUps[0] == 1) {
+            superPowerEmoji = "🗡️";
+        } else if (powerUps[0] == 2) {
+            superPowerEmoji = "⚔️";
+        } else if (powerUps[0] == 3) {
+            superPowerEmoji = "🔥";
+            updateStylesBasedOnPowerUps();
+        }
+        updateSuperPowerCountDisplay();
+    }
+
+    function collectSuperPowerUpgrade() {
+        powerUpgrades[0].forEach((upgrade, index) => {
+            if (player.x === upgrade.x && player.y === upgrade.y && !upgrade.collected) {
+                maze[upgrade.y][upgrade.x] = ".";
+                upgrade.collected = true;
+                if (powerUps[0] < 3) {
+                    powerUps[0]++;
+                    updateSuperPowerEmoji();
+                }
+                updateScoreCountDisplay(5);
+                playSound("upgrade");
+            }
+        });
+    }
+
+    function collectAmmo() {
+        ammo.forEach((bullet, index) => {
+            if (player.x === bullet.x && player.y === bullet.y && !bullet.collected) {
+                maze[bullet.y][bullet.x] = ".";
+                bullet.collected = true;
+                ammoCollected++;
+                updateAmmoCountDisplay();
+                updateScoreCountDisplay(2);
+                playSound("blop");
+            }
+        });
+    }
+
+    function updateAmmoEmoji() {
+        if (powerUps[1] == 1) {
+            ammoEmoji = "🏹";
+        } else if (powerUps[1] == 2) {
+            ammoEmoji = "🔫";
+        } else if (powerUps[1] == 3) {
+            ammoEmoji = "⚡";
+            updateStylesBasedOnPowerUps();
+        }
+        updateAmmoCountDisplay();
+    }
+
+    function collectAmmoUpgrade() {
+        powerUpgrades[1].forEach((upgrade, index) => {
+            if (player.x === upgrade.x && player.y === upgrade.y && !upgrade.collected) {
+                maze[upgrade.y][upgrade.x] = ".";
+                upgrade.collected = true;
+                if (powerUps[1] < 3) {
+                    powerUps[1]++;
+                    updateAmmoEmoji();
+                }
+                updateScoreCountDisplay(5);
+                playSound("upgrade");
+            }
+        });
+    }
+
+    function collectBomb() {
+        bombs.forEach((bomb, index) => {
+            if (player.x === bomb.x && player.y === bomb.y && !bomb.collected) {
+                maze[bomb.y][bomb.x] = ".";
+                bomb.collected = true;
+                bombsCollected++;
+                updateBombsCountDisplay();
+                updateScoreCountDisplay(2);
+                playSound("blop");
+            }
+        });
+    }
+
+    function updateBombEmoji() {
+        if (powerUps[2] == 1) {
+            bombsEmoji = "💣";
+        } else if (powerUps[2] == 2) {
+            bombsEmoji = "🧨";
+        } else if (powerUps[2] == 3) {
+            bombsEmoji = "🍒";
+            updateStylesBasedOnPowerUps();
+        }
+        updateBombsCountDisplay();
+    }
+
+    function collectBombUpgrade() {
+        powerUpgrades[2].forEach((upgrade, index) => {
+            if (player.x === upgrade.x && player.y === upgrade.y && !upgrade.collected) {
+                maze[upgrade.y][upgrade.x] = ".";
+                upgrade.collected = true;
+                if (powerUps[2] < 3) {
+                    powerUps[2]++;
+                    updateBombEmoji();
+                }
+                updateScoreCountDisplay(5);
+                playSound("upgrade");
+            }
+        });
+    }
+
+    function collisionWithTurretBulle(x, y) {
+        
+        
+    }
+
+    function attack(newX, newY, isStrongAttack=false) {
+        let returnValue = false;
+        if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+            // for (let i = turretBullets.length - 1; i >= 0; i--) {
+            //     if (turretBullets[i].x == newX && turretBullets[i].y == newY) {
+            //         if (turretBullets[i].level == 2) {
+            //             activateSuperPower(turretBullets[i].x, turretBullets[i].y, 3, true, 1, false, false);
+            //         }
+            //         playSound("splat");
+            //         turretBullets.splice(i, 1);
+            //         returnValue = true;
+            //     }
+            // }
+            if (player.x == newX && player.y == newY) {
+                checkGameOver(true);
+                returnValue = true;
+            } else if (maze[newY][newX] === "w") {
+                updateScoreCountDisplay(3);
+                if (Math.random() < 0.5) {
+                    maze[newY][newX] = "c";
+                } else {
+                    maze[newY][newX] = "q";
+                }
+                returnValue = true;
+                playSound("break");
+            } else if (maze[newY][newX] === "J") {
+                if (isStrongAttack) {
+                    updateScoreCountDisplay(3);
+                    if (Math.random() < 0.75) {
+                        maze[newY][newX] = "c";
+                    } else {
+                        maze[newY][newX] = "q";
+                    }
+                    playSound("break");
+                } else {
+                    playSound("knock");
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "W") {
+                if (isStrongAttack) {
+
+                } else {
+                    playSound("knock");
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "L" || maze[newY][newX] === "l") {
+                maze[newY][newX] = "q";
+                for (let i = lives.length - 1; i >= 0; i--) {
+                    if (lives[i].x == newX && lives[i].y == newY) {
+                        lives[i].collected = true;
+                        playSound("splat");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "S") {
+                maze[newY][newX] = "q";
+                for (let i = superPowers.length - 1; i >= 0; i--) {
+                    if (superPowers[i].x == newX && superPowers[i].y == newY) {
+                        superPowers[i].collected = true;
+                        playSound("break");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "s") {
+                maze[newY][newX] = "q";
+                for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
+                    if (powerUpgrades[0][i].x == newX && powerUpgrades[0][i].y == newY) {
+                        powerUpgrades[0][i].collected = true;
+                        playSound("break");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "Z") {
+                maze[newY][newX] = "q";
+                for (let i = ammo.length - 1; i >= 0; i--) {
+                    if (ammo[i].x == newX && ammo[i].y == newY) {
+                        ammo[i].collected = true;
+                        playSound("break");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "z") {
+                maze[newY][newX] = "q";
+                for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
+                    if (powerUpgrades[1][i].x == newX && powerUpgrades[1][i].y == newY) {
+                        powerUpgrades[1][i].collected = true;
+                        playSound("break");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "B") {
+                maze[newY][newX] = "q";
+                for (let i = bombs.length - 1; i >= 0; i--) {
+                    if (bombs[i].x == newX && bombs[i].y == newY) {
+                        bombs[i].collected = true;
+                        playSound("break");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "b") {
+                maze[newY][newX] = "q";
+                for (let i = powerUpgrades[0].length - 1; i >= 0; i--) {
+                    if (powerUpgrades[2][i].x == newX && powerUpgrades[2][i].y == newY) {
+                        powerUpgrades[2][i].collected = true;
+                        playSound("break");
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "C" || maze[newY][newX] === "c") {
+                maze[newY][newX] = "q";
+                if (coins.length > 0) {
+                    for (let i = coins.length - 1; i >= 0; i--) {
+                        if (coins[i].x == newX && coins[i].y == newY) {
+                            coins[i].collected = true;
+                            playSound("break");
+                        }
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "e" || maze[newY][newX] === "E" || maze[newY][newX] === "F") {
+                for (let j = 0; j < 3; j++) {
+                    for (let i = enemies[j].length - 1; i >= 0; i--) {
+                        if (enemies[j][i].x == newX && enemies[j][i].y == newY) {
+                            if (Math.random() < 0.5) {
+                                maze[newY][newX] = "c";
+                            } else {
+                                maze[newY][newX] = "l";
+                                lives.push({ x: newX, y: newY, collected: false });
+                            }
+                            enemies[j].splice(i, 1);
+                            updateScoreCountDisplay(5);
+                            playSound("dead");
+                        }
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "o" || maze[newY][newX] === "O") {
+                for (let j = 0; j < 2; j++) {
+                    for (let i = turrets[j].length - 1; i >= 0; i--) {
+                        if (turrets[j][i].x == newX && turrets[j][i].y == newY) {
+                            maze[newY][newX] = "l";
+                            lives.push({ x: newX, y: newY, collected: false });
+                            turrets[j].splice(i, 1);
+                            updateScoreCountDisplay(25);
+                            playSound("break");
+                        }
+                    }
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "." || maze[newY][newX] === "," || maze[newY][newX] === "*") {
+                maze[newY][newX] = "'";
+                returnValue = true;
+            } else if (maze[newY][newX] === "H" || maze[newY][newX] === "K" || maze[newY][newX] === "h" || maze[newY][newX] === "k" || maze[newY][newX] === "T" || maze[newY][newX] === "t" || maze[newY][newX] === "Y") {
+                if ((maze[newY][newX] === "H" || maze[newY][newX] === "h" || maze[newY][newX] === "T" || maze[newY][newX] === "Y") && !isStrongAttack) {
+                    // should only be able to destroy chests with powerful attacks!
+                } else {
+                    maze[newY][newX] = "q";
+                }
+                returnValue = true;
+            } else if (maze[newY][newX] === "!" || maze[newY][newX] === "i" || maze[newY][newX] === "j") {
+                checkSwitchActivation(newX, newY);
+            }
+        }
+        if (isStrongAttack) {
+            playSound("explosion");
+        }
+        return returnValue;
+    }
+
+    function activateSuperPower(x, y, powerLevel, override=false, range=1, forceStrongAttack=false, usesSuperPowerAmmo=true) {
+        if (override || (superPowersCollected > 0 && powerUps[0] > 0)) {
+            if (!override) {
+                playerCurrentSpaceType = "'";
+                playSound("punch");
+            }
+            let directions;
+            if (range == 1) {
+                directions = [-1, 0, 1];
+            } else if (range == 2) {
+                directions = [-2, -1, 0, 1, 2];
+            } else if (range == 3) {
+                directions = [-3, -2, -1, 0, 1, 2, 3];
+            }
+            directions.forEach(dx => {
+                directions.forEach(dy => {
+                    let xInFrontOfPlayer;
+                    let yInFrontOfPlayer;
+                    if (currentPlayerOrientation == "Up") {
+                        xInFrontOfPlayer = 0;
+                        yInFrontOfPlayer = -1;
+                    } else if (currentPlayerOrientation == "Down") {
+                        xInFrontOfPlayer = 0;
+                        yInFrontOfPlayer = 1;
+                    } else if (currentPlayerOrientation == "Left") {
+                        xInFrontOfPlayer = -1;
+                        yInFrontOfPlayer = 0;
+                    } else if (currentPlayerOrientation == "Right") {
+                        xInFrontOfPlayer = 1;
+                        yInFrontOfPlayer = 0;
+                    } 
+                    if (!override && dx == 0 && dy == 0) {
+                        // prevents player from hitting themselves when using the level 3 melee attack (?Sonichu?)
+                    } else if (override || (powerLevel == 1 && dx == xInFrontOfPlayer && dy == yInFrontOfPlayer) || (powerLevel == 2 && ((dy == yInFrontOfPlayer && (currentPlayerOrientation == "Up" || currentPlayerOrientation == "Down")) || (dx == xInFrontOfPlayer && (currentPlayerOrientation == "Left" || currentPlayerOrientation == "Right")))) || (powerLevel == 3)) {
+                        attack(x + dx, y + dy, powerUps[0] == 3 || forceStrongAttack);
+                    }
+                });
+            });
+            if (usesSuperPowerAmmo) {
+                superPowersCollected--;
+            }
+            updateSuperPowerCountDisplay();
+        }
+    }
+
+    function activateGun() {
+        if (ammoCollected > 0 && powerUps[1] > 0) {
+            let dx;
+            let dy;
+            if (currentPlayerOrientation == "Up") {
+                dx = 0;
+                dy = -1;
+            } else if (currentPlayerOrientation == "Down") {
+                dx = 0;
+                dy = 1;
+            } else if (currentPlayerOrientation == "Left") {
+                dx = -1;
+                dy = 0;
+            } else if (currentPlayerOrientation == "Right") {
+                dx = 1;
+                dy = 0;
+            } 
+            let bgTile = maze[player.y][player.x];
+            let bgTileColor;
+            if (bgTile == ".") {
+                bgTileColor = levels[currentLevel].colors.ground;
+            } else if (bgTile == ",") {
+                bgTileColor = levels[currentLevel].colors.walked;
+            } else if (bgTile == "'") {
+                bgTileColor = levels[currentLevel].colors.burned;
+            } else if (bgTile == "q") {
+                bgTileColor = levels[currentLevel].colors.broken;
+            } else if (bgTile == "*") {
+                bgTileColor = levels[currentLevel].colors.creeped;
+            }
+
+            if (powerUps[1] == 3) {
+                drawLasers(player.x + dx, player.y + dy, currentPlayerOrientation, true);
+                lasers.push({ Sonichu: true, health: 30, x: player.x + dx, y: player.y + dy, orientation: currentPlayerOrientation })
+                playSound("laser");
+            } else {
+                bullets.push({ x: player.x, y: player.y, dx, dy, level: powerUps[1], bgColor: bgTileColor });
+                playSound("gun");
+            }
+            ammoCollected--;
+            updateAmmoCountDisplay();
+        }
+    }
+
+    function activateBomb() {
+        if (bombsCollected > 0 && powerUps[2] > 0) {
+            let dx;
+            let dy;
+            if (currentPlayerOrientation == "Up") {
+                dx = 0;
+                dy = -1;
+            } else if (currentPlayerOrientation == "Down") {
+                dx = 0;
+                dy = 1;
+            } else if (currentPlayerOrientation == "Left") {
+                dx = -1;
+                dy = 0;
+            } else if (currentPlayerOrientation == "Right") {
+                dx = 1;
+                dy = 0;
+            } 
+            let bombX = player.x + dx;
+            let bombY = player.y + dy;
+            let bombBg = maze[bombY][bombX];
+            let bgTileColor;
+            if (bombBg != "W" && bombBg != "w" && bombBg != "J" && bombBg != "M" && bombBg != "N" && bombBg != "U" && bombBg != "H" &&bombBg != "K"  && bombBg != "h" && bombBg != "k" &&  bombBg != "T" && bombBg != "t" && bombBg != "Y" && bombBg != "y" && bombBg != "s" && bombBg != "z" && bombBg != "b" && bombBg != "!" && bombBg != "i" && bombBg != "j" && bombBg != "-" && bombBg != "x") {
+                maze[bombY][bombX] = "a";
+                if (bombBg == ".") {
+                    bgTileColor = levels[currentLevel].colors.ground;
+                } else if (bombBg == ",") {
+                    bgTileColor = levels[currentLevel].colors.walked;
+                } else if (bombBg == "'") {
+                    bgTileColor = levels[currentLevel].colors.burned;
+                } else if (bombBg == "q") {
+                    bgTileColor = levels[currentLevel].colors.broken;
+                } else if (bombBg == "*") {
+                    bgTileColor = levels[currentLevel].colors.creeped;
+                } else if (bombBg == "V") {
+                    maze[bombY][bombX] = "V";
+                    bgTileColor = colors.vortex;
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k]. x == bombX && vortexes[k].y == bombY) {
+                            if (k == 0) {
+                                bombX = vortexes[1].x;
+                                bombY = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                bombX = vortexes[0].x;
+                                bombY = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                activeBombs.push({ health: 10, x: bombX, y: bombY, level: powerUps[2], bgTile: bombBg, bgColor: bgTileColor });
+                bombsCollected--;
+                updateBombsCountDisplay();
+                playSound("knock");
+            }
+        }
+    }
+
+    function activateTurret() {
+        if (turrets[0].length > 0 || turrets[1].length > 0) {
+            const directions = [-1, 0, 1];
+            directions.forEach(dx => {
+                directions.forEach(dy => {
+                    let bgTileColor;
+                    if ((dx == -1 && dy == 0) || (dx == 1 && dy == 0) || (dx == 0 && dy == -1) || (dx == 0 && dy == 1)) {
+                        for (let i = 0; i < turrets[0].length; i++) {
+                            let newX = turrets[0][i].x;
+                            let newY = turrets[0][i].y;
+                            let bulletBg = maze[newY][newX];
+                            if (bulletBg == ".") {
+                                bgTileColor = levels[currentLevel].colors.ground;
+                            } else if (bulletBg == ",") {
+                                bgTileColor = levels[currentLevel].colors.walked;
+                            } else if (bulletBg == "'") {
+                                bgTileColor = levels[currentLevel].colors.burned;
+                            } else if (bulletBg == "q") {
+                                bgTileColor = levels[currentLevel].colors.broken;
+                            } else if (bulletBg == "*") {
+                                bgTileColor = levels[currentLevel].colors.creeped;
+                            } else if (bulletBg == "V") {
+                                bgTileColor = colors.vortex;
+                                for (let k = 0; k < vortexes.length; k++) {
+                                    if (vortexes[k]. x == bombX && vortexes[k].y == bombY) {
+                                        if (k == 0) {
+                                            newX = vortexes[1].x;
+                                            newY = vortexes[1].y;
+                                            playSound("vortex0");
+                                            break;
+                                        } else if (k == 1) {
+                                            newX = vortexes[0].x;
+                                            newY = vortexes[0].y;
+                                            playSound("vortex1");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            turretBullets.push({ x: newX, y: newY, dx, dy, level: 1, bgColor: bgTileColor, drawMe: false });
+                        }
+                        
+                        for (let i = 0; i < turrets[1].length; i++) {
+                            let newX = turrets[1][i].x + dx;
+                            let newY = turrets[1][i].y + dy;
+                            let bulletBg = maze[newY][newX];
+                            if (bulletBg == "o" || bulletBg == "o") {
+                                bgTileColor = levels[currentLevel].colors.ground;
+                            } else if (bulletBg == ".") {
+                                bgTileColor = levels[currentLevel].colors.ground;
+                            } else if (bulletBg == ",") {
+                                bgTileColor = levels[currentLevel].colors.walked;
+                            } else if (bulletBg == "'") {
+                                bgTileColor = levels[currentLevel].colors.burned;
+                            } else if (bulletBg == "q") {
+                                bgTileColor = levels[currentLevel].colors.broken;
+                            } else if (bulletBg == "*") {
+                                bgTileColor = levels[currentLevel].colors.creeped;
+                            } else if (bulletBg == "V") {
+                                bgTileColor = colors.vortex;
+                                for (let k = 0; k < vortexes.length; k++) {
+                                    if (vortexes[k]. x == bombX && vortexes[k].y == bombY) {
+                                        if (k == 0) {
+                                            newX = vortexes[1].x;
+                                            newY = vortexes[1].y;
+                                            playSound("vortex0");
+                                            break;
+                                        } else if (k == 1) {
+                                            newX = vortexes[0].x;
+                                            newY = vortexes[0].y;
+                                            playSound("vortex1");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            turretBullets.push({ x: newX, y: newY, dx, dy, level: 2, bgColor: bgTileColor, drawMe: false });
+                        }
+                    }
+                })
+            });
+            //drawTurretBullets();
+        }
+        
+    }
+
+
+    $(document).keydown(function(event) {
+        // Include SHIFT (16) in the array to ignore its default action
+        if ([16, 38, 40, 37, 39].includes(event.which)) { // removed 32 SPACE
+            event.preventDefault(); // Prevent the default action (scrolling or other)
+        }
+        
+        switch (event.key) {
+            case "U":
+            case "u":
+                nextGame();
+            case "C":
+            case "c": // Handle both uppercase and lowercase
+                activateSuperPower(player.x, player.y, powerUps[0], false, 1, false, true);
+                break;
+            case "V":
+            case "v": // Handle both uppercase and lowercase
+                activateGun();
+                break;
+            case "B":
+            case "b": // Handle both uppercase and lowercase
+                activateBomb();
+                break;
+            default:
+                // Replace the arrow key names with direction names if necessary
+                playerMove(event.key.replace("Arrow", ""));
+                break;
+        }
+    });
+
+    $(".control-button").click(function() {
+        const action = $(this).attr('id');
+        switch (action) {
+            case "super":
+                activateSuperPower(player.x, player.y, powerUps[0], false, 1, false, true);
+                break;
+            case "shoot":
+                activateGun();
+                break;
+            case "bomb":
+                activateBomb();
+                break;
+            default:
+                playerMove(action);
+                break;
+        }
+    });
+
+    $("#nextLevel").click(function() {
+        nextGame();
+    });
+
+    function checkGameOver(override1=false, override2=false) {
+        if (checkEnemyCollisions() || override1) {
+            playSound("grunt");
+            if (livesCollected == 1 || override2) {
+                gameOver = true;
+                draw();
+                alert(`GAME OVER!!!\nYOU SCORED ${scoreCollected}!!!`);
+                location.reload();
+            } else if (livesCollected > 1) {
+                if (powerUps[0] > 0) {
+                    powerUps[0]--;
+                    updateSuperPowerEmoji();
+                }
+                if (powerUps[1] > 0) {
+                    powerUps[1]--;
+                    updateAmmoEmoji();
+                }
+                if (powerUps[2] > 0) {
+                    powerUps[2]--;
+                    updateBombEmoji();
+                }
+                updateStylesBasedOnPowerUps();
+                livesCollected--;
+                updateLivesCountDisplay();
+                draw();
+            } else {
+                alert("an error occurred! :(")
+                location.reload();
+            }
+        }
+    }
+
+    function scrollMazeToCenterPlayer() {
+        const gameContainer = document.getElementById('gameContainer');
+        const playerPosX = player.x * cellSize + cellSize / 2;
+        const playerPosY = player.y * cellSize + cellSize / 2;
+
+        const visibleAreaX = gameContainer.offsetWidth / 2;
+        const visibleAreaY = gameContainer.offsetHeight / 2;
+
+        gameContainer.scrollLeft = playerPosX - visibleAreaX;
+        gameContainer.scrollTop = playerPosY - visibleAreaY;
+    }
+
+    var soundTap = new Howl({
+        src: ['tap.mp3'],
+        autoplay: false,
+        loop: false,
+        volume: 0.1,
+        onplay: function() {
+            setTimeout(function() {
+                soundTap.pause();
+                soundTap.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundCoin = new Howl({
+        src: ['coin.mp3'],
+        autoplay: false,
+        loop: false,
+        volume: 0.33,
+        onplay: function() {
+            soundCoin.seek(soundCoin.duration() / 2);
+        }
+    });
+
+    var soundBlop = new Howl({
+        src: ['blop.mp3'],
+        volume: 0.25,
+        onplay: function() {
+            soundBlop.seek(soundBlop.duration() / 2);
+        }
+    });
+
+    var soundChime = new Howl({
+        src: ['chime.mp3'],
+        volume: 0.25,
+        onplay: function() {
+            soundChime.seek(soundChime.duration() * 0.2);
+            setTimeout(function() {
+                soundChime.pause();
+                soundChime.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundUpgrade = new Howl({
+        src: ['upgrade.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundUpgrade.seek(soundUpgrade.duration() * 0.2);
+        }
+    });
+
+    var soundUnlock = new Howl({
+        src: ['unlock.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundUnlock.seek(soundUnlock.duration() * 0.2);
+            setTimeout(function() {
+                soundUnlock.pause();
+                soundUnlock.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundKeys = new Howl({
+        src: ['keys.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundKeys.seek(soundKeys.duration() * 0.2);
+            setTimeout(function() {
+                soundKeys.pause();
+                soundKeys.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundGrunt = new Howl({
+        src: ['grunt.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundGrunt.seek(soundGrunt.duration() * 0.2);
+        }
+    });
+
+    var soundLava = new Howl({
+        src: ['lava.mp3'],
+        volume: 1.0
+    });
+
+    var soundBreak = new Howl({
+        src: ['break.mp3'],
+        volume: 0.02,
+        onplay: function() {
+            soundBreak.seek(soundBreak.duration() / 2);
+        }
+    });
+
+    var soundKnock = new Howl({
+        src: ['knock.mp3'],
+        volume: 0.05,
+        onplay: function() {
+            soundKnock.seek(soundKnock.duration() * 0.2);
+            setTimeout(function() {
+                soundKnock.pause();
+                soundKnock.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundDead = new Howl({
+        src: ['dead.mp3'],
+        volume: 0.1,
+        onplay: function() {
+            soundDead.seek(soundDead.duration() * 0.2);
+            setTimeout(function() {
+                soundDead.pause();
+                soundDead.seek(0);
+            }, 400);
+        }
+    });
+
+    var soundPoweringup = new Howl({
+        src: ['poweringup.mp3'],
+        volume: 0.75,
+        onplay: function() {
+            soundPoweringup.seek(soundPoweringup.duration() / 2);
+            setTimeout(function() {
+                soundPoweringup.pause();
+                soundPoweringup.seek(0);
+            }, 1000);
+        }
+    });
+
+    var soundPoweringdown = new Howl({
+        src: ['poweringdown.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundPoweringdown.seek(soundPoweringdown.duration() * .25);
+            setTimeout(function() {
+                soundPoweringdown.pause();
+                soundPoweringdown.seek(0);
+            }, 1000);
+        }
+    });
+
+    var soundTing = new Howl({
+        src: ['ting.mp3'],
+        volume: 0.25
+    });
+
+    var soundVortex0 = new Howl({
+        src: ['vortex0.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundVortex0.seek(soundVortex0.duration() / 2);
+            setTimeout(function() {
+                soundVortex0.pause();
+                soundVortex0.seek(0);
+            }, 700);
+        }
+    });
+
+    var soundVortex1 = new Howl({
+        src: ['vortex1.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundVortex1.seek(soundVortex1.duration() * 0.9);
+            setTimeout(function() {
+                soundVortex1.pause();
+                soundVortex1.seek(0);
+            }, 700);
+        }
+    });
+
+    var soundExplosion = new Howl({
+        src: ['explosion.mp3'],
+        volume: 0.1
+    });
+
+    var soundSplat = new Howl({
+        src: ['splat.mp3'],
+        volume: 0.3,
+        onplay: function() {
+            soundSplat.seek(soundSplat.duration() * 0.25);
+        }
+    });
+
+    var soundLaser = new Howl({
+        src: ['laser.mp3'],
+        volume: 0.5,
+        onplay: function() {
+            soundLaser.seek(soundLaser.duration() * 0.25);
+            setTimeout(function() {
+                soundLaser.pause();
+                soundLaser.seek(0);
+            }, 500);
+        }
+    });
+
+    var soundGun = new Howl({
+        src: ['gun.mp3'],
+        volume: 1.0,
+        onplay: function() {
+            soundGun.seek(soundGun.duration() * 0.2);
+        }
+    });
+
+    var soundPunch = new Howl({
+        src: ['punch.mp3'],
+        volume: 0.05,
+        onplay: function() {
+            soundPunch.seek(soundPunch.duration() * 0.66);
+        }
+    });
+
+    function playSound(sound) {
+        if (sound == "tap") {
+            if (!soundTap.playing()) {
+                soundTap.play();
+            } else {
+                soundTap.stop();
+                soundTap.play();
+            }
+        } else if (sound == "coin") {
+            if (!soundCoin.playing()) {
+                soundCoin.play();
+            } else {
+                soundCoin.stop();
+                soundCoin.play();
+            }
+        } else if (sound == "blop") {
+            if (!soundBlop.playing()) {
+                soundBlop.play();
+            } else {
+                soundBlop.stop();
+                soundBlop.play();
+            }
+        } else if (sound == "chime") {
+            if (!soundChime.playing()) {
+                soundChime.play();
+            } else {
+                soundChime.stop();
+                soundChime.play();
+            }
+        } else if (sound == "upgrade") {
+            if (!soundUpgrade.playing()) {
+                soundUpgrade.play();
+            } else {
+                soundUpgrade.stop();
+                soundUpgrade.play();
+            }
+        } else if (sound == "unlock") {
+            if (!soundUnlock.playing()) {
+                soundUnlock.play();
+            } else {
+                soundUnlock.stop();
+                soundUnlock.play();
+            }
+        } else if (sound == "keys") {
+            if (!soundKeys.playing()) {
+                soundKeys.play();
+            } else {
+                soundKeys.stop();
+                soundKeys.play();
+            }
+        } else if (sound == "grunt") {
+            if (!soundGrunt.playing()) {
+                soundGrunt.play();
+            } else {
+                soundGrunt.stop();
+                soundGrunt.play();
+            }
+        } else if (sound == "lava") {
+            soundLava.play();
+        } else if (sound == "break") {
+            if (!soundBreak.playing()) {
+                soundBreak.play();
+            } else {
+                soundBreak.stop();
+                soundBreak.play();
+            }
+        } else if (sound == "knock") {
+            if (!soundKnock.playing()) {
+                soundKnock.play();
+            } else {
+                soundKnock.stop();
+                soundKnock.play();
+            }
+        } else if (sound == "dead") {
+            if (!soundDead.playing()) {
+                soundDead.play();
+            } else {
+                soundDead.stop();
+                soundDead.play();
+            }
+        } else if (sound == "poweringup") {
+            if (!soundPoweringup.playing()) {
+                soundPoweringup.play();
+            } else {
+                soundPoweringup.stop();
+                soundPoweringup.play();
+            }
+        } else if (sound == "poweringdown") {
+            if (!soundPoweringdown.playing()) {
+                soundPoweringdown.play();
+            } else {
+                soundPoweringdown.stop();
+                soundPoweringdown.play();
+            }
+        } else if (sound == "ting") {
+            if (!soundTing.playing()) {
+                soundTing.play();
+            } else {
+                soundTing.stop();
+                soundTing.play();
+            }
+        }  else if (sound == "vortex0") {
+            if (!soundVortex0.playing()) {
+                soundVortex0.play();
+            } else {
+                soundVortex0.stop();
+                soundVortex0.play();
+            }
+        } else if (sound == "vortex1") {
+            if (!soundVortex1.playing()) {
+                soundVortex1.play();
+            } else {
+                soundVortex1.stop();
+                soundVortex1.play();
+            }
+        } else if (sound == "explosion") {
+            if (!soundExplosion.playing()) {
+                soundExplosion.play();
+            } else {
+                soundExplosion.stop();
+                soundExplosion.play();
+            }
+        } else if (sound == "splat") {
+            if (!soundSplat.playing()) {
+                soundSplat.play();
+            } else {
+                soundSplat.stop();
+                soundSplat.play();
+            }
+        } else if (sound == "laser") {
+            if (!soundLaser.playing()) {
+                soundLaser.play();
+            } else {
+                soundLaser.stop();
+                soundLaser.play();
+            }
+        } else if (sound == "gun") {
+            if (!soundGun.playing()) {
+                soundGun.play();
+            } else {
+                soundGun.stop();
+                soundGun.play();
+            }
+        }  else if (sound == "punch") {
+            if (!soundPunch.playing()) {
+                soundPunch.play();
+            } else {
+                soundPunch.stop();
+                soundPunch.play();
+            }
+        } 
+    }
+
+    let playerCurrentSpaceType = ".";
+
+    function playerMove(direction){
+
+        if (gameOver) return;
+        currentPlayerOrientation = direction;
+        
+        let newX = player.x;
+        let newY = player.y;
+
+        switch (direction) {
+            case "Up":    newY--; break;
+            case "Down":  newY++; break;
+            case "Left":  newX--; break;
+            case "Right": newX++; break;
+            default:      return;
+        }
+
+        if (checkCollision(newX, newY)) {
+            if (maze[player.y][player.x] != "V" && maze[player.y][player.x] != "q" && maze[player.y][player.x] != "'" && maze[player.y][player.x] != "*" && maze[player.y][player.x] != "m" && maze[player.y][player.x] != "n" && maze[player.y][player.x] != "u" && maze[player.y][player.x] != "c" && maze[player.y][player.x] != "l" && maze[player.y][player.x] != "R") {
+                maze[player.y][player.x] = ",";
+            } else if (maze[player.y][player.x] == "c" || maze[player.y][player.x] == "l") {
+                maze[player.y][player.x] = "q";
+            }
+            playerCurrentSpaceType = maze[newY][newX];
+            if (playerCurrentSpaceType == "K") {
+                key1Collected = true;
+                updateScoreCountDisplay(3);
+                playSound("keys");
+            } else if (playerCurrentSpaceType == "k") {
+                key2Collected = true;
+                updateScoreCountDisplay(3);
+                playSound("keys");
+            } else if (playerCurrentSpaceType == "t") {
+                key3Collected = true;
+                updateScoreCountDisplay(3);
+                playSound("keys");
+            } else if (playerCurrentSpaceType == "C" || playerCurrentSpaceType == "c") {
+                updateCoinsCountDisplay(1);
+                playSound("coin");
+            } else if (playerCurrentSpaceType == "R") {
+                player.x = newX;
+                player.y = newY;
+                draw();
+                playSound("lava");
+                setTimeout(() => checkGameOver(true, true), 100);
+            }
+            player.x = newX;
+            player.y = newY;
+            scrollMazeToCenterPlayer();
+            vortexResult = collectVortex();
+            if (vortexResult[0] === 1) {
+                player.x = vortexResult[1];
+                player.y = vortexResult[2];
+            }
+            collectExitKey();
+            exitLevel();
+            collectLife();
+            collectSuperPower();
+            collectSuperPowerUpgrade();
+            collectAmmo();
+            collectAmmoUpgrade();
+            collectBomb();
+            collectBombUpgrade();
+            checkSwitchActivation(player.x, player.y);
+            checkChestActivation();
+            draw();
+            playSound("tap");
+        }
+        checkGameOver();
+    }
+
+    function drawPlayer() {
+        if (playerCurrentSpaceType == "." || playerCurrentSpaceType == "S" || playerCurrentSpaceType == "s" || playerCurrentSpaceType == "Z" || playerCurrentSpaceType == "z" || playerCurrentSpaceType == "B" || playerCurrentSpaceType == "b" || playerCurrentSpaceType == "L" || playerCurrentSpaceType == "l" || playerCurrentSpaceType == "K"|| playerCurrentSpaceType == "k"|| playerCurrentSpaceType == "t" || playerCurrentSpaceType == "G" || playerCurrentSpaceType == "m" || playerCurrentSpaceType == "n" || playerCurrentSpaceType == "u" || playerCurrentSpaceType == "C") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.ground);
+        } else if (playerCurrentSpaceType == ",") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.walked);
+        } else if (playerCurrentSpaceType == "'") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.burned);
+        } else if (playerCurrentSpaceType == "q" || playerCurrentSpaceType == "c") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.broken);
+        } else if (playerCurrentSpaceType == "*") {
+            drawShape("triangle", player.x, player.y, colors.player, levels[currentLevel].colors.creeped);
+        } else if (playerCurrentSpaceType == "V") {
+            drawShape("triangle", player.x, player.y, colors.player, colors.vortex);
+        } else if (playerCurrentSpaceType == "R") {
+            drawShape("triangle", player.x, player.y, colors.player, colors.lava);
+        }
+    }
+
+    function drawEnemies() {
+        for (let j = 0; j < 3; j++) {
+            for (let i = 0; i < enemies[j].length; i++) {
+                if (enemies[j][i].currentSpaceType == ".") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.ground, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == ",") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.walked, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "'") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.burned, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "q") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.broken, enemies[j][i].orientation);
+                } else if (enemies[j][i].currentSpaceType == "*") {
+                    drawShape("triangle", enemies[j][i].x, enemies[j][i].y, colors.enemy[j], levels[currentLevel].colors.creeped, enemies[j][i].orientation);
+                }
+            }
+        }
+    }
+
+    function drawBullets() {
+        for (let i = 0; i < bullets.length; i++) {
+            let o;
+            if (bullets[i].dy < 0) {
+                o = "Up";
+            } else if (bullets[i].dy > 0) {
+                o = "Down";
+            } else if (bullets[i].dx < 0) {
+                o = "Left";
+            }  else if (bullets[i].dx > 0) {
+                o = "Right";
+            }
+            if (bullets[i].level == 1) {
+                drawShape("smallTriangle", bullets[i].x, bullets[i].y, colors.ammo, bullets[i].bgColor, o);
+            } else if (bullets[i].level == 2) {
+                drawShape("triangle", bullets[i].x, bullets[i].y, colors.ammo, bullets[i].bgColor, o);
+            }
+        }
+    }
+
+    function drawTurretBullets() {
+        for (let i = 0; i < turretBullets.length; i++) {
+            if (turretBullets[i].drawMe) {
+                let o;
+                if (turretBullets[i].dy < 0) {
+                    o = "Up";
+                } else if (turretBullets[i].dy > 0) {
+                    o = "Down";
+                } else if (turretBullets[i].dx < 0) {
+                    o = "Left";
+                }  else if (turretBullets[i].dx > 0) {
+                    o = "Right";
+                }
+                if (turretBullets[i].level == 1) {
+                    drawShape("smallTriangle", turretBullets[i].x, turretBullets[i].y, colors.turret[0].bullet, turretBullets[i].bgColor, o);
+                } else if (turretBullets[i].level == 2) {
+                    drawShape("triangle", turretBullets[i].x, turretBullets[i].y, colors.turret[1].bullet, turretBullets[i].bgColor, o);
+                }
+            }
+            
+        }
+    }
+
+    function drawLasers(x, y, o, doAttack) {
+        if (o == "Up") {
+            for (let i = y; i >= 0; i--) {
+                if (maze[i][x] == "V") {
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k].x == x && vortexes[k].y == i) {
+                            if (k == 0) {
+                                x = vortexes[1].x;
+                                i = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                x = vortexes[0].x;
+                                i = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (maze[i][x] != "W" && maze[i][x] != "M" && maze[i][x] != "N" && maze[i][x] != "U" && maze[i][x] != "x") {
+                    drawShape("square", x, i, colors.ammo);
+                    if (doAttack) {
+                        attack(x, i, true);
+                    }
+                } else {
+                    return true;
+                }
+                
+            }
+            return false;
+        } else if (o == "Down") {
+            for (let i = y; i < maze.length; i++) {
+                if (maze[i][x] == "V") {
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k].x == x && vortexes[k].y == i) {
+                            console.log(k);
+                            if (k == 0) {
+                                x = vortexes[1].x;
+                                i = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                x = vortexes[0].x;
+                                i = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (maze[i][x] != "W" && maze[i][x] != "M" && maze[i][x] != "N" && maze[i][x] != "U" && maze[i][x] != "x") {
+                    drawShape("square", x, i, colors.ammo);
+                    if (doAttack) {
+                        attack(x, i, true);
+                    }
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        } else if (o == "Left") {
+            for (let i = x; i >= 0; i--) {
+                if (maze[y][i] == "V") {
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k].x == i && vortexes[k].y == y) {
+                            if (k == 0) {
+                                i = vortexes[1].x;
+                                y = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                i = vortexes[0].x;
+                                y = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (maze[y][i] != "W" && maze[y][i] != "M" && maze[y][i] != "N" && maze[y][i] != "U" && maze[y][i] != "x") {
+                    drawShape("square", i, y, colors.ammo);
+                    if (doAttack) {
+                        attack(i, y, true);
+                    }
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        } else if (o == "Right") {
+            for (let i = x; i < maze[0].length; i++) {
+                if (maze[y][i] == "V") {
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k].x == i && vortexes[k].y == y) {
+                            if (k == 0) {
+                                i = vortexes[1].x;
+                                y = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                i = vortexes[0].x;
+                                y = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (maze[y][i] != "W" && maze[y][i] != "M" && maze[y][i] != "N" && maze[y][i] != "U" && maze[y][i] != "x") {
+                    drawShape("square", i, y, colors.ammo);
+                    if (doAttack) {
+                        attack(i, y, true);
+                    }
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    function drawBombs() {
+        for (let i = 0; i < activeBombs.length; i++) {
+            if (activeBombs[i].level == 1) {
+                drawShape("circle", activeBombs[i].x, activeBombs[i].y, levels[currentLevel].colors.wall, activeBombs[i].bgColor);
+            } else if (activeBombs[i].level == 2) {
+                drawShape("circle", activeBombs[i].x, activeBombs[i].y, colors.key, activeBombs[i].bgColor);
+            } else if (activeBombs[i].level == 3) {
+                drawShape("circle", activeBombs[i].x, activeBombs[i].y, colors.switch.off, activeBombs[i].bgColor);
+            }
+        }
+    }
+
+    function showLevelCreationUI() {
+        gameIsInBuildMode = true;
+        $(".controls-row").hide();
+        $("#toggleLevelBuilder").text("PLAY");
+        const levelCreationHtml = `
+            <div id="levelCreationUI" style="padding: 10px; display: block;">
+                <input type="text" id="title" placeholder="Your Game Title :)">
+                <br>
+                <label for="aestheticType">Aesthetic</label>
+                <select id="aestheticType">
+                    <option value="0">White</option>
+                    <option value="1">Pink</option>
+                    <option value="2">Red</option>
+                    <option value="3">Orange</option>
+                    <option value="4">Yellow</option>
+                    <option value="5">Green</option>
+                    <option value="6">Blue</option>
+                    <option value="7">Purple</option>
+                </select>
+                <br>
+                <label for="blockType">Tile</label>
+                <select id="blockType">
+                    <option value="W">Wall</option>
+                    <option value=".">Ground</option>
+                    <option value="P">Player</option>
+                    <option value="-">Entrance</option>
+                    <option value="x">Exit</option>
+                    <option value="G">Gate Key</option>
+                    <option value="S">Super</option>
+                    <option value="L">Life</option>
+                    <option value="V">Vortex</option>
+                    <option value="H">Chest</option>
+                    <option value="K">Key</option>
+                    <option value="!">Button</option>
+                    <option value="M">Barrier</option>
+                    <option value="w">Weak Breakable Wall</option>
+                    <option value="J">Strong Breakable Wall</option>
+                    <option value="e">Enemy Level 1</option>
+                    <option value="E">Enemy Level 2</option>
+                    <option value="F">Enemy Level 3</option>
+                    <option value="o">Turret Level 1</option>
+                    <option value="O">Turret Level 2</option>
+                    <option value="s">Melee Weapon Upgrade</option>
+                    <option value="Z">Melee Weapon Ammo</option>
+                    <option value="z">Ranged Weapon Upgrade</option>
+                    <option value="B">Ranged Weapon Ammo</option>
+                    <option value="b">Bomb Upgrade</option>
+                    <option value="C">Coin</option>
+                    <option value="R">Lava</option>
+                    <!-- More block types can be added here -->
+                </select>
+                <br>
+                <label for="levelWidth">Width</label>
+                <span id="decreaseWidth">➖</span>
+                <span id="levelWidthValue"></span>
+                <span id="increaseWidth">➕</span>
+                <br>
+                <label for="levelHeight">Height</label>
+                <span id="decreaseHeight">➖</span>
+                <span id="levelHeightValue"></span> <!-- Default or current height value -->
+                <span id="increaseHeight">➕</span>
+                <br>
+                <button id="cleanGround">Clean</button>
+                <br>
+                <span>Player Color</span>
+                <div id="playerColorControls">
+                    <div>
+                        <label for="sliderX">🔴</label>
+                        <input type="range" id="sliderX" min="0" max="15" value="0">
+                        <span id="valueX">0</span>
+                    </div>
+                    <div>
+                        <label for="sliderY">🟢</label>
+                        <input type="range" id="sliderY" min="0" max="15" value="0">
+                        <span id="valueY">0</span>
+                    </div>
+                    <div>
+                        <label for="sliderZ">🔵</label>
+                        <input type="range" id="sliderZ" min="0" max="15" value="15">
+                        <span id="valueZ">f</span>
+                    </div>
+                </div>
+                <br>
+                <button id="copyToClipboardButton">Copy Share to Clipboard</button>
+                <br>
+                <span id="sharableLink"></span>
+                <br>
+                <label for="levelsList">Levels</label>
+                <ul id="levelsList">
+                </ul>
+                <div id="tileLegend" style="margin-top: 20px; background-color: darkgrey;">
+                    <table id="tileLegendTable"></table>
+                </div>
+            </div>
+        `;
+
+        $("#gameContainer").append(levelCreationHtml);
+        $("#levelWidthValue").html(maze[0].length);
+        $("#levelHeightValue").html(maze.length);
+
+        $("#aestheticType").change(function() {
+            levels[currentLevel].colors_index = $("#aestheticType").val();
+            initializeGame();
+            populateTileLegend();
+            updateLinkAndStuff();
+            $("body").css("background-color", levels[currentLevel].colors.wall);
+        });
+
+        $("#title").on('input', function() {
+            let title = $("#title").val()
+            console.log(title);
+            if (title == "") {
+                $("h1").text("Battle Maze Ultra 9K");
+            } else {
+                $("h1").text(title);
+            }
+            $("h1").text();
+            //updateLinkAndStuff();
+        });
+
+        $("#increaseWidth").click(function() {
+            for (let i = 0; i < maze.length; i++) {
+                if (maze[i][maze[i].length - 1] == "W") {
+                    if (i == 0 || i == maze.length - 1) {
+                        maze[i][maze[i].length - 1] = "W";
+                    } else {
+                        maze[i][maze[i].length - 1] = ".";
+                    }
+                }
+                maze[i].push("W");
+            }
+            initializeGame();
+            $("#levelWidthValue").html(maze[0].length);
+            updateLinkAndStuff();
+        });
+
+        $("#decreaseWidth").click(function() {
+            if (maze[0].length > 0) {
+                for (let i = 0; i < maze.length; i++) {
+                    maze[i].pop();
+                }
+                for (let i = 0; i < maze.length; i++) {
+                    if (maze[i][maze[i].length - 1] == ".") {
+                        maze[i][maze[i].length - 1] = "W";
+                    }
+                }
+                initializeGame();
+                $("#levelWidthValue").html(maze[0].length);
+                updateLinkAndStuff();
+            }
+        });
+
+        $("#increaseHeight").click(function() {
+            let newRow = [];
+            for (let i = 0; i < maze[0].length; i++) {
+                if (maze[maze.length - 1][i] == "W" || maze[maze.length - 1][i] == "-") {
+                    if (i != 0 && i != maze[0].length - 1) {
+                        maze[maze.length - 1][i] = ".";
+                    }
+                }
+                newRow.push("W");
+            }
+            maze.push(newRow);
+            initializeGame();
+            $("#levelHeightValue").html(maze.length);
+            updateLinkAndStuff();
+        });
+
+        $("#decreaseHeight").click(function() {
+            //levelHeightValue
+            if (maze.length > 0) {
+                maze.pop();
+                for (let i = 0; i < maze[0].length; i ++) {
+                    if (maze[maze.length - 1][i] == ".") {
+                        maze[maze.length - 1][i] = "W";
+                    }
+                }
+                initializeGame();
+                $("#levelHeightValue").html(maze.length);
+                updateLinkAndStuff();
+            }
+        });
+
+        $("#gameCanvas").click(function(e) {
+            if (gameIsInBuildMode) { // Ensure this is only active on the last level
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const gridX = Math.floor(x / cellSize);
+                const gridY = Math.floor(y / cellSize);
+                const blockType = $("#blockType").val();
+                
+                if (gridX >= 0 && gridX < maze[0].length && gridY >= 0 && gridY < maze.length) {
+                    const prevBlockType = maze[gridY][gridX]; // use?
+
+                    maze[gridY][gridX] = blockType;
+                    
+                    if (blockType == "P") {
+                        maze[player.y][player.x] = ".";
+                    } else if (blockType == "S") {
+                        superPowers.push({ gridX, gridY, collected: false });
+                    } else if (blockType == "Z") {
+                        ammo.push({ gridX, gridY, collected: false });
+                    } else if (blockType == "B") {
+                        bombs.push({ gridX, gridY, collected: false });
+                    }
+                    initializeGame();
+                }
+            }
+            updateLinkAndStuff();
+        });
+
+        $("#toggleLevelBuilder").click(function() {
+            if ($("#levelCreationUI").is(":visible")) {
+                hideLevelCreationUI();
+            } else {
+                showLevelCreationUI();
+            }
+        });
+
+        $("#cleanGround").click(function() {
+            for (let j = 0; j < maze.length; j++) {
+                for (let i = 0; i < maze[j].length; i++) {
+                    if (maze[j][i] == "," || maze[j][i] == "'" || maze[j][i] == "q" || maze[j][i] == "*") {
+                        maze[j][i] = ".";
+                    }
+                }
+            }
+        });
+
+        $("#copyToClipboardButton").on("click", function() {
+            const tempInput = $("<input>");
+            $("body").append(tempInput);
+            tempInput.val($("#sharableLink").text()).select();
+            document.execCommand("copy");
+            tempInput.remove();
+        });
+        $("#copyToClipboardButton").hide();
+    }
+
+    function updateLinkAndStuff() {
+        let title = $("#title").val();
+        title = title ? encodeURIComponent(title) : "Unknown";
+        let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
+        let zoomValue = $("#levelZoomValue").html();
+
+        let sharableLink = `https://ossavivi.github.io/1218.html?autoplay=1&t=${title}&p=${playerHexCode}&z=${zoomValue}`;
+        for (let i = 0; i < levels.length; i++) {
+            let m = levels[i].maze;
+            let t = encodeURIComponent(levels[i].text.replace(/_/g, "UNDER---SCORE"));
+            let rows = m.length;
+            let cols = m[0].length;
+            
+            console.log(m);
+            let colorIndex = levels[i].colors_index;
+            let encodedMazeString = "";
+            for (let r = 0; r < m.length; r++) {
+                for (let c = 0; c < m[0].length; c++) {
+                    encodedMazeString += m[r][c];
+                }
+            }
+            sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${t}_${colorIndex}_magichan`;
+        }
+        $("#sharableLink").text(sharableLink);
+        $("#copyToClipboardButton").show();
+    }
+
+    function hideLevelCreationUI() {
+        gameIsInBuildMode = false;
+        $("#levelCreationUI").remove();
+        $(".controls-row").show();
+        $("#gameCanvas").off("click");
+        $("#toggleLevelBuilder").remove();
+        $("#zoomControls").remove();
+    }
+
+    function nextGame() {
+        currentLevel = (currentLevel + 1) % levels.length;
+        maze = levels[currentLevel].maze;
+        if (gameIsInBuildMode) {
+            //showLevelCreationUI();
+            
+        } else {
+            $("#toggleLevelBuilder").remove();
+            hideLevelCreationUI();
+        }
+        initializeGame();
+        playerCurrentSpaceType = ".";
+        switch1Activated = false;
+        switch2Activated = false;
+        switch3Activated = false;
+        key1Collected = false;
+        key2Collected = false;
+        key3Collected = false;
+    }
+
+    function collectVortex() {
+        for (let i = vortexes.length - 1; i >= 0; i--) {
+            if (player.x === vortexes[i].x && player.y === vortexes[i].y) {
+                vortexes[i].collected = true;
+                drawShape("circle", vortexes[0].x, vortexes[0].y, colors.vortex, levels[currentLevel].colors.walked);
+                drawShape("circle", vortexes[1].x, vortexes[1].y, colors.vortex, levels[currentLevel].colors.walked);
+                if (i === 0) {
+                    playSound("vortex0");
+                    return [1, vortexes[1].x, vortexes[1].y];
+                } else {
+                    playSound("vortex1");
+                    return [1, vortexes[0].x, vortexes[0].y];
+                }
+            }
+        }
+        return [0, 0, 0];
+    }
+
+    function collectExitKey() {
+        if (gateKey && !gateKey.collected && gateKey.x != null && gateKey.y != null && player.x === gateKey.x && player.y === gateKey.y) {
+            gateKey.collected = true;
+            maze[exit.y][exit.x] = "X";
+            updateScoreCountDisplay(10);
+            playSound("ting");
+            playSound("poweringup");
+        }
+    }
+
+    function exitLevel() {
+        if (exit && exit.x != null && exit.y != null && player.x === exit.x && player.y === exit.y) {
+            updateScoreCountDisplay(10);
+            nextGame();
+        }
+    }
+
+    function checkCollision(x, y) {
+        return maze[y][x] !== "W" && maze[y][x] !== "M" && maze[y][x] !== "N" && maze[y][x] !== "Y" && maze[y][x] !== "U" && maze[y][x] !== "H" && maze[y][x] !== "h" && maze[y][x] !== "T" && maze[y][x] !== "!" && maze[y][x] !== "i" && maze[y][x] !== "j" && maze[y][x] !== "w" && maze[y][x] !== "J" && maze[y][x] !== "x" && maze[y][x] !== "a" && maze[y][x] !== "-";
+    }
+
+    function checkEnemyCollisions() {
+        for (let j = 0; j < 3; j++) {
+            for (let i = enemies[j].length - 1; i >= 0; i--) {
+                if (player.x === enemies[j][i].x && player.y === enemies[j][i].y) {
+                    enemies[j].splice(i, 1);
+                    updateScoreCountDisplay(-5);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function checkSwitchActivation(x, y) {
+        const directions = [-1, 0, 1];
+        directions.forEach(dx => {
+            directions.forEach(dy => {
+                if (dx == 0 || dy == 0) {
+                    const newX = x + dx;
+                    const newY = y + dy;
+                    if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+                        if (maze[newY][newX] === "!") {
+                            updateScoreCountDisplay(4);
+                            switch1Activated = !switch1Activated;
+                            if (switch1Activated) {
+                                playSound("poweringup");
+                            } else {
+                                playSound("poweringdown");
+                            }
+                            for (let j = 0; j < maze.length; j++) {
+                                for (let i = 0; i < maze[j].length; i++) {
+                                    if (maze[j][i] == "M") {
+                                        maze[j][i] = "m";
+                                    } else if (maze[j][i] == "m") {
+                                        maze[j][i] = "M";
+                                    }
+                                }
+                            }
+                        } else if (maze[newY][newX] === "i") {
+                            updateScoreCountDisplay(4);
+                            switch2Activated = !switch2Activated;
+                            if (switch2Activated) {
+                                playSound("poweringup");
+                            } else {
+                                playSound("poweringdown");
+                            }
+                            for (let j = 0; j < maze.length; j++) {
+                                for (let i = 0; i < maze[j].length; i++) {
+                                    if (maze[j][i] == "N") {
+                                        maze[j][i] = "n";
+                                    } else if (maze[j][i] == "n") {
+                                        maze[j][i] = "N";
+                                    }
+                                }
+                            }
+                        } else if (maze[newY][newX] === "j") {
+                            updateScoreCountDisplay(4);
+                            switch3Activated = !switch3Activated;
+                            if (switch3Activated) {
+                                playSound("poweringup");
+                            } else {
+                                playSound("poweringdown");
+                            }
+                            for (let j = 0; j < maze.length; j++) {
+                                for (let i = 0; i < maze[j].length; i++) {
+                                    if (maze[j][i] == "U") {
+                                        maze[j][i] = "u";
+                                    } else if (maze[j][i] == "u") {
+                                        maze[j][i] = "U";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    function placeRandomItem(x, y, filterList=false) {
+        let randomChoices = ["L", "S", "s", "Z", "z", "B", "b"];
+        if (filterList) {
+            randomChoices = ["L", "s", "z", "b"];
+        }
+        maze[y][x] = randomChoices[Math.floor(Math.random() * randomChoices.length)];
+        if (maze[y][x] === "L") {
+            lives.push({ x, y, collected: false });
+        } else if (maze[y][x] === "S") {
+            superPowers.push({ x, y, collected: false });
+        } else if (maze[y][x] === "s") {
+            powerUpgrades[0].push({ x, y, collected: false });
+        } else if (maze[y][x] === "Z") {
+            ammo.push({ x, y, collected: false });
+        } else if (maze[y][x] === "z") {
+            powerUpgrades[1].push({ x, y, collected: false });
+        } else if (maze[y][x] === "B") {
+            bombs.push({ x, y, collected: false });
+        } else if (maze[y][x] === "b") {
+            powerUpgrades[2].push({ x, y, collected: false });
+        }
+    }
+
+    function checkChestActivation() {
+        if (key1Collected || key2Collected || key3Collected || coinsCollected >= 10) {
+            const directions = [-1, 0, 1];
+            directions.forEach(dx => {
+                directions.forEach(dy => {
+                    if (dx == 0 || dy == 0) {
+                        const newX = player.x + dx;
+                        const newY = player.y + dy;
+                        if (newX >= 0 && newX < maze[0].length && newY >= 0 && newY < maze.length) {
+                            if (key1Collected && maze[newY][newX] === "H") {
+                                playSound("unlock");
+                                updateScoreCountDisplay(6);
+                                placeRandomItem(newX, newY);
+                                key1Collected = false;
+                            } else if (key2Collected && maze[newY][newX] === "h") {
+                                playSound("unlock");
+                                updateScoreCountDisplay(6);
+                                placeRandomItem(newX, newY);
+                                key2Collected = false;
+                            } else if (key3Collected && maze[newY][newX] === "T") {
+                                playSound("unlock");
+                                updateScoreCountDisplay(6);
+                                placeRandomItem(newX, newY);
+                                key3Collected = false;
+                            } else if (coinsCollected >= 10 && maze[newY][newX] === "Y") {
+                                playSound("unlock");
+                                updateScoreCountDisplay(7);
+                                updateCoinsCountDisplay(-10);
+                                placeRandomItem(newX, newY, true);
+                            }
+                        }
+                    }
+                });
+            });
+        } 
+    }
+
+    function updateEnemies(levelIndex) {
+        let dx = 0;
+        let dy = 0;
+        for (let i = 0; i < enemies[levelIndex].length; i++) {
+            let playerInRange = false;
+            if (levelIndex == 2) {
+                if (Math.abs(enemies[levelIndex][i].x - player.x) <= 10 && Math.abs(enemies[levelIndex][i].y - player.y) <= 10) {
+                    playerInRange = true;
+                }
+            }
+            let currentEnemyOrientation = "Up";
+            if (Math.random() < 0.5 || playerInRange) {
+                if (Math.random() < 0.5 && !playerInRange) {
+                    dx = Math.floor(Math.random() * 3) - 1;
+                    dy = 0;
+                    if (dx > 0) {
+                        currentEnemyOrientation = "Right";
+                    } else {
+                        currentEnemyOrientation = "Left";
+                    }
+                } else if (!playerInRange) {
+                    dx = 0;
+                    dy = Math.floor(Math.random() * 3) - 1;
+                    if (dy > 0) {
+                        currentEnemyOrientation = "Down";
+                    } else {
+                        currentEnemyOrientation = "Up";
+                    }
+                } else if (playerInRange) {
+                    let directionChosen = false;
+                    if (Math.random() < 0.5) {
+                        if (player.y < enemies[levelIndex][i].y) {
+                            dx = 0;
+                            dy = -1;
+                            currentEnemyOrientation = "Up";
+                            directionChosen = true;
+                        } else if (player.y > enemies[levelIndex][i].y) {
+                            dx = 0;
+                            dy = 1;
+                            currentEnemyOrientation = "Down";
+                            directionChosen = true;
+                        }
+                    }
+                    if (!directionChosen) {
+                        if (player.x < enemies[levelIndex][i].x) {
+                            dx = -1;
+                            dy = 0;
+                            currentEnemyOrientation = "Left";
+                        } else if (player.x > enemies[levelIndex][i].x) {
+                            dx = 1;
+                            dy = 0;
+                            currentEnemyOrientation = "Right";
+                        }
+                    }
+                }
+                let spaceEnemyIsMovingTo = maze[enemies[levelIndex][i].y + dy][enemies[levelIndex][i].x + dx];
+                if (spaceEnemyIsMovingTo === "." || spaceEnemyIsMovingTo === "," || spaceEnemyIsMovingTo === "'" || spaceEnemyIsMovingTo === "q" || spaceEnemyIsMovingTo === "*") {
+                    
+                    enemies[levelIndex][i].currentSpaceType = spaceEnemyIsMovingTo;
+                    if (spaceEnemyIsMovingTo == "." || spaceEnemyIsMovingTo == ",") {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "*";
+                    } else {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = enemies[levelIndex][i].currentSpaceType;
+                    }
+
+                    enemies[levelIndex][i].x += dx;
+                    enemies[levelIndex][i].y += dy;
+                    enemies[levelIndex][i].orientation = currentEnemyOrientation;
+
+                    if (levelIndex === 0) {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "e";
+                    } else if (levelIndex === 1) {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "E";
+                    } else if (levelIndex === 2) {
+                        maze[enemies[levelIndex][i].y][enemies[levelIndex][i].x] = "F";
+                    }
+                }
+            }
+        }
+    }
+
+    function updateBullets() {
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            bullets[i].x += bullets[i].dx;
+            bullets[i].y += bullets[i].dy;
+            
+            if (bullets[i].x >= 0 && bullets[i].x < maze[0].length && bullets[i].y >= 0 && bullets[i].y < maze.length) {
+                let bgTile = maze[bullets[i].y][bullets[i].x];
+                if (bgTile == "V") {
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k].x == bullets[i].x && vortexes[k].y == bullets[i].y) {
+                            bullets[i].bgColor = colors.vortex;
+                            if (k == 0) {
+                                bullets[i].x = vortexes[1].x;
+                                bullets[i].y = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                bullets[i].x = vortexes[0].x;
+                                bullets[i].y = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                } else if (bgTile == "." || bgTile == "," || bgTile == "'" || bgTile == "q" || bgTile == "*" || bgTile == "m" || bgTile == "n" || bgTile == "u" || bgTile == "R") {
+                    if (bgTile == "." || bgTile == "m" || bgTile == "n" || bgTile == "u") {
+                        bullets[i].bgColor = levels[currentLevel].colors.ground;
+                    } else if (bgTile == ",") {
+                        bullets[i].bgColor = levels[currentLevel].colors.walked;
+                    } else if (bgTile == "'") {
+                        bullets[i].bgColor = levels[currentLevel].colors.burned;
+                    } else if (bgTile == "q") {
+                        bullets[i].bgColor = levels[currentLevel].colors.broken;
+                    } else if (bgTile == "*") {
+                        bullets[i].bgColor = levels[currentLevel].colors.creeped;
+                    } else if (bgTile == "R") {
+                        bullets[i].bgColor = colors.lava;
+                    }
+                } else {
+                    let hitSomething = attack(bullets[i].x, bullets[i].y, powerUps[1] > 1);
+                    if (bullets[i].level == 2 && hitSomething) {
+                        activateSuperPower(bullets[i].x, bullets[i].y, 3, true, 1, false, false);
+                    }
+                    bullets.splice(i, 1);
+                }
+            } else {
+                bullets.splice(i, 1);
+            }
+            
+        }
+    }
+
+    function updateTurretBullets() {
+        for (let i = turretBullets.length - 1; i >= 0; i--) {
+            turretBullets[i].x += turretBullets[i].dx;
+            turretBullets[i].y += turretBullets[i].dy;
+            if (!turretBullets[i].drawMe) {
+                turretBullets[i].drawMe = true;
+            }
+            let hitPlayer = turretBullets[i].x == player.x && turretBullets[i].y == player.y;
+            
+            if (turretBullets[i].x >= 0 && turretBullets[i].x < maze[0].length && turretBullets[i].y >= 0 && turretBullets[i].y < maze.length) {
+                let bgTile = maze[turretBullets[i].y][turretBullets[i].x];
+                if (bgTile == "V") {
+                    for (let k = 0; k < vortexes.length; k++) {
+                        if (vortexes[k].x == turretBullets[i].x && vortexes[k].y == turretBullets[i].y) {
+                            turretBullets[i].bgColor = colors.vortex;
+                            if (k == 0) {
+                                turretBullets[i].x = vortexes[1].x;
+                                turretBullets[i].y = vortexes[1].y;
+                                playSound("vortex0");
+                                break;
+                            } else if (k == 1) {
+                                turretBullets[i].x = vortexes[0].x;
+                                turretBullets[i].y = vortexes[0].y;
+                                playSound("vortex1");
+                                break;
+                            }
+                        }
+                    }
+                } else if (!hitPlayer && (bgTile == "." || bgTile == "," || bgTile == "'" || bgTile == "q" || bgTile == "*" || bgTile == "m" || bgTile == "n" || bgTile == "u" || bgTile == "R")) {
+                    if (bgTile == "." || bgTile == "m" || bgTile == "n" || bgTile == "u") {
+                        turretBullets[i].bgColor = levels[currentLevel].colors.ground;
+                    } else if (bgTile == ",") {
+                        turretBullets[i].bgColor = levels[currentLevel].colors.walked;
+                    } else if (bgTile == "'") {
+                        turretBullets[i].bgColor = levels[currentLevel].colors.burned;
+                    } else if (bgTile == "q") {
+                        turretBullets[i].bgColor = levels[currentLevel].colors.broken;
+                    } else if (bgTile == "*") {
+                        turretBullets[i].bgColor = levels[currentLevel].colors.creeped;
+                    } else if (bgTile == "R") {
+                        turretBullets[i].bgColor = colors.lava;
+                    }
+                } else {
+                    let hitSomething = attack(turretBullets[i].x, turretBullets[i].y, turretBullets[i].level == 2);
+                    if (turretBullets[i].level == 2 && hitSomething) {
+                        activateSuperPower(turretBullets[i].x, turretBullets[i].y, 3, true, 1, false, false);
+                    }
+                    turretBullets.splice(i, 1);
+                }
+            } else {
+                turretBullets.splice(i, 1);
+            }
+            
+        }
+    }
+
+    function updateLasers() {
+        for (let i = lasers.length - 1; i >= 0; i--) {
+            if (lasers[i].health > 0) {
+                lasers[i].health--;
+                let hitObstacle = drawLasers(lasers[i].x, lasers[i].y, lasers[i].orientation, false);
+                if (hitObstacle) {
+                    lasers.splice(i, 1);
+                }
+            } else {
+                lasers.splice(i, 1);
+            }
+            
+        }
+    }
+
+    function updateBombs() {
+        for (let i = activeBombs.length - 1; i >= 0; i--) {
+            if (activeBombs[i].health > 0) {
+                activeBombs[i].health--;
+                
+            } else {
+                activateSuperPower(activeBombs[i].x, activeBombs[i].y, 3, true, activeBombs[i].level, true, false);
+                if (activeBombs[i].bgTile == "V") {
+                    maze[activeBombs[i].y][activeBombs[i].x] = "V";
+                } else {
+                    maze[activeBombs[i].y][activeBombs[i].x] = "q";
+                }
+                activeBombs.splice(i, 1);
+            }
+        }
+        //drawBombs();
+    }
+
+    function logMaze() {
+        var line = "";
+        for (let j = 0; j < maze.length; j++) {
+            for (let i = 0; i < maze[j].length; i++) {
+                line += maze[j][i];
+            }
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMaze();
+        drawPlayer();
+        drawEnemies();
+        drawBullets();
+        drawTurretBullets();
+        drawBombs();
+        $("#levelTitle").text("Level " + currentLevel);
+        if (!gameIsInBuildMode) {
+            $("#levelText").text(levels[currentLevel].text);
+        }
+        logMaze();
+    }
+    
+    showLevelCreationUI();
+    initializeGame();
+    draw();
+    setInterval(function() {
+        if (!gameOver && !gameIsInBuildMode) {
+            updateBullets();
+            updateTurretBullets();
+            updateLasers();
+            updateBombs();
+        }
+        draw();
+    }, 150);
+    setInterval(function() {
+        if (!gameOver && !gameIsInBuildMode) {
+            activateTurret();
+            draw();
+        }
+    }, 3000);
+    setInterval(function() {
+        if (!gameOver && !gameIsInBuildMode) {
+            activateTurret();
+            draw();
+        }
+    }, 13550);
+    setInterval(function() {
+        if (!gameOver && !gameIsInBuildMode) {
+            updateEnemies(1);
+        }
+    }, 150);
+    setInterval(function() {
+        if (!gameOver && !gameIsInBuildMode) {
+            updateEnemies(0);
+            updateEnemies(2);
+            checkGameOver();
+            //draw();
+        }
+    }, 500);
+
+    function updateColor() {
+        const x = parseInt($('#sliderX').val(), 10).toString(16);
+        const y = parseInt($('#sliderY').val(), 10).toString(16);
+        const z = parseInt($('#sliderZ').val(), 10).toString(16);
+        
+        const hexColor = `#${x}${y}${z}`;
+        colors.player = hexColor;
+        $('#hexColor').text(hexColor);
+        $('#colorDisplay').css('background-color', hexColor);
+        
+        // Update slider value displays
+        $('#valueX').text(x);
+        $('#valueY').text(y);
+        $('#valueZ').text(z);
+        populateTileLegend();
+        updateLinkAndStuff();
+    }
+    $('#sliderX').on('input', updateColor);
+    $('#sliderY').on('input', updateColor);
+    $('#sliderZ').on('input', updateColor);
+
+    drawMaze();
+
+    function populateLevelsList() {
+        const listOfLevels = $('#levelsList');
+        listOfLevels.empty();
+
+        levels.forEach((level, index) => {
+            const item = $('<li>').text(`Level ${index + 1}`);
+            
+            const deleteButton = $('<button>').text('Delete').on('click', function(e) {
+                e.stopPropagation(); // Prevent triggering the li click event
+                if (window.confirm(`Are you sure you want to delete Level ${index + 1}?`)) {
+                    deleteLevel(index);
+                }
+            });
+
+            const addButton = $('<button>').text('Add Before').on('click', function(e) {
+                e.stopPropagation(); // Prevent triggering the li click event
+                addLevelBefore(index);
+            });
+
+            item.append(deleteButton, addButton).on('click', function() {
+                currentLevel = index;
+                initializeGame();
+                draw();
+            });
+
+            listOfLevels.append(item);
+        });
+        let addButtonToEnd = $('<button>').text('Add at End').on('click', function(e) {
+            e.stopPropagation(); // Prevent triggering the li click event
+            addLevelAtEnd();
+        });
+        listOfLevels.append(addButtonToEnd);
+    }
+
+    function deleteLevel(index) {
+        levels.splice(index, 1); // Remove the level at the specified index
+        populateLevelsList(); // Refresh the levels list
+    }
+
+    function addLevelBefore(index) {
+        const newLevel = {
+            maze: [
+                ["W","W","W","W","x","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".","P",".","G","W"],
+                ["W","W","-","W","W","W"]
+            ],
+            text: "New Level",
+            colors_index: 0
+        };
+        levels.splice(index, 0, newLevel); // Insert the new level before the specified index
+        populateLevelsList(); // Refresh the levels list
+    }
+
+    function addLevelAtEnd() {
+        const newLevel = {
+            maze: [
+                ["W","W","W","W","x","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".",".",".",".","W"],
+                ["W",".","P",".","G","W"],
+                ["W","W","-","W","W","W"]
+            ],
+            text: "New Level",
+            colors_index: 0
+        };
+        levels.push(newLevel); // Add a new level at the end of the levels array
+        populateLevelsList(); // Refresh the levels list
+    }
+
+
+
+    function populateTileLegend() {
+        const tileTypes = [
+            { description: 'Player', shape: 'triangle', color: colors.player, bgColor: "", orientation: currentPlayerOrientation, decalShape: "", decalColor: "" },
+
+            { description: 'Enemy 1', shape: 'triangle', color: colors.enemy[0], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { description: 'Enemy 2', shape: 'triangle', color: colors.enemy[1], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { description: 'Enemy 3', shape: 'triangle', color: colors.enemy[2], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+
+            { description: 'Turret 1', shape: 'cross', color: colors.turret[0].decal, bgColor: colors.turret[0].base, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Turret 2', shape: 'cross', color: colors.turret[1].decal, bgColor: colors.turret[1].base, orientation: "", decalShape: "", decalColor: "" },
+
+            { description: 'Lava', shape: 'square', color: colors.lava, bgColor: '', orientation: '', decalShape: '', decalColor: '' },
+            
+            { description: 'Ground', shape: 'square', color: levels[currentLevel].colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Player Walked', shape: 'square', color: levels[currentLevel].colors.walked, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Enemy Walked', shape: 'square', color: levels[currentLevel].colors.creeped, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Burned', shape: 'square', color: levels[currentLevel].colors.burned, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Blasted', shape: 'square', color: levels[currentLevel].colors.broken, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            
+            { description: 'Starting Door', shape: 'square', color: colors.start, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Closed Exit', shape: 'circle', color: colors.switch.off, bgColor: colors.closed_exit, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Exit Key', shape: 'circle', color: colors.switch.on, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Vortex', shape: 'circle', color: colors.vortex, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+
+            { description: 'Wall', shape: 'square', color: levels[currentLevel].colors.wall, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Weak Breakable Wall', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: colors.weak_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Strong Breakable Wall', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: colors.strong_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
+            
+            { description: 'Closed Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Open Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Off Toggleable Wall Switch 1', shape: 'dot', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'On Toggleable Wall Switch 1', shape: 'dot', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            
+            { description: 'Closed Toggleable Wall 2', shape: 'smallTriangle', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Open Toggleable Wall 2', shape: 'smallTriangle', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Off Toggleable Wall Switch 2', shape: 'smallTriangle', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'On Toggleable Wall Switch 2', shape: 'smallTriangle', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+
+            { description: 'Closed Toggleable Wall 3', shape: 'smallDiamond', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Open Toggleable Wall 3', shape: 'smallDiamond', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'Off Toggleable Wall Switch 3', shape: 'smallDiamond', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { description: 'On Toggleable Wall Switch 3', shape: 'smallDiamond', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            
+            { description: 'Treasure Chest 1', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'dot', decalColor: colors.key },
+            { description: 'Treasure Chest 1 Key', shape: 'dot', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { description: 'Treasure Chest 2', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'smallTriangle', decalColor: colors.key },
+            { description: 'Treasure Chest 2 Key', shape: 'smallTriangle', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { description: 'Treasure Chest 2', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'smallDiamond', decalColor: colors.key },
+            { description: 'Treasure Chest 3 Key', shape: 'smallDiamond', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { description: 'Purchasable Treasure Chest', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'dot', decalColor: colors.coin },
+            { description: 'Coin', shape: 'dot', color: colors.coin, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+
+            { description: 'Melee Weapon Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'smallDiamond', decalColor: colors.super },
+            { description: 'Melee Weapon Ammo', shape: 'smallDiamond', color: colors.super, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { description: 'Ranged Weapon Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'smallTriangle', decalColor: colors.ammo },
+            { description: 'Ranged Weapon Ammo', shape: 'smallTriangle', color: colors.ammo, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { description: 'Bomb Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'dot', decalColor: levels[currentLevel].colors.wall },
+            { description: 'Bomb Ammo', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            
+            { description: 'Life', shape: 'heart', color: colors.life, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },            
+        ];
+
+
+        const table = $('#tileLegendTable');
+        table.empty();
+
+        tileTypes.forEach(tile => {
+            const canvas = $('<canvas>').attr({width: cellSize, height: cellSize})[0];
+            const cc = canvas.getContext('2d');
+            drawShape(tile.shape, 0, 0, tile.color, tile.bgColor, tile.orientation, tile.decalShape, tile.decalColor, cc);
+
+            const row = $('<tr>');
+            const canvasCell = $('<td>').append(canvas);
+            const descriptionCell = $('<td>').text(tile.description);
+
+            row.append(canvasCell, descriptionCell);
+            table.append(row);
+        });
+    }
+    populateLevelsList();
+    populateTileLegend();
+
+    function updateStylesBasedOnPowerUps() {
+        const allPowerUpsMaxed = powerUps.every(power => power === 3);
+
+        if (allPowerUpsMaxed) {
+            // Apply rainbow effect
+            document.body.style.animation = "bgColorChange 30s infinite alternate";
+            document.querySelectorAll("h1, h2, .controls, #livesCount, #coinsCount, #superPowerCount, #ammoCount, #bombsCount, #scoreCount, #levelTitle")
+                .forEach(element => {
+                    element.style.animation = "txtColorChange 10s infinite alternate";
+                });
+        } else {
+            // Revert to default styles
+            document.body.style.animation = "";
+            document.body.style.backgroundColor = "black";
+            document.body.style.color = "white";
+            document.querySelectorAll("h1, h2, .controls, #livesCount, #coinsCount, #superPowerCount, #ammoCount, #bombsCount, #scoreCount, #levelTitle")
+                .forEach(element => {
+                    element.style.animation = "";
+                    element.style.color = "white"; // Ensure text color is reverted
+                });
+        }
+    }
+
+    // Call this function every time a powerUp is collected or used
+    updateStylesBasedOnPowerUps();
+
+    function stringTo2DArray(str, columns) {
+        let array2D = [];
+        for (let i = 0; i < str.length; i += columns) {
+            let row = str.substring(i, i + columns).split('');
+            array2D.push(row);
+        }
+        return array2D;
+    }
+
+    let isCustomLevelSet = false;
+    function updateHeadingWithQueryParam() {
+        const queryParams = new URLSearchParams(window.location.search);
+        
+        if (queryParams.has('t')) {
+            const titleQueryParameter = queryParams.get('t');
+            $("h1").text(titleQueryParameter);
+            $("#title").val(titleQueryParameter);
+            isCustomLevelSet = true;
+        } else {
+            $("h1").text("Battle Maze Ultra 9K");
+        }
+
+        if (queryParams.has('p')) {
+            const playerColorQueryParameter = queryParams.get('p');
+            const rHex = playerColorQueryParameter.length >= 1 ? playerColorQueryParameter.charAt(0) : '0';
+            const gHex = playerColorQueryParameter.length >= 2 ? playerColorQueryParameter.charAt(1) : '0';
+            const bHex = playerColorQueryParameter.length === 3 ? playerColorQueryParameter.charAt(2) : '0';
+            const rDec = parseInt(rHex, 16);
+            const gDec = parseInt(gHex, 16);
+            const bDec = parseInt(bHex, 16);
+            $('#sliderX').val(rDec);
+            $('#sliderY').val(gDec);
+            $('#sliderZ').val(bDec);
+            updateColor();
+            isCustomLevelSet = true;
+        }
+
+        if (queryParams.has('0')) {
+            levels = [];
+            for (let i = 0; i < 100; i++) {
+                console.log(`meow ${i}`);
+                if (queryParams.has(i.toString())) {
+                    let levelQueryParameterArray = queryParams.get(i.toString()).split("_");
+                    let checkValue = levelQueryParameterArray[5]; // meow
+                    if (checkValue == "magichan") { // meeooww
+                        console.log("pow");
+                        let rows = parseInt(levelQueryParameterArray[0], 10);
+                        let cols = parseInt(levelQueryParameterArray[1], 10);
+                        let encodedTiles = levelQueryParameterArray[2];
+                        let levelTxt = decodeURIComponent(levelQueryParameterArray[3]).replace(/UNDER---SCORE/g, "_");
+                        let colorIdx = parseInt(levelQueryParameterArray[4], 10);
+                        let decodedMaze = stringTo2DArray(encodedTiles, cols);
+                        levels.push({
+                            maze: decodedMaze,
+                            text: levelTxt,
+                            colors_index: colorIdx,
+                            colors: levelColors[colorIdx]
+                        });
+                        console.log(levels);
+                    } else {
+                        console.log("Code ⚡️💙⚡️: nonchristoric data identified.");
+                        break;
+                    }
+                } else {
+                    console.log("Code ⚡️💙⚡️: merging...");
+                    break;
+                }
+            }
+            maze = levels[currentLevel].maze;
+            populateLevelsList();
+            draw();
+            isCustomLevelSet = true;
+        }
+
+        if (queryParams.has('z')) {
+            let newCellSize = queryParams.get('z');
+            newCellSize = parseInt(newCellSize, 10);
+            if (newCellSize >= 1 && newCellSize <= 100) {
+                setCellSize(newCellSize);
+                $("#levelZoomValue").html(cellSize);
+                isCustomLevelSet = true;
+            }
+        }
+
+
+        if (queryParams.has('autoplay')) {
+            let autoplayValue = queryParams.get('autoplay');
+            if (autoplayValue.charAt(0) == '1' || autoplayValue.charAt(0) == 't') {
+                hideLevelCreationUI();
+            }
+        }
+        
+    }
+
+    updateHeadingWithQueryParam();
+
+});
+</script>
+
+</body>
+</html>
