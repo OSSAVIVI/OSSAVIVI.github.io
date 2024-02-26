@@ -284,12 +284,12 @@ $(document).ready(function() {
             broken: "#880" // Olive
         },
         { // 5 Green (grass)
-            wall: "#040", // Dark Green
-            ground: "#0F0", // Bright Green
-            walked: "#0D0", // Medium Green
-            creeped: "#0B0", // Deep Green
-            burned: "#630", // Brownish (Burned Grass)
-            broken: "#520" // Darker Brown (Broken Dirt)
+            wall: "#999",
+            ground: "#5d2",
+            walked: "#5c2",
+            creeped: "#5b2",
+            burned: "#562",
+            broken: "#750"
         },
         { // 6 Blue (beautiful)
             wall: "#009", // Dark Blue
@@ -320,35 +320,7 @@ $(document).ready(function() {
                 ["W",".","P",".","G","W"],
                 ["W","W","-","W","W","W"]
             ],
-            text: "You awake to somehow find the key to your cell... What does it mean?",
-            colors_index: 0
-        },
-        {
-            maze: [
-                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","i","W","W","W","x","W","W","W","W","W","W"],
-                ["W","R","R",".","R","R","W","Y",".","H","W","C","C","C","C","C","C","!","W","m","W","W","G",".",".","W"],
-                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W",".",".",".","O",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W","E","o",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
-                ["W","e","e",".",".",".","W",".",".",".","W","C","W","j","W","W","W","W","W","m","W","W","W","W",".","W"],
-                ["W","W","w","W","w","W","W",".",".","K","W","C","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
-                ["W",".","w",".","w",".","W","M","M","W","W","C","C","C",".",".",".",".",".",".",".","L","L","L","L","W"],
-                ["W",".","w",".",".",".","W",".",".",".",".","C","C","C","C",".",".",".",".","V",".","J","J","J","w","W"],
-                ["W",".","w",".",".",".",".",".",".",".",".","C","C","C","C","C",".",".",".",".",".","J","J","J","w","W"],
-                ["W","R","w",".",".",".","W","L","Z","L",".","C","C","C","C","C",".",".",".",".",".",".",".","J","w","W"],
-                ["W","R","R",".",".",".","W","L","Z","L",".","C","C","C","C",".",".",".",".",".",".","J","J","J","w","W"],
-                ["W","R","R","R",".",".","W","S","Z","B",".","C","C","C",".",".",".",".",".",".",".","S","S","S","S","w"],
-                ["W","R","R","R","R",".","W","S","Z","B",".",".",".",".",".","N",".",".","U","W","W","W","W","W","W","W"],
-                ["W","R","R","R","R","R","W","S","Z","B",".",".",".",".","N","k","N","U","t","W","V","u",".",".","E","W"],
-                ["W","R","R","R","R","R","W","S","Z","B",".","s","z","b","N",".","N","U",".","W","n",".",".",".",".","W"],
-                ["W","R","R","R","R","R","W","S","Z","B",".","s","z","b","N",".","N","U",".","W",".",".",".",".",".","W"],
-                ["W","R","J","R","J","R","W","S","P","B",".","s","z","b","N","h","N","U","T","W","F",".","e",".","L","W"],
-                ["W","W","W","W","W","W","W","W","-","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
-            ],
-            text: "This is a testing level :)",
+            text: "You awake and find the key to your cell... but why?",
             colors_index: 0
         },
         {
@@ -361,7 +333,7 @@ $(document).ready(function() {
                 ["W","P","W",".",".",".",".",".","x"],
                 ["W","-","W","W","W","W","W","W","W"]
             ],
-            text: "You awake in a room...",
+            text: "You can hear the guard at the end of the hall... be careful!",
             colors_index: 0
         },
         {
@@ -458,6 +430,34 @@ $(document).ready(function() {
                 ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
             ],
             text: "Things are getting interesting...",
+            colors_index: 0
+        },
+        {
+            maze: [
+                ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","i","W","W","W","x","W","W","W","W","W","W"],
+                ["W","R","R",".","R","R","W","Y",".","H","W","C","C","C","C","C","C","!","W","m","W","W","G",".",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W",".",".",".","O",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","E","o",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","C","C","C","C","C","W","W","m","W","W","W","W",".","W"],
+                ["W","e","e",".",".",".","W",".",".",".","W","C","W","j","W","W","W","W","W","m","W","W","W","W",".","W"],
+                ["W","W","w","W","w","W","W",".",".","K","W","C","W","W","W","W","W","W","W",".",".",".",".",".",".","W"],
+                ["W",".","w",".","w",".","W","M","M","W","W","C","C","C",".",".",".",".",".",".",".","L","L","L","L","W"],
+                ["W",".","w",".",".",".","W",".",".",".",".","C","C","C","C",".",".",".",".","V",".","J","J","J","w","W"],
+                ["W",".","w",".",".",".",".",".",".",".",".","C","C","C","C","C",".",".",".",".",".","J","J","J","w","W"],
+                ["W","R","w",".",".",".","W","L","Z","L",".","C","C","C","C","C",".",".",".",".",".",".",".","J","w","W"],
+                ["W","R","R",".",".",".","W","L","Z","L",".","C","C","C","C",".",".",".",".",".",".","J","J","J","w","W"],
+                ["W","R","R","R",".",".","W","S","Z","B",".","C","C","C",".",".",".",".",".",".",".","S","S","S","S","w"],
+                ["W","R","R","R","R",".","W","S","Z","B",".",".",".",".",".","N",".",".","U","W","W","W","W","W","W","W"],
+                ["W","R","R","R","R","R","W","S","Z","B",".",".",".",".","N","k","N","U","t","W","V","u",".",".","E","W"],
+                ["W","R","R","R","R","R","W","S","Z","B",".","s","z","b","N",".","N","U",".","W","n",".",".",".",".","W"],
+                ["W","R","R","R","R","R","W","S","Z","B",".","s","z","b","N",".","N","U",".","W",".",".",".",".",".","W"],
+                ["W","R","J","R","J","R","W","S","P","B",".","s","z","b","N","h","N","U","T","W","F",".","e",".","L","W"],
+                ["W","W","W","W","W","W","W","W","-","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
+            ],
+            text: "This is a testing level :)",
             colors_index: 0
         },
     ];
@@ -2349,34 +2349,45 @@ $(document).ready(function() {
                 <br>
                 <label for="blockType">Tile</label>
                 <select id="blockType">
-                    <option value="W">Wall</option>
-                    <option value=".">Ground</option>
                     <option value="P">Player</option>
-                    <option value="-">Entrance</option>
-                    <option value="x">Exit</option>
-                    <option value="G">Gate Key</option>
-                    <option value="S">Super</option>
-                    <option value="L">Life</option>
+                    <option value="e">Enemy 1</option>
+                    <option value="E">Enemy 2</option>
+                    <option value="F">Enemy 3</option>
+                    <option value="o">Turret 1</option>
+                    <option value="O">Turret 2</option>
+                    <option value="R">Lava</option>
+                    <option value=".">Ground</option>
+                    <option value="-">Starting Door</option>
+                    <option value="x">Closed Exit</option>
+                    <option value="G">Exit Key</option>
                     <option value="V">Vortex</option>
-                    <option value="H">Chest</option>
-                    <option value="K">Key</option>
-                    <option value="!">Button</option>
-                    <option value="M">Barrier</option>
+                    <option value="W">Wall</option>
                     <option value="w">Weak Breakable Wall</option>
                     <option value="J">Strong Breakable Wall</option>
-                    <option value="e">Enemy Level 1</option>
-                    <option value="E">Enemy Level 2</option>
-                    <option value="F">Enemy Level 3</option>
-                    <option value="o">Turret Level 1</option>
-                    <option value="O">Turret Level 2</option>
-                    <option value="s">Melee Weapon Upgrade</option>
-                    <option value="Z">Melee Weapon Ammo</option>
-                    <option value="z">Ranged Weapon Upgrade</option>
-                    <option value="B">Ranged Weapon Ammo</option>
-                    <option value="b">Bomb Upgrade</option>
+                    <option value="M">Closed Toggleable Wall 1</option>
+                    <option value="m">Open Toggleable Wall 1</option>
+                    <option value="!">Off Toggleable Wall Switch 1</option>
+                    <option value="N">Closed Toggleable Wall 2</option>
+                    <option value="n">Open Toggleable Wall 2</option>
+                    <option value="i">Off Toggleable Wall Switch 2</option>
+                    <option value="U">Closed Toggleable Wall 3</option>
+                    <option value="u">Open Toggleable Wall 3</option>
+                    <option value="j">Off Toggleable Wall Switch 3</option>
+                    <option value="H">Treasure Chest 1</option>
+                    <option value="K">Treasure Chest 1 Key</option>
+                    <option value="h">Treasure Chest 2</option>
+                    <option value="k">Treasure Chest 2 Key</option>
+                    <option value="T">Treasure Chest 3</option>
+                    <option value="t">Treasure Chest 3 Key</option>
+                    <option value="Y">Purchasable Treasure Chest</option>
                     <option value="C">Coin</option>
-                    <option value="R">Lava</option>
-                    <!-- More block types can be added here -->
+                    <option value="s">Melee Weapon Upgrade</option>
+                    <option value="S">Melee Weapon Ammo</option>
+                    <option value="z">Ranged Weapon Upgrade</option>
+                    <option value="Z">Ranged Weapon Ammo</option>
+                    <option value="b">Bomb Upgrade</option>
+                    <option value="B">Bomb Ammo</option>
+                    <option value="L">Life</option>
                 </select>
                 <br>
                 <label for="levelWidth">Width</label>
@@ -3183,64 +3194,65 @@ $(document).ready(function() {
 
     function populateTileLegend() {
         const tileTypes = [
-            { description: 'Player', shape: 'triangle', color: colors.player, bgColor: "", orientation: currentPlayerOrientation, decalShape: "", decalColor: "" },
+            { character: 'P', description: 'Player', shape: 'triangle', color: colors.player, bgColor: "", orientation: currentPlayerOrientation, decalShape: "", decalColor: "" },
 
-            { description: 'Enemy 1', shape: 'triangle', color: colors.enemy[0], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
-            { description: 'Enemy 2', shape: 'triangle', color: colors.enemy[1], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
-            { description: 'Enemy 3', shape: 'triangle', color: colors.enemy[2], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { character: 'e', description: 'Enemy 1', shape: 'triangle', color: colors.enemy[0], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { character: 'E', description: 'Enemy 2', shape: 'triangle', color: colors.enemy[1], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
+            { character: 'F', description: 'Enemy 3', shape: 'triangle', color: colors.enemy[2], bgColor: levels[currentLevel].colors.ground, orientation: "Up", decalShape: "", decalColor: "" },
 
-            { description: 'Turret 1', shape: 'cross', color: colors.turret[0].decal, bgColor: colors.turret[0].base, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Turret 2', shape: 'cross', color: colors.turret[1].decal, bgColor: colors.turret[1].base, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'o', description: 'Turret 1', shape: 'cross', color: colors.turret[0].decal, bgColor: colors.turret[0].base, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'O', description: 'Turret 2', shape: 'cross', color: colors.turret[1].decal, bgColor: colors.turret[1].base, orientation: "", decalShape: "", decalColor: "" },
 
-            { description: 'Lava', shape: 'square', color: colors.lava, bgColor: '', orientation: '', decalShape: '', decalColor: '' },
+            { character: 'R', description: 'Lava', shape: 'square', color: colors.lava, bgColor: '', orientation: '', decalShape: '', decalColor: '' },
             
-            { description: 'Ground', shape: 'square', color: levels[currentLevel].colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Player Walked', shape: 'square', color: levels[currentLevel].colors.walked, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Enemy Walked', shape: 'square', color: levels[currentLevel].colors.creeped, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Burned', shape: 'square', color: levels[currentLevel].colors.burned, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Blasted', shape: 'square', color: levels[currentLevel].colors.broken, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: '.', description: 'Ground', shape: 'square', color: levels[currentLevel].colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: ',', description: 'Player Walked', shape: 'square', color: levels[currentLevel].colors.walked, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: '*', description: 'Enemy Walked', shape: 'square', color: levels[currentLevel].colors.creeped, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: '\'', description: 'Burned', shape: 'square', color: levels[currentLevel].colors.burned, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: 'q', description: 'Blasted', shape: 'square', color: levels[currentLevel].colors.broken, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
             
-            { description: 'Starting Door', shape: 'square', color: colors.start, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Closed Exit', shape: 'circle', color: colors.switch.off, bgColor: colors.closed_exit, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Exit Key', shape: 'circle', color: colors.switch.on, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Vortex', shape: 'circle', color: colors.vortex, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: '-', description: 'Starting Door', shape: 'square', color: colors.start, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: 'x', description: 'Closed Exit', shape: 'circle', color: colors.switch.off, bgColor: colors.closed_exit, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'X', description: 'Open Exit', shape: 'square', color: levels[currentLevel].colors.ground, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: 'G', description: 'Exit Key', shape: 'circle', color: colors.switch.on, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: 'V', description: 'Vortex', shape: 'circle', color: colors.vortex, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
 
-            { description: 'Wall', shape: 'square', color: levels[currentLevel].colors.wall, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Weak Breakable Wall', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: colors.weak_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Strong Breakable Wall', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: colors.strong_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'W', description: 'Wall', shape: 'square', color: levels[currentLevel].colors.wall, bgColor: "", orientation: "", decalShape: "", decalColor: "" },
+            { character: 'w', description: 'Weak Breakable Wall', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: colors.weak_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'J', description: 'Strong Breakable Wall', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: colors.strong_breakable_wall, orientation: "", decalShape: "", decalColor: "" },
             
-            { description: 'Closed Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Open Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Off Toggleable Wall Switch 1', shape: 'dot', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'On Toggleable Wall Switch 1', shape: 'dot', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'M', description: 'Closed Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'm', description: 'Open Toggleable Wall 1', shape: 'dot', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
+            { character: '!', description: 'Off Toggleable Wall Switch 1', shape: 'dot', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: '!', description: 'On Toggleable Wall Switch 1', shape: 'dot', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
             
-            { description: 'Closed Toggleable Wall 2', shape: 'smallTriangle', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Open Toggleable Wall 2', shape: 'smallTriangle', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Off Toggleable Wall Switch 2', shape: 'smallTriangle', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'On Toggleable Wall Switch 2', shape: 'smallTriangle', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'N', description: 'Closed Toggleable Wall 2', shape: 'smallTriangle', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'n', description: 'Open Toggleable Wall 2', shape: 'smallTriangle', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'i', description: 'Off Toggleable Wall Switch 2', shape: 'smallTriangle', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'i', description: 'On Toggleable Wall Switch 2', shape: 'smallTriangle', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
 
-            { description: 'Closed Toggleable Wall 3', shape: 'smallDiamond', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Open Toggleable Wall 3', shape: 'smallDiamond', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'Off Toggleable Wall Switch 3', shape: 'smallDiamond', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
-            { description: 'On Toggleable Wall Switch 3', shape: 'smallDiamond', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'U', description: 'Closed Toggleable Wall 3', shape: 'smallDiamond', color: levels[currentLevel].colors.ground, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'u', description: 'Open Toggleable Wall 3', shape: 'smallDiamond', color: levels[currentLevel].colors.walked, bgColor: levels[currentLevel].colors.ground, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'j', description: 'Off Toggleable Wall Switch 3', shape: 'smallDiamond', color: colors.switch.off, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
+            { character: 'j', description: 'On Toggleable Wall Switch 3', shape: 'smallDiamond', color: colors.switch.on, bgColor: levels[currentLevel].colors.wall, orientation: "", decalShape: "", decalColor: "" },
             
-            { description: 'Treasure Chest 1', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'dot', decalColor: colors.key },
-            { description: 'Treasure Chest 1 Key', shape: 'dot', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-            { description: 'Treasure Chest 2', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'smallTriangle', decalColor: colors.key },
-            { description: 'Treasure Chest 2 Key', shape: 'smallTriangle', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-            { description: 'Treasure Chest 2', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'smallDiamond', decalColor: colors.key },
-            { description: 'Treasure Chest 3 Key', shape: 'smallDiamond', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-            { description: 'Purchasable Treasure Chest', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'dot', decalColor: colors.coin },
-            { description: 'Coin', shape: 'dot', color: colors.coin, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 'H', description: 'Treasure Chest 1', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'dot', decalColor: colors.key },
+            { character: 'K', description: 'Treasure Chest 1 Key', shape: 'dot', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 'h', description: 'Treasure Chest 2', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'smallTriangle', decalColor: colors.key },
+            { character: 'k', description: 'Treasure Chest 2 Key', shape: 'smallTriangle', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 'T', description: 'Treasure Chest 2', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'smallDiamond', decalColor: colors.key },
+            { character: 't', description: 'Treasure Chest 3 Key', shape: 'smallDiamond', color: colors.key, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 'Y', description: 'Purchasable Treasure Chest', shape: 'chest', color: colors.chest, bgColor: '', orientation: '', decalShape: 'dot', decalColor: colors.coin },
+            { character: 'c', description: 'Coin', shape: 'dot', color: colors.coin, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
 
-            { description: 'Melee Weapon Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'smallDiamond', decalColor: colors.super },
-            { description: 'Melee Weapon Ammo', shape: 'smallDiamond', color: colors.super, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-            { description: 'Ranged Weapon Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'smallTriangle', decalColor: colors.ammo },
-            { description: 'Ranged Weapon Ammo', shape: 'smallTriangle', color: colors.ammo, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
-            { description: 'Bomb Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'dot', decalColor: levels[currentLevel].colors.wall },
-            { description: 'Bomb Ammo', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 's', description: 'Melee Weapon Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'smallDiamond', decalColor: colors.super },
+            { character: 'S', description: 'Melee Weapon Ammo', shape: 'smallDiamond', color: colors.super, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 'z', description: 'Ranged Weapon Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'smallTriangle', decalColor: colors.ammo },
+            { character: 'Z', description: 'Ranged Weapon Ammo', shape: 'smallTriangle', color: colors.ammo, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
+            { character: 'b', description: 'Bomb Upgrade', shape: 'chest', color: colors.upgrade, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: 'dot', decalColor: levels[currentLevel].colors.wall },
+            { character: 'B', description: 'Bomb Ammo', shape: 'dot', color: levels[currentLevel].colors.wall, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },
             
-            { description: 'Life', shape: 'heart', color: colors.life, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },            
+            { character: 'L', description: 'Life', shape: 'heart', color: colors.life, bgColor: levels[currentLevel].colors.ground, orientation: '', decalShape: '', decalColor: '' },            
         ];
 
 
@@ -3255,8 +3267,9 @@ $(document).ready(function() {
             const row = $('<tr>');
             const canvasCell = $('<td>').append(canvas);
             const descriptionCell = $('<td>').text(tile.description);
+            const charCell = $('<td>').text(tile.character);
 
-            row.append(canvasCell, descriptionCell);
+            row.append(charCell, canvasCell, descriptionCell);
             table.append(row);
         });
     }
