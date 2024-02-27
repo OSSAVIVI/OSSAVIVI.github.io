@@ -707,10 +707,8 @@ $(document).ready(function() {
 
     function initializeGame() {
         maze = levels[currentLevel].maze;
-        console.log(`LEVEL COLR IDX: ${levels[currentLevel].colors_index}...`);
         levels[currentLevel].colors = levelColors[levels[currentLevel].colors_index];
         $("body").css("background-color", levels[currentLevel].colors.wall);
-        console.log(levels[currentLevel].colors);
         resizeCanvas(maze[0].length * cellSize, maze.length * cellSize);
         enemies = [[], [], []];
         turrets = [[], []];
@@ -857,7 +855,6 @@ $(document).ready(function() {
     function drawMaze() {
         maze.forEach((row, rowIndex) => {
             row.forEach((cell, colIndex) => {
-                //console.log(levels[currentLevel].colors);
                 switch (cell) {
                     case "W": // Wall
                         drawShape("square", colIndex, rowIndex, levels[currentLevel].colors.wall);
@@ -2229,7 +2226,6 @@ $(document).ready(function() {
                 if (maze[i][x] == "V") {
                     for (let k = 0; k < vortexes.length; k++) {
                         if (vortexes[k].x == x && vortexes[k].y == i) {
-                            console.log(k);
                             if (k == 0) {
                                 x = vortexes[1].x;
                                 i = vortexes[1].y;
@@ -2448,7 +2444,6 @@ $(document).ready(function() {
 
         $("#title").on('input', function() {
             let title = $("#title").val()
-            console.log(title);
             if (title == "") {
                 $("h1").text("Battle Maze Ultra 9K");
             } else {
@@ -2610,7 +2605,105 @@ $(document).ready(function() {
         return decoded;
     }
 
+    function numberOfCharsSavedByEncoding(x, n) {
+        return (n * x) - (2 * n) - x - 3;
+    }
+    function countOccurrences(str, pattern) {
+        const regex = new RegExp(pattern, 'g');
+        const matches = str.match(regex);
+        return matches ? matches.length : 0;
+    }
 
+    function customCrypto(mode, lvlsInput) {
+        let alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let currentAlphabetIndex = 0;
+        let lvlIdx = 0;
+        let offsetIdx = 0;
+        let numberOfCharsUnderConsideration = 3;
+        let qPars = {};
+        let lastSubstring = "";
+        let lastSavings = 0;
+        let totalSavings = 0;
+        if (mode == "encrypt") { // lvlsInput is an array
+            while (currentAlphabetIndex < alphabet.length && lvlIdx < lvlsInput.length) {
+                if (offsetIdx >= lvlsInput[lvlIdx].length) {
+                    lvlIdx++;
+                    offsetIdx = 0;
+                } else {
+                    let subString = lvlsInput[lvlIdx].substring(offsetIdx, offsetIdx + numberOfCharsUnderConsideration);
+                    let countOfSubstring = 0;
+                    for (let i = 0; i < lvlsInput.length; i++) {
+                        countOfSubstring += countOccurrences(lvlsInput[i], subString);
+                    }
+                    if (countOfSubstring > 1) {
+                        let savings = numberOfCharsSavedByEncoding(numberOfCharsUnderConsideration, countOfSubstring);
+                        if (savings > 0 && savings > lastSavings && offsetIdx + numberOfCharsUnderConsideration < lvlsInput[lvlIdx].length - 1) {  // Found a more efficient way!
+                            lastSubstring = subString;
+                            lastSavings = savings;
+                            numberOfCharsUnderConsideration++;
+                        } else {  // Last way was most efficient!
+                            if (lastSavings > 0) {
+                                for (let i = 0; i < lvlsInput.length; i++) {
+                                    lvlsInput[i] = lvlsInput[i].replaceAll(lastSubstring, `@${alphabet[currentAlphabetIndex]}`);
+                                }
+                                qPars[alphabet[currentAlphabetIndex]] = lastSubstring;
+                                totalSavings += lastSavings;
+                                lastSubstring = "";
+                                lastSavings = 0;
+                                currentAlphabetIndex++;
+                                numberOfCharsUnderConsideration = 3;
+                                offsetIdx++;
+                            } else {
+                                if (numberOfCharsUnderConsideration < lvlsInput[lvlIdx].length - 1) {
+                                    numberOfCharsUnderConsideration++;
+                                } else {
+                                    offsetIdx++;
+                                }
+                            }
+                        }
+                    } else {
+                        if (lastSavings > 0) {
+                            for (let i = 0; i < lvlsInput.length; i++) {
+                                lvlsInput[i] = lvlsInput[i].replaceAll(lastSubstring, `@${alphabet[currentAlphabetIndex]}`);
+                            }
+                            qPars[alphabet[currentAlphabetIndex]] = lastSubstring;
+                            totalSavings += lastSavings;
+                            lastSubstring = "";
+                            lastSavings = 0;
+                            currentAlphabetIndex++;
+                        }
+                        numberOfCharsUnderConsideration = 3;
+                        offsetIdx++;
+                    }
+                }
+            }
+            for (let x = 0; x < lvlsInput.length; x++) {
+                qPars[x.toString()] = lvlsInput[x];
+            }
+            return qPars;
+        } else if (mode == "decrypt") { // lvlsInput is a dictionary
+            let decodedLevels = [];
+            for (let l = 0; l < 100; l++) {
+                
+                if (l.toString() in lvlsInput) {
+                    decodedLevels.push(lvlsInput[l.toString()]);
+                } else {
+                    break;
+                }
+            }
+            for (let r = alphabet.length - 1; r >= 0; r--) {
+                if (alphabet[r].toString() in lvlsInput) {
+                    for (let m = 0; m < decodedLevels.length; m++) {
+                        decodedLevels[m] = decodedLevels[m].replaceAll(`@${alphabet[r].toString()}`, lvlsInput[alphabet[r].toString()]);
+                    }
+                }
+            }
+            return decodedLevels;
+        } else {
+            console.log('Invalid mode: ' + mode);
+        }
+    }
+    
 
     function updateLinkAndStuff() {
         let title = $("#title").val();
@@ -2618,14 +2711,16 @@ $(document).ready(function() {
         let playerHexCode = parseInt($("#sliderX").val(), 10).toString(16) + parseInt($("#sliderY").val(), 10).toString(16) + parseInt($("#sliderZ").val(), 10).toString(16);
         let zoomValue = $("#levelZoomValue").html();
 
-        let sharableLink = `https://ossavivi.github.io/c197.html?autoplay=1&t=${title}&p=${playerHexCode}&z=${zoomValue}`;
+        let rleEncodedValuesMetaData = {};
+        let rleEncodedValues = [];
+
+        let sharableLink = `https://ossavivi.github.io/c197.html?autoplay=1&ttl=${title}&plyr=${playerHexCode}&z00m=${zoomValue}`;
         for (let i = 0; i < levels.length; i++) {
             let m = levels[i].maze;
             let t = encodeURIComponent(levels[i].text.replace(/_/g, "UNDER---SCORE"));
             let rows = m.length;
             let cols = m[0].length;
             
-            console.log(m);
             let colorIndex = levels[i].colors_index;
             let encodedMazeString = "";
             for (let r = 0; r < m.length; r++) {
@@ -2634,7 +2729,24 @@ $(document).ready(function() {
                 }
             }
             encodedMazeString = encodeRLE(encodedMazeString);
-            sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${t}_${colorIndex}_magichan`;
+            rleEncodedValuesMetaData[i] = {
+                rows,
+                cols,
+                rle_encoded: encodedMazeString,
+                t,
+                color_index: colorIndex
+            }
+            rleEncodedValues.push(encodedMazeString);
+            //sharableLink += `&${i}=${rows}_${cols}_${ENCODED}_${t}_${colorIndex}_pew`;
+        }
+        let customEncodingLevels = customCrypto('encrypt', rleEncodedValues);
+        let encKeys = Object.keys(customEncodingLevels);
+        for (let x = 0; x < Object.keys(encKeys).length; x++) {
+            if (!isNaN(+encKeys[x])) { // is number (a level)
+                sharableLink += `&${x}=${rleEncodedValuesMetaData[x.toString()]["rows"]}_${rleEncodedValuesMetaData[x.toString()]["cols"]}_${customEncodingLevels[x.toString()]}_${rleEncodedValuesMetaData[x.toString()]["t"]}_${rleEncodedValuesMetaData[x.toString()]["color_index"]}_pew`;
+            } else { // is key for decoding
+                sharableLink += `&${encKeys[x]}=${customEncodingLevels[encKeys[x].toString()]}`;
+            }
         }
         $("#sharableLink").text(sharableLink);
         $("#copyToClipboardButton").show();
@@ -3349,9 +3461,14 @@ $(document).ready(function() {
     let isCustomLevelSet = false;
     function updateHeadingWithQueryParam() {
         const queryParams = new URLSearchParams(window.location.search);
+        let qDict = {};
+        for (const [key, value] of queryParams.entries()) {
+            qDict[key] = value;
+        }
+        let decodedTiles = customCrypto('decrypt', qDict);
         
-        if (queryParams.has('t')) {
-            const titleQueryParameter = queryParams.get('t');
+        if (queryParams.has('ttl')) {
+            const titleQueryParameter = queryParams.get('ttl');
             $("h1").text(titleQueryParameter);
             $("#title").val(titleQueryParameter);
             isCustomLevelSet = true;
@@ -3359,8 +3476,8 @@ $(document).ready(function() {
             $("h1").text("Battle Maze Ultra 9K");
         }
 
-        if (queryParams.has('p')) {
-            const playerColorQueryParameter = queryParams.get('p');
+        if (queryParams.has('plyr')) {
+            const playerColorQueryParameter = queryParams.get('plyr');
             const rHex = playerColorQueryParameter.length >= 1 ? playerColorQueryParameter.charAt(0) : '0';
             const gHex = playerColorQueryParameter.length >= 2 ? playerColorQueryParameter.charAt(1) : '0';
             const bHex = playerColorQueryParameter.length === 3 ? playerColorQueryParameter.charAt(2) : '0';
@@ -3374,30 +3491,28 @@ $(document).ready(function() {
             isCustomLevelSet = true;
         }
 
+
         if (queryParams.has('0')) {
             levels = [];
             for (let i = 0; i < 100; i++) {
-                console.log(`meow ${i}`);
                 if (queryParams.has(i.toString())) {
-                    let levelQueryParameterArray = queryParams.get(i.toString()).split("_");
-                    let checkValue = levelQueryParameterArray[5]; // meow
-                    if (checkValue == "magichan") { // meeooww
-                        console.log("pow");
+                    //let levelQueryParameterArray = queryParams.get(i.toString()).split("_");
+                    let levelQueryParameterArray = decodedTiles[i].split("_");
+                    let checkValue = levelQueryParameterArray[5];
+                    if (checkValue == "pew") { 
                         let rows = parseInt(levelQueryParameterArray[0], 10);
                         let cols = parseInt(levelQueryParameterArray[1], 10);
-                        let encodedTiles = decodeRLE(levelQueryParameterArray[2]);
+                        let decodedData = decodeRLE(levelQueryParameterArray[2]);
                         let levelTxt = decodeURIComponent(levelQueryParameterArray[3]).replace(/UNDER---SCORE/g, "_");
                         let colorIdx = parseInt(levelQueryParameterArray[4], 10);
-                        let decodedMaze = stringTo2DArray(encodedTiles, cols);
+                        let decodedMaze = stringTo2DArray(decodedData, cols);
                         levels.push({
                             maze: decodedMaze,
                             text: levelTxt,
                             colors_index: colorIdx,
                             colors: levelColors[colorIdx]
                         });
-                        console.log(levels);
                     } else {
-                        console.log(checkValue);
                         console.log("Code ⚡️💙⚡️: nonchristoric data identified.");
                         break;
                     }
@@ -3412,8 +3527,8 @@ $(document).ready(function() {
             isCustomLevelSet = true;
         }
 
-        if (queryParams.has('z')) {
-            let newCellSize = queryParams.get('z');
+        if (queryParams.has('z00m')) {
+            let newCellSize = queryParams.get('z00m');
             newCellSize = parseInt(newCellSize, 10);
             if (newCellSize >= 1 && newCellSize <= 100) {
                 setCellSize(newCellSize);
