@@ -2578,6 +2578,40 @@ $(document).ready(function() {
         $("#copyToClipboardButton").hide();
     }
 
+    function encodeRLE(str) {
+        let encoded = '';
+        let count = 1;
+
+        for (let i = 0; i < str.length; i++) {
+            if (str[i] === str[i + 1]) {
+                count++;
+            } else {
+                encoded += count + str[i];
+                count = 1; // Reset count for the next character
+            }
+        }
+
+        return encoded;
+    }
+
+    function decodeRLE(encoded) {
+        let decoded = '';
+        let count = '';
+
+        for (let char of encoded) {
+            if (!isNaN(char)) { // If the character is a number
+                count += char;
+            } else {
+                decoded += char.repeat(parseInt(count));
+                count = ''; // Reset count for the next sequence
+            }
+        }
+
+        return decoded;
+    }
+
+
+
     function updateLinkAndStuff() {
         let title = $("#title").val();
         title = title ? encodeURIComponent(title) : "Unknown";
@@ -2599,6 +2633,7 @@ $(document).ready(function() {
                     encodedMazeString += m[r][c];
                 }
             }
+            encodedMazeString = encodeRLE(encodedMazeString);
             sharableLink += `&${i}=${rows}_${cols}_${encodedMazeString}_${t}_${colorIndex}_magichan`;
         }
         $("#sharableLink").text(sharableLink);
@@ -3350,7 +3385,7 @@ $(document).ready(function() {
                         console.log("pow");
                         let rows = parseInt(levelQueryParameterArray[0], 10);
                         let cols = parseInt(levelQueryParameterArray[1], 10);
-                        let encodedTiles = levelQueryParameterArray[2];
+                        let encodedTiles = decodeRLE(levelQueryParameterArray[2]);
                         let levelTxt = decodeURIComponent(levelQueryParameterArray[3]).replace(/UNDER---SCORE/g, "_");
                         let colorIdx = parseInt(levelQueryParameterArray[4], 10);
                         let decodedMaze = stringTo2DArray(encodedTiles, cols);
@@ -3362,6 +3397,7 @@ $(document).ready(function() {
                         });
                         console.log(levels);
                     } else {
+                        console.log(checkValue);
                         console.log("Code ⚡️💙⚡️: nonchristoric data identified.");
                         break;
                     }
