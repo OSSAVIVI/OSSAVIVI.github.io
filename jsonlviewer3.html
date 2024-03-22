@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSONL Viewer</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding-top: 20px; background-color: black; color: white; }
+        .container { max-width: 1200px; }
+        .jsonl-file { margin-bottom: 40px; }
+        .jsonl-content { border: 1px solid #ccc; padding: 20px; white-space: pre-wrap; }
+        .color-0 { background-color: red; color: green; }
+        .color-1 { background-color: orange; color: blue; }
+        .color-2 { background-color: yellow; color: purple; }
+        .color-3 { background-color: green; color: red; }
+        .color-4 { background-color: blue; color: orange; }
+        .color-5 { background-color: purple; color: yellow; }
+        .color-6 { background-color: pink; color: black;  }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>sample viewer!</h1>
+        <div id="jsonlViewer"></div>
+    </div>
+
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            //const hosturl = "~";
+            const hosturl = "https://ossavivi.github.io";
+            const files = [
+                hosturl+"/Property_of_Farran_Media_All_Rights_Reserved_20240322T233914_TogetherAI_Format_1000_Tokens.jsonl",
+                hosturl+"/Not2Users_1PT_FullHarvest_1000Tokens_03082024_20240308193200_83412 4.jsonl",
+                hosturl+"/Not2Users_2MB_FullHarvest_1000Tokens_03082024_20240308193123_79288 4.jsonl",
+                hosturl+"/2Users_0GK_FullHarvest_1000Tokens_03082024_20240308193121_34944 4.jsonl",
+                hosturl+"/2Users_1PT_FullHarvest_1000Tokens_03082024_20240308193200_83412 4.jsonl",
+                hosturl+"/2Users_2MB_FullHarvest_1000Tokens_03082024_20240308193123_79288 4.jsonl",
+                hosturl+"/2Users_3MA_FullHarvest_1000Tokens_03082024_20240308193122_105172 4.jsonl"
+            ];
+
+            files.forEach((file, index) => {
+                fetch(file)
+                .then(response => response.text())
+                .then(data => {
+                    const fileName = file.substring(file.lastIndexOf('/') + 1);
+                    const lines = data.trim().split('\n');
+                    const jsonlContent = lines.map(line => JSON.stringify(JSON.parse(line), null, 4)).join('\n');
+                    const colorClass = `color-${index % 7}`; // Cycle through the colors for each file
+                    const element = $(`
+                        <div class="jsonl-file">
+                            <h3>File ${index + 1} - ${fileName}</h3>
+                            <div class="jsonl-content ${colorClass}"><pre class="${colorClass}">${jsonlContent}</pre></div>
+                        </div>
+                    `);
+                    $('#jsonlViewer').append(element);
+                })
+                .catch(err => console.log('Error loading file: ', file, err));
+            });
+        });
+    </script>
+</body>
+</html>
