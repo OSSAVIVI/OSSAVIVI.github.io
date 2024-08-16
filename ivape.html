@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovape Smoke & Vape</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link id="themeStylesheet" rel="stylesheet" href="styles-0.css">
+</head>
+<body>
+    <header>
+        <div class="header-image">
+            <img id="headerGif" src="gif-header-0.gif" alt="Vaping GIF">
+        </div>
+        <div class="header-content text-center">
+            <h1 class="display-4">Innovape Smoke & Vape</h1>
+            <p class="lead">Your premier vape and smoke lounge in the Valley, offering a curated selection of the finest liquids, top-tier smoking essentials, and Kratom products—all under one roof.</p>
+        </div>
+    </header>
+
+    <section id="contact" class="text-center py-3">
+        <div class="container">
+            <div class="special-deals bg-black text-white">
+                <p class="mb-1 animated-text">50% off on Kratom from 8:00pm to 10:00pm!</p>
+            </div>            
+            <p><a href="tel:+16239322145">(623) 932-2145</a></p>
+            <p><a href="https://maps.app.goo.gl/AN2bC8kFtfZ8K8Dq5">650 N Estrella Pkwy #3, Goodyear, AZ 85338</a></p>
+            <p>
+                <img src="x-logo.webp" alt="Twitter Logo" style="height: 20px; vertical-align: middle; margin-right: 5px;">
+                <a href="https://twitter.com/Innovape650" target="_blank">@Innovape650</a><br>
+                <img src="insta-logo.webp" alt="Instagram Logo" style="height: 20px; vertical-align: middle; margin-right: 5px;">
+                <a href="https://www.instagram.com/innovape650" target="_blank">@Innovape650</a>
+            </p>
+        </div>
+    </section>   
+
+    <section id="about" class="text-center py-3">
+        <div class="container">
+            <p>
+                Welcome to Innovape Smoke & Vape, Goodyear's top spot for premium vape gear and smoke essentials. From high-end vape liquids to cutting-edge accessories and Kratom, we've got everything you need. Whether you're a vaping pro or just starting, our chill lounge and savvy staff are here to make sure you have a smooth experience. Innovape is your go-to for all things vape and Kratom, delivered with style and expertise.</p>
+        </div>
+    </section>
+
+    <section class="photos text-center py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="image-0.jpg" class="img-fluid" alt="Product 1">
+                </div>
+                <div class="col-md-4">
+                    <img src="image-1.jpg" class="img-fluid" alt="Product 2">
+                </div>
+                <div class="col-md-4">
+                    <img src="image-2.jpg" class="img-fluid" alt="Product 3">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p><a href="https://maps.app.goo.gl/AN2bC8kFtfZ8K8Dq5">650 N Estrella Pkwy #3, Goodyear, AZ 85338</a></p>
+            <p><a href="tel:+16239322145">(623) 932-2145</a></p>
+            <p>&copy; 2024 Innovape Smoke & Vape. All rights reserved.</p>
+        </div>
+        <div class="footer-image">
+            <img id="footerGif" src="gif-footer-0.gif" alt="Girl Vaping" class="img-fluid">
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let currentStyle = 0;
+            const totalStyles = 5; 
+    
+            $('header h1').on('click', function() {
+                currentStyle = (currentStyle + 1) % totalStyles;
+                $('#themeStylesheet').attr('href', `styles-${currentStyle}.css`);
+                updateGifColors(currentStyle);
+            });
+    
+            updateGifColors(currentStyle);
+        });
+    </script>
+    
+    
+    </script>
+</body>
+</html>
